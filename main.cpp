@@ -1,15 +1,18 @@
-#include <iostream>
+//#include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "Controller.h"
+
 int main(int argc, char** argv) {
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    GLFWwindow* window = glfwCreateWindow(800, 600, "GLFW-Window", NULL, NULL);
-    
-    while(1){}
-    
+    // Suppress warning about unused variable
+    (void)argc; (void)argv;
+
+    // Create window
+    Controller *mainController = new Controller();
+
+    mainController->run();
+
+    delete mainController;
     return 0;
 }

@@ -10,7 +10,12 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/lib/glad)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-add_executable(Fall-Fever main.cpp)
+add_executable(Fall-Fever
+    main.cpp
+    Controller.cpp
+    Window.cpp
+    EventHandler.cpp
+)
 
 target_link_libraries(
     Fall-Fever PRIVATE 
