@@ -15,6 +15,8 @@ add_executable(Fall-Fever
     Controller.cpp
     Window.cpp
     EventHandler.cpp
+    ShaderProgram.cpp
+    VertexBuffer.cpp
 )
 
 target_link_libraries(
