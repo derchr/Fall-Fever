@@ -21,6 +21,7 @@ target_link_libraries(
     Fall-Fever PRIVATE 
     glfw
     glad
+    GL
 )
 
 target_compile_options(Fall-Fever PRIVATE -Wall -Wextra -pedantic)

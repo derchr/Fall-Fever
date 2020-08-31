@@ -30,22 +30,24 @@ Controller::~Controller() {
 }
 
 void Controller::run() {
-    bool running = 1;
-    while(running) {
+    glClearColor(0.341f, 0.678f, 0.408f, 1.0f);
+    // This is the game loop
+    while(!glfwWindowShouldClose(gameWindow->getGLFWwindow())) {
         // Timing
         limit_framerate();
-        std::cout << 1/deltaTime << std::endl;
+        std::cout << "FPS: " << 1/deltaTime << std::endl;
 
         // Update game
 
         // Render and buffer swap
+        glClear(GL_COLOR_BUFFER_BIT);
         glfwSwapBuffers(gameWindow->getGLFWwindow());
 
 
         // Check events, handle input
         gameEventHandler->handleEvents(gameWindow->getGLFWwindow());
-        if(gameEventHandler->gameShouldTerminate) running = 0;
     }
+
 }
 
 void Controller::error_callback(int error, const char* description) {

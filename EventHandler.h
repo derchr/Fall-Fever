@@ -7,7 +7,6 @@ class EventHandler {
 public:
 
     void handleEvents(GLFWwindow *window);
-    bool gameShouldTerminate;
 
 private:
 
