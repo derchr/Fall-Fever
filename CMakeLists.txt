@@ -4,7 +4,7 @@ project(Fall-Fever)
 
 find_package(glfw3 3.3 REQUIRED)
 
-add_subdirectory(${PROJECT_SOURCE_DIR}/lib/glad)
+add_subdirectory(${PROJECT_SOURCE_DIR}/lib)
 
 # Specify the C++ standard
 set(CMAKE_CXX_STANDARD 11)
