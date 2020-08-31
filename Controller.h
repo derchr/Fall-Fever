@@ -4,6 +4,9 @@
 
 #include "Window.h"
 #include "EventHandler.h"
+#include "ShaderProgram.h"
+#include "VertexBuffer.h"
+#include "defines.h"
 
 class Controller {
 
@@ -23,7 +26,15 @@ private:
     EventHandler *gameEventHandler;
 
     const uint16_t MAX_FPS = 60;
-
     double deltaTime;
+
+    ShaderProgram *shaderProgram;
+    VertexBuffer *vertexBuffer;
+
+    Vertex vertices[3] = {
+        Vertex{-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f},
+        Vertex{0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f},
+        Vertex{0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f}
+    };
 
 };

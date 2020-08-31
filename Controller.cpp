@@ -10,9 +10,6 @@
 #endif
 
 #include "Controller.h"
-#include "ShaderProgram.h"
-#include "VertexBuffer.h"
-#include "defines.h"
 
 Controller::Controller() {
     if(!glfwInit()) exit(-1);
@@ -34,39 +31,34 @@ Controller::~Controller() {
 }
 
 void Controller::run() {
-    glClearColor(0.241f, 0.578f, 0.308f, 1.0f);
+    glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
 
-    ShaderProgram shaderProgram("res/shaders/old.vs", "res/shaders/old.fs");
-    shaderProgram.bind();
+    shaderProgram = new ShaderProgram("res/shaders/basic.vs", "res/shaders/basic.fs");
+    shaderProgram->bind();
 
-    Vertex vertices[] = {
-        Vertex{-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f},
-        Vertex{0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f},
-        Vertex{0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f}
-    };
     uint32_t numVertices = sizeof(vertices) / sizeof(Vertex);
 
-    VertexBuffer vertexBuffer(vertices, numVertices);
-    vertexBuffer.unbind();
+    vertexBuffer = new VertexBuffer(vertices, numVertices);
 
     // This is the game loop
     while(!glfwWindowShouldClose(gameWindow->getGLFWwindow())) {
         // Timing
         limit_framerate();
-        static int slowdown = 0;
-        if(slowdown++ == 60) {
+        static int frameCount = 55;
+        if(frameCount++ == 60) {
             std::cout << "FPS: " << 1/deltaTime << std::endl;
-            slowdown = 0;
+            frameCount = 0;
         }
 
         // Update game
+        // ...
 
         // Render and buffer swap
         glClear(GL_COLOR_BUFFER_BIT);
 
-        vertexBuffer.bind();
+        vertexBuffer->bind();
         glDrawArrays(GL_TRIANGLES, 0, 3);
-        vertexBuffer.unbind();
+        vertexBuffer->unbind();
 
         glfwSwapBuffers(gameWindow->getGLFWwindow());
 
@@ -74,11 +66,6 @@ void Controller::run() {
         gameEventHandler->handleEvents(gameWindow->getGLFWwindow());
     }
 
-}
-
-void Controller::error_callback(int error, const char* description) {
-    (void)error;
-    fprintf(stderr, "Error: %s\n", description);
 }
 
 void Controller::limit_framerate() {
@@ -100,4 +87,10 @@ void Controller::limit_framerate() {
     deltaTime = glfwGetTime() - startingTime;
 
     startingTime = glfwGetTime();
+}
+
+// GLFW error function
+void Controller::error_callback(int error, const char* description) {
+    (void)error;
+    fprintf(stderr, "Error: %s\n", description);
 }
