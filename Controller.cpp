@@ -33,12 +33,25 @@ Controller::~Controller() {
 void Controller::run() {
     glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
 
-    shaderProgram = new ShaderProgram("res/shaders/basic.vs", "res/shaders/basic.fs");
-    shaderProgram->bind();
+    ShaderProgram shaderProgram("res/shaders/basic.vs", "res/shaders/basic.fs");
+    shaderProgram.bind();
+
+    Vertex vertices[] = {
+        Vertex{-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f},
+        Vertex{0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f},
+        Vertex{-0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f},
+        Vertex{0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f}
+    };
+
+    uint32_t indices[] = {
+        0, 1, 2,
+        1, 2, 3
+    };
 
     uint32_t numVertices = sizeof(vertices) / sizeof(Vertex);
+    uint32_t numIndices = sizeof(indices) / sizeof(indices[0]);
 
-    vertexBuffer = new VertexBuffer(vertices, numVertices);
+    VertexBuffer vertexBuffer(vertices, indices, numVertices, numIndices);
 
     // This is the game loop
     while(!glfwWindowShouldClose(gameWindow->getGLFWwindow())) {
@@ -56,9 +69,9 @@ void Controller::run() {
         // Render and buffer swap
         glClear(GL_COLOR_BUFFER_BIT);
 
-        vertexBuffer->bind();
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-        vertexBuffer->unbind();
+        vertexBuffer.bind();
+        glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
+        vertexBuffer.unbind();
 
         glfwSwapBuffers(gameWindow->getGLFWwindow());
 

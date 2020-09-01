@@ -6,7 +6,7 @@ class VertexBuffer {
 
 public:
 
-    VertexBuffer(void* data, uint32_t numVertices);
+    VertexBuffer(void *vertexData, void *indexData, uint32_t numVertices, uint32_t numIndices);
     ~VertexBuffer();
 
     void bind();
@@ -16,5 +16,6 @@ private:
 
     GLuint bufferId;
     GLuint VAO;
+    GLuint EBO;
 
 };
