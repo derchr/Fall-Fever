@@ -1,6 +1,7 @@
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <stb_image.h>
 
 #include "Controller.h"
 
@@ -10,8 +11,6 @@ int main(int argc, char** argv) {
 
     #ifdef _DEBUG
     std::cout << "[Debug Mode]" << std::endl;
-    #else
-    std::cout << "[Release Mode]" << std::endl;
     #endif
 
     // Create window

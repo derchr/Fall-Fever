@@ -42,13 +42,11 @@ void Controller::run() {
     Vertex vertices[] = {
         Vertex{-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f},
         Vertex{0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f},
-        Vertex{-0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f},
-        Vertex{0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f}
+        Vertex{0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f}
     };
 
     uint32_t indices[] = {
-        0, 1, 2,
-        1, 2, 3
+        0, 1, 2
     };
 
     uint32_t numVertices = sizeof(vertices) / sizeof(Vertex);
@@ -60,11 +58,14 @@ void Controller::run() {
     while(!glfwWindowShouldClose(gameWindow->getGLFWwindow())) {
         // Timing
         limit_framerate();
+
+        #ifdef _DEBUG
         static uint8_t frameCount = 250;
         if(frameCount++ == 255) {
             std::cout << "FPS: " << 1/deltaTime << std::endl;
             frameCount = 0;
         }
+        #endif
 
         // Update game
         // ...

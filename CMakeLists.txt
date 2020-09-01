@@ -25,6 +25,7 @@ target_link_libraries(
     Fall-Fever PRIVATE 
     glfw
     glad
+    stb
     GL
 )
 
