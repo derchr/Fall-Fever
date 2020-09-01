@@ -21,6 +21,7 @@ Window::Window() {
     }
 
     glViewport(0, 0, width, height);
+    std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
 
     // Tell GLFW which function to call when window is resized
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
