@@ -1,4 +1,4 @@
-//#include <iostream>
+#include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -7,6 +7,12 @@
 int main(int argc, char** argv) {
     // Suppress warning about unused variable
     (void)argc; (void)argv;
+
+    #ifdef _DEBUG
+    std::cout << "[Debug Mode]" << std::endl;
+    #else
+    std::cout << "[Release Mode]" << std::endl;
+    #endif
 
     // Create window
     Controller *mainController = new Controller();

@@ -17,11 +17,14 @@ Controller::Controller() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    #ifdef _DEBUG
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+    #endif
 
     glfwSetErrorCallback(error_callback);
 
     gameWindow = new Window();
-    gameEventHandler = new EventHandler();
+    gameEventHandler = new EventHandler(gameWindow->getGLFWwindow());
 }
 
 Controller::~Controller() {
@@ -57,8 +60,8 @@ void Controller::run() {
     while(!glfwWindowShouldClose(gameWindow->getGLFWwindow())) {
         // Timing
         limit_framerate();
-        static int frameCount = 55;
-        if(frameCount++ == 60) {
+        static uint8_t frameCount = 250;
+        if(frameCount++ == 255) {
             std::cout << "FPS: " << 1/deltaTime << std::endl;
             frameCount = 0;
         }
@@ -76,7 +79,7 @@ void Controller::run() {
         glfwSwapBuffers(gameWindow->getGLFWwindow());
 
         // Check events, handle input
-        gameEventHandler->handleEvents(gameWindow->getGLFWwindow());
+        gameEventHandler->handleEvents();
     }
 
 }

@@ -10,6 +10,8 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/lib)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
+
 add_executable(Fall-Fever
     main.cpp
     Controller.cpp

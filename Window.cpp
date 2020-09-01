@@ -20,6 +20,12 @@ Window::Window() {
         exit(-1);
     }
 
+    #ifdef _DEBUG
+	glEnable(GL_DEBUG_OUTPUT);
+	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+	glDebugMessageCallback(openGLDebugCallback, NULL);
+	#endif
+
     glViewport(0, 0, width, height);
 
     // Tell GLFW which function to call when window is resized
@@ -36,3 +42,16 @@ void Window::framebuffer_size_callback(GLFWwindow* window, int width, int height
     (void)window;
     glViewport(0, 0, width, height);
 }  
+
+void Window::openGLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
+	(void)length; (void)userParam;
+    
+    if(severity == GL_DEBUG_SEVERITY_HIGH || severity == GL_DEBUG_SEVERITY_MEDIUM)
+    std::cout << "[OpenGL Error]" << std::endl
+        << "Message: " << message << std::endl
+        << "Source: " << source << std::endl
+        << "Type: " << type << std::endl
+        << "ID: " << id << std::endl
+        << "Severity: " << severity << std::endl
+        << std::endl;
+}

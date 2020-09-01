@@ -82,3 +82,18 @@ GLuint ShaderProgram::compile(std::string shaderSource, GLenum type) {
     }
     return shaderId;
 }
+
+void ShaderProgram::setBool(const char *name, bool value) const {
+    GLint location = glGetUniformLocation(shaderProgramId, name);
+    glUniform1i(location, (int)value);
+}
+
+void ShaderProgram::setInt(const char *name, int value) const {
+    GLint location = glGetUniformLocation(shaderProgramId, name);
+    glUniform1i(location, value);
+}
+
+void ShaderProgram::setFloat(const char *name, float value) const {
+    GLint location = glGetUniformLocation(shaderProgramId, name);
+    glUniform1f(location, value);
+}

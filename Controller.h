@@ -28,4 +28,6 @@ private:
     const uint16_t MAX_FPS = 60;
     double deltaTime;
 
+    bool wireFrameMode = 0;
+
 };
