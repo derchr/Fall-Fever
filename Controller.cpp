@@ -10,6 +10,7 @@
 #endif
 
 #include "Controller.h"
+#include "Texture.h"
 
 Controller::Controller() {
     if(!glfwInit()) exit(-1);
@@ -40,19 +41,31 @@ void Controller::run() {
     shaderProgram.bind();
 
     Vertex vertices[] = {
-        Vertex{-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f},
-        Vertex{0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f},
-        Vertex{0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f}
+        Vertex{-0.5f, -0.5f, 0.0f,
+            0.0f, 0.0f,
+            1.0f, 0.0f, 0.0f, 1.0f},
+        Vertex{0.5f, -0.5f, 0.0f,
+            1.0f, 0.0f,
+            0.0f, 1.0f,0.0f, 1.0f},
+        Vertex{-0.5f, 0.5f, 0.0f,
+            0.0f, 1.0f,
+            0.0f, 0.0f, 1.0f, 1.0f},
+        Vertex{0.5f, 0.5f, 0.0f,
+            1.0f, 1.0f,
+            0.0f, 0.0f, 1.0f, 1.0f}
     };
 
     uint32_t indices[] = {
-        0, 1, 2
+        0, 1, 2,
+        1, 2, 3
     };
 
     uint32_t numVertices = sizeof(vertices) / sizeof(Vertex);
     uint32_t numIndices = sizeof(indices) / sizeof(indices[0]);
 
     VertexBuffer vertexBuffer(vertices, indices, numVertices, numIndices);
+
+    Texture tex1("res/tex.png", shaderProgram.getShaderProgramId());
 
     // This is the game loop
     while(!glfwWindowShouldClose(gameWindow->getGLFWwindow())) {
@@ -74,7 +87,9 @@ void Controller::run() {
         glClear(GL_COLOR_BUFFER_BIT);
 
         vertexBuffer.bind();
+        tex1.bind(0);
         glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
+        tex1.unbind();
         vertexBuffer.unbind();
 
         glfwSwapBuffers(gameWindow->getGLFWwindow());

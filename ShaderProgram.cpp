@@ -3,8 +3,8 @@
 
 #include "ShaderProgram.h"
 
-ShaderProgram::ShaderProgram(const char* vertexShaderFilename, const char* fragmentShaderFilename) {
-    shaderProgramId = createShader(vertexShaderFilename, fragmentShaderFilename);
+ShaderProgram::ShaderProgram(const char* vertexShaderPath, const char* fragmentShaderPath) {
+    shaderProgramId = createShader(vertexShaderPath, fragmentShaderPath);
 }
 
 ShaderProgram::~ShaderProgram() {
@@ -19,9 +19,9 @@ void ShaderProgram::unbind() {
     glUseProgram(0);
 }
 
-GLuint ShaderProgram::createShader(const char* vertexShaderFilename, const char* framentShaderFilename) {
-    std::string vertexShaderSource = parse(vertexShaderFilename);
-    std::string fragmentShaderSource = parse(framentShaderFilename);
+GLuint ShaderProgram::createShader(const char* vertexShaderPath, const char* framentShaderPath) {
+    std::string vertexShaderSource = parse(vertexShaderPath);
+    std::string fragmentShaderSource = parse(framentShaderPath);
 
     GLuint program = glCreateProgram();
     GLuint vs = compile(vertexShaderSource, GL_VERTEX_SHADER);
