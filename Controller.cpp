@@ -2,6 +2,9 @@
 #include <iostream>
 #include <glad/glad.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 #ifdef __linux__
 #include <unistd.h>
 #endif
@@ -82,6 +85,9 @@ void Controller::run() {
 
         // Update game
         // ...
+        glm::mat4 trans_mat = glm::mat4(1.0f);
+        trans_mat = glm::rotate(trans_mat, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+        shaderProgram.setUniform("transform", trans_mat);
 
         // Render and buffer swap
         glClear(GL_COLOR_BUFFER_BIT);

@@ -1,10 +1,18 @@
 #include <iostream>
 #include <string>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "ShaderProgram.h"
 
 ShaderProgram::ShaderProgram(const char* vertexShaderPath, const char* fragmentShaderPath) {
     shaderProgramId = createShader(vertexShaderPath, fragmentShaderPath);
+
+    // Set transformation matrix as default to identity matrix
+    this->bind();
+    glm::mat4 identity_matrix = glm::mat4(1.0f);
+    this->setUniform("transform", identity_matrix);
+    this->unbind();
 }
 
 ShaderProgram::~ShaderProgram() {
@@ -83,17 +91,22 @@ GLuint ShaderProgram::compile(std::string shaderSource, GLenum type) {
     return shaderId;
 }
 
-void ShaderProgram::setBool(const char *name, bool value) const {
+void ShaderProgram::setUniform(const char *name, bool value) const {
     GLint location = glGetUniformLocation(shaderProgramId, name);
     glUniform1i(location, (int)value);
 }
 
-void ShaderProgram::setInt(const char *name, int value) const {
+void ShaderProgram::setUniform(const char *name, int value) const {
     GLint location = glGetUniformLocation(shaderProgramId, name);
     glUniform1i(location, value);
 }
 
-void ShaderProgram::setFloat(const char *name, float value) const {
+void ShaderProgram::setUniform(const char *name, float value) const {
     GLint location = glGetUniformLocation(shaderProgramId, name);
     glUniform1f(location, value);
+}
+
+void ShaderProgram::setUniform(const char *name, glm::mat4 matrix) const {
+    GLint location = glGetUniformLocation(shaderProgramId, name);
+    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glad/glad.h>
+#include <glm/glm.hpp>
 #include <string>
 
 class ShaderProgram {
@@ -14,9 +15,10 @@ public:
     void unbind();
 
     // May be rewritten...
-    void setBool(const char *name, bool value) const;  
-    void setInt(const char *name, int value) const;   
-    void setFloat(const char *name, float value) const;
+    void setUniform(const char *name, bool value) const;  
+    void setUniform(const char *name, int value) const;   
+    void setUniform(const char *name, float value) const;
+    void setUniform(const char *name, glm::mat4 matrix) const;
 
     GLuint getShaderProgramId() { return shaderProgramId; }
 

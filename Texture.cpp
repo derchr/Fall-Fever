@@ -1,6 +1,6 @@
 #include "Texture.h"
 
-#include <stb_image.h>
+#include <stb/stb_image.h>
 #include <iostream>
 
 Texture::Texture(const char* texturePath, GLuint shaderProgramId) {
