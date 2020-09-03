@@ -73,7 +73,8 @@ void Controller::run() {
 
     glm::mat4 model = glm::mat4(1.0f);
     Camera cam1(90.0f, gameWindow->getWindowWidth(), gameWindow->getWindowHeight());
-    cam1.translate(glm::vec3(0.0f, 0.0f, 1.5f));
+    
+    cam1.translate(glm::vec3(0.0f, 0.0f, 2.5f));
 
     // This is the game loop
     while(!glfwWindowShouldClose(gameWindow->getGLFWwindow())) {
@@ -90,17 +91,27 @@ void Controller::run() {
 
         // Update game
         // ...
-        model = glm::rotate(model, (float)this->deltaTime, glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::rotate(model, (float)(this->deltaTime*0.05), glm::vec3(0.0f, 1.0f, 0.0f));
+
+        cam1.lookAtTarget(glm::vec3(0.0f, 0.0f, 0.0f));
+        cam1.lookForward();
         cam1.updateVPM();
         glm::mat4 modelViewProj = cam1.getViewProj() * model;
         shaderProgram.setUniform("u_modelViewProj", modelViewProj);
 
         // Render and buffer swap
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         vertexBuffer.bind();
         tex1.bind(0);
-        glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
+        for(int i=0;i<20;i++) {
+            glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
+            model = glm::translate(model, glm::vec3(0.0f, 0.0f, 1.0f));
+            cam1.updateVPM();
+            glm::mat4 modelViewProj = cam1.getViewProj() * model;
+            shaderProgram.setUniform("u_modelViewProj", modelViewProj);
+        }
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, -20.0f));
         tex1.unbind();
         vertexBuffer.unbind();
 
@@ -108,6 +119,7 @@ void Controller::run() {
 
         // Check events, handle input
         gameEventHandler->handleEvents();
+        cam1.updatePositionFromKeyboardInput(gameEventHandler->getCameraActionRegister());
 
         // Update window size
         int new_window_width, new_window_height;

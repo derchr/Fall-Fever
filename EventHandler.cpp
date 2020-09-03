@@ -11,9 +11,25 @@ EventHandler::EventHandler(GLFWwindow *p_window)
 
 void EventHandler::handleEvents() {
     glfwPollEvents();
+    for(int i=0; i<CAMERA_ACTION_NUM_ITEMS; i++) {
+        actionCameraRegister[i] = 0;
+    }
 
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        actionCameraRegister[cameraForward] = 1;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        actionCameraRegister[cameraBackward] = 1;
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+        actionCameraRegister[cameraUp] = 1;
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+        actionCameraRegister[cameraDown] = 1;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        actionCameraRegister[cameraLeft] = 1;
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        actionCameraRegister[cameraRight] = 1;
 
 }
 

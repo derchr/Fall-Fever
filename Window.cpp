@@ -20,6 +20,9 @@ Window::Window() {
         exit(-1);
     }
 
+    // Enable z buffer
+    glEnable(GL_DEPTH_TEST);
+
     #ifdef _DEBUG
     std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
 	glEnable(GL_DEBUG_OUTPUT);

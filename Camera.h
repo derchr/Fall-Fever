@@ -12,8 +12,13 @@ public:
     glm::mat4 getViewProj();
     void updateVPM();
     void updateAspectRatio(int width, int height);
+    void updatePositionFromKeyboardInput(bool *actionCameraRegister);
 
-    void translate(glm::vec3 vector);
+    void translate(glm::vec3 translateVector);
+
+    void setPosition(glm::vec3 position) { this->position = position; }
+    void lookAtTarget(glm::vec3 target);
+    void lookForward();
     
 
 private:
@@ -22,6 +27,13 @@ private:
     glm::mat4 projectionMatrix;
 
     glm::mat4 viewProjectionMatrix;
+
+    glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
+    glm::vec3 direction = glm::vec3(0.0f, 0.0f, 1.0f);
+    glm::vec3 frontVec = glm::vec3(0.0f, 0.0f, -1.0f);
+    glm::vec3 upVec = glm::vec3(0.0f, 1.0f,  0.0f);
+
+    float speed = 0.05f;
 
     float fov;
 
