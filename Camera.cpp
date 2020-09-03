@@ -38,17 +38,38 @@ void Camera::lookForward() {
     viewMatrix = glm::lookAt(position, position + frontVec, upVec);
 }
 
-void Camera::updatePositionFromKeyboardInput(bool *actionCameraRegister) {
+void Camera::updatePositionFromKeyboardInput(bool *actionCameraRegister, float deltaTime) {
+    glm::vec3 frontVecWithoutY = glm::vec3(frontVec.x, 0.0f, frontVec.z);
+
+    glm::vec3 deltaPos = glm::vec3(0.0f, 0.0f, 0.0f);
+
     if(actionCameraRegister[cameraForward])
-        position += speed * frontVec;
+        deltaPos += speed * deltaTime * frontVecWithoutY;
     if(actionCameraRegister[cameraBackward])
-        position -= speed * frontVec;
+        deltaPos -= speed * deltaTime * frontVecWithoutY;
     if(actionCameraRegister[cameraLeft])
-        position -= speed * glm::cross(frontVec, upVec);
+        deltaPos -= speed * deltaTime * glm::cross(frontVec, upVec);
     if(actionCameraRegister[cameraRight])
-        position += speed * glm::cross(frontVec, upVec);
+        deltaPos += speed * deltaTime * glm::cross(frontVec, upVec);
     if(actionCameraRegister[cameraUp])
-        position += speed * upVec;
+        deltaPos += speed * deltaTime * upVec;
     if(actionCameraRegister[cameraDown])
-        position -= speed * upVec;
+        deltaPos -= speed * deltaTime * upVec;
+
+    position += deltaPos;
+}
+
+void Camera::updateDirectionFromMouseInput(float deltaCursorX, float deltaCursorY) {
+    yaw += deltaCursorX;
+    pitch += deltaCursorY;
+    
+    if(pitch > 89.0f)
+        pitch =  89.0f;
+    if(pitch < -89.0f)
+        pitch = -89.0f;
+
+    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    direction.y = sin(glm::radians(pitch));
+    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    frontVec = glm::normalize(direction);
 }

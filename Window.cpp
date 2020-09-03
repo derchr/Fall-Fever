@@ -2,9 +2,12 @@
 #include <glad/glad.h>
 
 #include "Window.h"
+#include "defines.h"
+
+bool Window::windowWasResized = 0;
 
 Window::Window() {
-    width = 800; height = 600;
+    width = INIT_WINDOW_WIDTH; height = INIT_WINDOW_HEIGHT;
 
     window = glfwCreateWindow(width, height, "Fall-Fever", NULL, NULL);
     if(!window) {
@@ -23,6 +26,9 @@ Window::Window() {
     // Enable z buffer
     glEnable(GL_DEPTH_TEST);
 
+    // Disable mouse cursor
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
     #ifdef _DEBUG
     std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
 	glEnable(GL_DEBUG_OUTPUT);
@@ -34,7 +40,7 @@ Window::Window() {
 
     // Tell GLFW which function to call when window is resized
     // Currently not used...
-    // glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
 }
 
@@ -45,6 +51,7 @@ Window::~Window() {
 // This function is called when the window gets resized
 void Window::framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     (void)window;
+    windowWasResized = 1;
     glViewport(0, 0, width, height);
 }  
 

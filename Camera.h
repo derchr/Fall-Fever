@@ -12,7 +12,8 @@ public:
     glm::mat4 getViewProj();
     void updateVPM();
     void updateAspectRatio(int width, int height);
-    void updatePositionFromKeyboardInput(bool *actionCameraRegister);
+    void updatePositionFromKeyboardInput(bool *actionCameraRegister, float deltaTime);
+    void updateDirectionFromMouseInput(float deltaCursorX, float deltaCursorY);
 
     void translate(glm::vec3 translateVector);
 
@@ -33,7 +34,10 @@ private:
     glm::vec3 frontVec = glm::vec3(0.0f, 0.0f, -1.0f);
     glm::vec3 upVec = glm::vec3(0.0f, 1.0f,  0.0f);
 
-    float speed = 0.05f;
+    float pitch;
+    float yaw = -90.0f;
+
+    float speed = 2.0f;
 
     float fov;
 

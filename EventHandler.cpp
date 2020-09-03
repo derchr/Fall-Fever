@@ -2,18 +2,27 @@
 
 bool EventHandler::wireFrameMode = 0;
 
-EventHandler::EventHandler(GLFWwindow *p_window)
-    : window(p_window) {
+EventHandler::EventHandler(GLFWwindow *window)
+    : window(window) {
 
     glfwSetKeyCallback(window, key_callback);
+
+    // Currently disabled because callbacks are shitty
+    //glfwSetCursorPosCallback(window, mouse_callback);
 
 }
 
 void EventHandler::handleEvents() {
+
+    // Restore deltaCursorPos BEFORE polling events
+    //deltaCursorPosX = 0.0f; deltaCursorPosY = 0.0f;
+
     glfwPollEvents();
     for(int i=0; i<CAMERA_ACTION_NUM_ITEMS; i++) {
         actionCameraRegister[i] = 0;
     }
+
+    updateMouseDelta();
 
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
@@ -33,9 +42,9 @@ void EventHandler::handleEvents() {
 
 }
 
-void EventHandler::key_callback(GLFWwindow *p_window, int key, int scancode, int action, int mods) {
+void EventHandler::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
     // Silence warnings of unused variables.
-    (void)p_window; (void)scancode; (void)mods;
+    (void)window; (void)scancode; (void)mods;
 
     if (key == GLFW_KEY_O && action == GLFW_PRESS) {
         wireFrameMode = !wireFrameMode;
@@ -46,3 +55,42 @@ void EventHandler::key_callback(GLFWwindow *p_window, int key, int scancode, int
         }
     }
 }
+
+void EventHandler::updateMouseDelta() {
+    double xPos, yPos;
+    glfwGetCursorPos(window, &xPos, &yPos);
+
+    if(firstMouseInput) {
+        firstMouseInput = 0;
+        lastCursorPosX = xPos;
+        lastCursorPosY = yPos;
+    }
+
+    deltaCursorPosX = xPos - lastCursorPosX;
+    deltaCursorPosY = -(yPos - lastCursorPosY);
+    lastCursorPosX = xPos;
+    lastCursorPosY = yPos;
+
+    deltaCursorPosX *= mouseSensitivity;
+    deltaCursorPosY *= mouseSensitivity;
+
+}
+
+/*void EventHandler::mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+    // Silence warnings of unused variables.
+    (void)window;
+
+    if(firstMouseInput) {
+        firstMouseInput = 0;
+        lastCursorPosX = xpos;
+        lastCursorPosY = ypos;
+    }
+
+    deltaCursorPosX = xpos - lastCursorPosX;
+    deltaCursorPosY = lastCursorPosY - ypos;
+    lastCursorPosX = xpos;
+    lastCursorPosY = ypos;
+
+    deltaCursorPosX *= mouseSensitivity;
+    deltaCursorPosY *= mouseSensitivity;
+}*/

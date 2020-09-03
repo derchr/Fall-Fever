@@ -1,5 +1,7 @@
  #pragma once
 
+#define INIT_WINDOW_WIDTH 800
+#define INIT_WINDOW_HEIGHT 600 
 struct Vertex {
     // Postition
     float x;
