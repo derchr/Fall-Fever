@@ -30,7 +30,8 @@ Window::Window() {
     glViewport(0, 0, width, height);
 
     // Tell GLFW which function to call when window is resized
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    // Currently not used...
+    // glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
 }
 

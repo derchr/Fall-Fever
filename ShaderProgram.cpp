@@ -9,10 +9,10 @@ ShaderProgram::ShaderProgram(const char* vertexShaderPath, const char* fragmentS
     shaderProgramId = createShader(vertexShaderPath, fragmentShaderPath);
 
     // Set transformation matrix as default to identity matrix
-    this->bind();
+    bind();
     glm::mat4 identity_matrix = glm::mat4(1.0f);
-    this->setUniform("transform", identity_matrix);
-    this->unbind();
+    setUniform("transform", identity_matrix);
+    unbind();
 }
 
 ShaderProgram::~ShaderProgram() {

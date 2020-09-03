@@ -13,6 +13,7 @@
 #endif
 
 #include "Controller.h"
+#include "Camera.h"
 #include "Texture.h"
 
 Controller::Controller() {
@@ -49,7 +50,7 @@ void Controller::run() {
             1.0f, 0.0f, 0.0f, 1.0f},
         Vertex{0.5f, -0.5f, 0.0f,
             1.0f, 0.0f,
-            0.0f, 1.0f,0.0f, 1.0f},
+            0.0f, 1.0f, 0.0f, 1.0f},
         Vertex{-0.5f, 0.5f, 0.0f,
             0.0f, 1.0f,
             0.0f, 0.0f, 1.0f, 1.0f},
@@ -70,6 +71,10 @@ void Controller::run() {
 
     Texture tex1("res/tex.png", shaderProgram.getShaderProgramId());
 
+    glm::mat4 model = glm::mat4(1.0f);
+    Camera cam1(90.0f, gameWindow->getWindowWidth(), gameWindow->getWindowHeight());
+    cam1.translate(glm::vec3(0.0f, 0.0f, 1.5f));
+
     // This is the game loop
     while(!glfwWindowShouldClose(gameWindow->getGLFWwindow())) {
         // Timing
@@ -85,9 +90,10 @@ void Controller::run() {
 
         // Update game
         // ...
-        glm::mat4 trans_mat = glm::mat4(1.0f);
-        trans_mat = glm::rotate(trans_mat, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-        shaderProgram.setUniform("transform", trans_mat);
+        model = glm::rotate(model, (float)this->deltaTime, glm::vec3(0.0f, 1.0f, 0.0f));
+        cam1.updateVPM();
+        glm::mat4 modelViewProj = cam1.getViewProj() * model;
+        shaderProgram.setUniform("u_modelViewProj", modelViewProj);
 
         // Render and buffer swap
         glClear(GL_COLOR_BUFFER_BIT);
@@ -102,6 +108,13 @@ void Controller::run() {
 
         // Check events, handle input
         gameEventHandler->handleEvents();
+
+        // Update window size
+        int new_window_width, new_window_height;
+        glfwGetFramebufferSize(gameWindow->getGLFWwindow(), &new_window_width, &new_window_height);
+        gameWindow->setWindowDimensions(new_window_width, new_window_height);
+        glViewport(0, 0, new_window_width, new_window_height);
+        cam1.updateAspectRatio(new_window_width, new_window_height);
     }
 
 }

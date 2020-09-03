@@ -20,6 +20,7 @@ add_executable(Fall-Fever
     ShaderProgram.cpp
     VertexBuffer.cpp
     Texture.cpp
+    Camera.cpp
 )
 
 target_link_libraries(
