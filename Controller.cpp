@@ -111,7 +111,7 @@ void Controller::run() {
         // Update game
         // ...
         shaderProgram.setUniform("mix_val", (float) (sin(glfwGetTime()*0.25)*sin(glfwGetTime()*0.25)));
-        model = glm::rotate(model, (float)(this->deltaTime*0.005), glm::vec3(0.0f, 1.0f, 0.0f));
+        //model = glm::rotate(model, (float)(this->deltaTime*0.005), glm::vec3(0.0f, 1.0f, 0.0f));
 
         //camera->lookAtTarget(glm::vec3(0.0f, 0.0f, 0.0f));
         camera->lookForward();
