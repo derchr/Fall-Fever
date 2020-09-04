@@ -36,7 +36,7 @@ private:
     glm::vec3 frontVec = glm::vec3(0.0f, 0.0f, -1.0f);
     glm::vec3 upVec = glm::vec3(0.0f, 1.0f,  0.0f);
 
-    float pitch;
+    float pitch = 0.0f;
     float yaw = -90.0f;
 
     float speed = 2.0f;
