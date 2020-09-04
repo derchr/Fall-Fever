@@ -2,7 +2,10 @@ cmake_minimum_required(VERSION 3.10)
 
 project(Fall-Fever)
 
+set(OpenGL_GL_PREFERENCE "GLVND")
+
 find_package(glfw3 3.3 REQUIRED)
+find_package(OpenGL REQUIRED)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/lib)
 
@@ -28,7 +31,8 @@ target_link_libraries(
     glfw
     glad
     stb
-    GL
+    ${OPENGL_LIBRARIES}
+    assimp
 )
 
 target_compile_options(Fall-Fever PRIVATE -Wall -Wextra -pedantic)
