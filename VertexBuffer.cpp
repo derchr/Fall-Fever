@@ -24,11 +24,15 @@ VertexBuffer::VertexBuffer(void *vertexData, void *indexData, uint32_t numVertic
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(struct Vertex, textureCoords));
 
-    // Color
+    // Normal vectors
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(struct Vertex, color));
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(struct Vertex, normalVec));
+
+    // Color
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(struct Vertex, color));
     
-    // This will also unbind the vertex buffer
+    // This will also unbind the vertex buffer and index buffer
     glBindVertexArray(0);
 }
 

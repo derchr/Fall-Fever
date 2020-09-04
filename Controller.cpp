@@ -1,5 +1,5 @@
-#include <stdlib.h>
 #include <iostream>
+#include <vector>
 #include <glad/glad.h>
 
 #include <glm/glm.hpp>
@@ -14,6 +14,7 @@
 
 #include "Controller.h"
 #include "Texture.h"
+#include "Mesh.h"
 
 Controller::Controller() {
     if(!glfwInit()) exit(-1);
@@ -44,40 +45,48 @@ void Controller::run() {
     ShaderProgram shaderProgram("res/shaders/basic.vs", "res/shaders/basic.fs");
     shaderProgram.bind();
 
-    Vertex vertices[] = {
+    std::vector<Vertex> vertices {
         Vertex{
             glm::vec3(-0.5f, -0.5f, 0.0f),
             glm::vec2(0.0f, 0.0f),
+            glm::vec3(0.0f, 0.0f, 0.0f),
+            glm::vec3(0.0f, 0.0f, 0.0f),
             glm::vec3(0.0f, 0.0f, 0.0f),
             glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)},
         Vertex{
             glm::vec3(0.5f, -0.5f, 0.0f),
             glm::vec2(1.0f, 0.0f),
             glm::vec3(0.0f, 0.0f, 0.0f),
+            glm::vec3(0.0f, 0.0f, 0.0f),
+            glm::vec3(0.0f, 0.0f, 0.0f),
             glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)},
         Vertex{
             glm::vec3(-0.5f, 0.5f, 0.0f),
             glm::vec2(0.0f, 1.0f),
+            glm::vec3(0.0f, 0.0f, 0.0f),
+            glm::vec3(0.0f, 0.0f, 0.0f),
             glm::vec3(0.0f, 0.0f, 0.0f),
             glm::vec4(0.0f, 0.0f, 1.0f, 1.0f)},
         Vertex{
             glm::vec3(0.5f, 0.5f, 0.0f),
             glm::vec2(1.0f, 1.0f),
             glm::vec3(0.0f, 0.0f, 0.0f),
+            glm::vec3(0.0f, 0.0f, 0.0f),
+            glm::vec3(0.0f, 0.0f, 0.0f),
             glm::vec4(0.0f, 0.0f, 1.0f, 1.0f)}
     };
 
-    uint32_t indices[] = {
+    std::vector<uint32_t> indices {
         0, 1, 2,
         1, 2, 3
     };
 
-    uint32_t numVertices = sizeof(vertices) / sizeof(Vertex);
-    uint32_t numIndices = sizeof(indices) / sizeof(indices[0]);
+    std::vector<Texture*> textures {
+        new Texture("res/tex2.png", texture_diffuse),
+        new Texture("res/tex1.png", texture_diffuse)
+    };
 
-    VertexBuffer vertexBuffer(vertices, indices, numVertices, numIndices);
-
-    Texture tex1("res/tex.png", shaderProgram.getShaderProgramId());
+    Mesh mesh1(vertices, indices, textures);
 
     glm::mat4 model = glm::mat4(1.0f);
     
@@ -98,7 +107,8 @@ void Controller::run() {
 
         // Update game
         // ...
-        model = glm::rotate(model, (float)(this->deltaTime*0.0005), glm::vec3(0.0f, 1.0f, 0.0f));
+        shaderProgram.setUniform("mix_val", (float) (sin(glfwGetTime())*sin(glfwGetTime())));
+        model = glm::rotate(model, (float)(this->deltaTime*0.005), glm::vec3(0.0f, 1.0f, 0.0f));
 
         //camera->lookAtTarget(glm::vec3(0.0f, 0.0f, 0.0f));
         camera->lookForward();
@@ -109,18 +119,14 @@ void Controller::run() {
         // Render and buffer swap
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        vertexBuffer.bind();
-        tex1.bind(0);
         for(int i=0;i<20;i++) {
-            glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
-            model = glm::translate(model, glm::vec3(0.0f, 0.0f, 1.0f));
+            mesh1.draw(&shaderProgram);
+            model = glm::translate(model, glm::vec3(0.0f, 0.0f, -1.0f));
             camera->updateVPM();
             glm::mat4 modelViewProj = camera->getViewProj() * model;
             shaderProgram.setUniform("u_modelViewProj", modelViewProj);
         }
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, -20.0f));
-        tex1.unbind();
-        vertexBuffer.unbind();
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 20.0f));
 
         glfwSwapBuffers(gameWindow->getGLFWwindow());
             
@@ -134,6 +140,8 @@ void Controller::run() {
         camera->updatePositionFromKeyboardInput(gameEventHandler->getCameraActionRegister(), deltaTime);
         camera->updateDirectionFromMouseInput(gameEventHandler->getCursorDeltaX(), gameEventHandler->getCursorDeltaY());
     }
+
+    delete textures[0];
 
 }
 

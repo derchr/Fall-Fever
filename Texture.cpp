@@ -3,8 +3,10 @@
 #include <stb/stb_image.h>
 #include <iostream>
 
-Texture::Texture(const char* texturePath, GLuint shaderProgramId) {
-    this->shaderProgramId = shaderProgramId;
+Texture::Texture(const char* texturePath, uint8_t textureType) {
+
+    this->texturePath = texturePath;
+    this->textureType = textureType;
 
     stbi_set_flip_vertically_on_load(1);
     stbi_uc *textureBuffer = stbi_load(texturePath, &textureWidth, &textureHeight, &bitsPerPixel, 4);
@@ -42,9 +44,27 @@ Texture::~Texture() {
     glDeleteTextures(1, &textureId);
 }
 
-void Texture::bind(uint8_t textureUnit) {
-    GLint uniformLoc = glGetUniformLocation(shaderProgramId, "u_texture");
-    glUniform1i(uniformLoc, textureUnit);
+void Texture::bind(uint8_t textureUnit, ShaderProgram* shaderProgram, uint8_t textureTypeNum) {
+    std::string uniformName = "u_texture_";
+
+    switch(textureType) {
+
+        case texture_diffuse:
+            uniformName += "diffuse" + std::to_string(textureTypeNum);
+            break;
+        case texture_specular:
+            uniformName += "specular" + std::to_string(textureTypeNum);
+            break;
+        case texture_height:
+            uniformName += "height" + std::to_string(textureTypeNum);
+            break;
+        case texture_normal:
+            uniformName += "normal" + std::to_string(textureTypeNum);
+            break;
+    }
+
+    shaderProgram->setUniform(uniformName.c_str(), textureTypeNum);
+
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_2D, textureId);
 }
