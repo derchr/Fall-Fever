@@ -13,7 +13,6 @@
 #endif
 
 #include "Controller.h"
-#include "Camera.h"
 #include "Texture.h"
 
 Controller::Controller() {
@@ -30,6 +29,7 @@ Controller::Controller() {
 
     gameWindow = new Window();
     gameEventHandler = new EventHandler(gameWindow->getGLFWwindow());
+    camera = new Camera(90.0f, gameWindow->getWindowWidth(), gameWindow->getWindowHeight());
 }
 
 Controller::~Controller() {
@@ -72,9 +72,8 @@ void Controller::run() {
     Texture tex1("res/tex.png", shaderProgram.getShaderProgramId());
 
     glm::mat4 model = glm::mat4(1.0f);
-    Camera cam1(90.0f, gameWindow->getWindowWidth(), gameWindow->getWindowHeight());
     
-    cam1.translate(glm::vec3(0.0f, 0.0f, 2.5f));
+    camera->translate(glm::vec3(0.0f, 0.0f, 2.5f));
 
     // This is the game loop
     while(!glfwWindowShouldClose(gameWindow->getGLFWwindow())) {
@@ -93,10 +92,10 @@ void Controller::run() {
         // ...
         model = glm::rotate(model, (float)(this->deltaTime*0.0005), glm::vec3(0.0f, 1.0f, 0.0f));
 
-        cam1.lookAtTarget(glm::vec3(0.0f, 0.0f, 0.0f));
-        cam1.lookForward();
-        cam1.updateVPM();
-        glm::mat4 modelViewProj = cam1.getViewProj() * model;
+        camera->lookAtTarget(glm::vec3(0.0f, 0.0f, 0.0f));
+        camera->lookForward();
+        camera->updateVPM();
+        glm::mat4 modelViewProj = camera->getViewProj() * model;
         shaderProgram.setUniform("u_modelViewProj", modelViewProj);
 
         // Render and buffer swap
@@ -107,8 +106,8 @@ void Controller::run() {
         for(int i=0;i<20;i++) {
             glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
             model = glm::translate(model, glm::vec3(0.0f, 0.0f, 1.0f));
-            cam1.updateVPM();
-            glm::mat4 modelViewProj = cam1.getViewProj() * model;
+            camera->updateVPM();
+            glm::mat4 modelViewProj = camera->getViewProj() * model;
             shaderProgram.setUniform("u_modelViewProj", modelViewProj);
         }
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, -20.0f));
@@ -119,18 +118,12 @@ void Controller::run() {
 
         // Check events, handle input
         gameEventHandler->handleEvents();
-        cam1.updatePositionFromKeyboardInput(gameEventHandler->getCameraActionRegister(), deltaTime);
-        cam1.updateDirectionFromMouseInput(gameEventHandler->getCursorDeltaX(), gameEventHandler->getCursorDeltaY());
+        camera->updatePositionFromKeyboardInput(gameEventHandler->getCameraActionRegister(), deltaTime);
+        camera->updateDirectionFromMouseInput(gameEventHandler->getCursorDeltaX(), gameEventHandler->getCursorDeltaY());
 
         // Update window size
-        if(gameWindow->getWindowWasResized()) {
-            int new_window_width, new_window_height;
-            glfwGetFramebufferSize(gameWindow->getGLFWwindow(), &new_window_width, &new_window_height);
-            gameWindow->setWindowDimensions(new_window_width, new_window_height);
-            glViewport(0, 0, new_window_width, new_window_height);
-            cam1.updateAspectRatio(new_window_width, new_window_height);
-            gameEventHandler->setFirstMouseInput(1);
-        }
+        if(gameWindow->getWindowWasResized()) 
+            updateWindowSize();
     }
 
 }
@@ -160,4 +153,13 @@ void Controller::limit_framerate() {
 void Controller::error_callback(int error, const char* description) {
     (void)error;
     fprintf(stderr, "Error: %s\n", description);
+}
+
+void Controller::updateWindowSize() {
+    int new_window_width, new_window_height;
+    glfwGetFramebufferSize(gameWindow->getGLFWwindow(), &new_window_width, &new_window_height);
+    gameWindow->setWindowDimensions(new_window_width, new_window_height);
+    glViewport(0, 0, new_window_width, new_window_height);
+    camera->updateAspectRatio(new_window_width, new_window_height);
+    gameEventHandler->setFirstMouseInput(1);
 }

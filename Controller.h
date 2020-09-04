@@ -4,6 +4,7 @@
 
 #include "Window.h"
 #include "EventHandler.h"
+#include "Camera.h"
 #include "ShaderProgram.h"
 #include "VertexBuffer.h"
 #include "defines.h"
@@ -22,8 +23,11 @@ private:
 
     void limit_framerate();
 
+    void updateWindowSize();
+
     Window *gameWindow;
     EventHandler *gameEventHandler;
+    Camera *camera;
 
     const uint16_t MAX_FPS = 60;
     double deltaTime;

@@ -14,10 +14,8 @@ EventHandler::EventHandler(GLFWwindow *window)
 
 void EventHandler::handleEvents() {
 
-    // Restore deltaCursorPos BEFORE polling events
-    //deltaCursorPosX = 0.0f; deltaCursorPosY = 0.0f;
-
     glfwPollEvents();
+
     for(int i=0; i<CAMERA_ACTION_NUM_ITEMS; i++) {
         actionCameraRegister[i] = 0;
     }
