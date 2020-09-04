@@ -25,6 +25,7 @@ add_executable(Fall-Fever
     Texture.cpp
     Camera.cpp
     Mesh.cpp
+    Model.cpp
 )
 
 target_link_libraries(

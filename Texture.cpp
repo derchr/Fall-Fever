@@ -41,7 +41,7 @@ Texture::Texture(const char* texturePath, uint8_t textureType) {
 }
 
 Texture::~Texture() {
-    glDeleteTextures(1, &textureId);
+    //glDeleteTextures(1, &textureId);
 }
 
 void Texture::bind(uint8_t textureUnit, ShaderProgram* shaderProgram, uint8_t textureTypeNum) {
@@ -62,6 +62,9 @@ void Texture::bind(uint8_t textureUnit, ShaderProgram* shaderProgram, uint8_t te
             uniformName += "normal" + std::to_string(textureTypeNum);
             break;
     }
+
+    // Add material. as we store textures in a struct
+    uniformName = "material." + uniformName;
 
     shaderProgram->setUniform(uniformName.c_str(), textureTypeNum);
 

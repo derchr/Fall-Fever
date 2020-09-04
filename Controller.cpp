@@ -14,7 +14,8 @@
 
 #include "Controller.h"
 #include "Texture.h"
-#include "Mesh.h"
+#include "Model.h"
+//#include "Mesh.h"
 
 Controller::Controller() {
     if(!glfwInit()) exit(-1);
@@ -81,12 +82,14 @@ void Controller::run() {
         1, 2, 3
     };
 
-    std::vector<Texture*> textures {
-        new Texture("res/tex2.png", texture_diffuse),
-        new Texture("res/tex1.png", texture_diffuse)
+    std::vector<Texture> textures {
+        Texture("res/textures/tex2.png", texture_diffuse),
+        Texture("res/textures/tex1.png", texture_diffuse)
     };
 
-    Mesh mesh1(vertices, indices, textures);
+    Model model1("res/models/cube.obj");
+
+    //Mesh mesh1(vertices, indices, textures);
 
     glm::mat4 model = glm::mat4(1.0f);
     
@@ -120,13 +123,14 @@ void Controller::run() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         for(int i=0;i<20;i++) {
-            mesh1.draw(&shaderProgram);
-            model = glm::translate(model, glm::vec3(0.0f, 0.0f, -1.0f));
+            //mesh1.draw(&shaderProgram);
+            model1.draw(&shaderProgram);
+            //model = glm::translate(model, glm::vec3(0.0f, 0.0f, -1.0f));
             camera->updateVPM();
             glm::mat4 modelViewProj = camera->getViewProj() * model;
             shaderProgram.setUniform("u_modelViewProj", modelViewProj);
         }
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 20.0f));
+        //model = glm::translate(model, glm::vec3(0.0f, 0.0f, 20.0f));
 
         glfwSwapBuffers(gameWindow->getGLFWwindow());
             
@@ -140,8 +144,6 @@ void Controller::run() {
         camera->updatePositionFromKeyboardInput(gameEventHandler->getCameraActionRegister(), deltaTime);
         camera->updateDirectionFromMouseInput(gameEventHandler->getCursorDeltaX(), gameEventHandler->getCursorDeltaY());
     }
-
-    delete textures[0];
 
 }
 

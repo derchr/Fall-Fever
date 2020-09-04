@@ -19,6 +19,7 @@ public:
     void unbind();
 
     uint8_t getTextureType() { return textureType; }
+    std::string getPath() { return texturePath; }
 
 private:
 
