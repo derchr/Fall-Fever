@@ -1,20 +1,19 @@
  #pragma once
 
+#include <glm/glm.hpp>
+
 #define INIT_WINDOW_WIDTH 960
 #define INIT_WINDOW_HEIGHT 720 
 struct Vertex {
     // Postition
-    float x;
-    float y;
-    float z;
+    glm::vec3 position;
     
     // UV Texture Mapping
-    float u;
-    float v;
+    glm::vec2 textureCoords;
+
+    // Normal vector
+    glm::vec3 normal;
 
     // Color
-    float r;
-    float g;
-    float b;
-    float a;
+    glm::vec4 color;
 };

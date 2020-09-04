@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <glad/glad.h>
+#include <string>
 
 class Texture {
 
@@ -20,6 +21,8 @@ private:
     int32_t bitsPerPixel;
 
     GLuint textureId;
+
+    std::string textureType;
 
     GLuint shaderProgramId;
 

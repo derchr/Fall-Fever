@@ -1,8 +1,6 @@
 #include "Camera.h"
 #include "eventActions.h"
 
-#include <iostream>
-
 Camera::Camera(float fov, int width, int height) {
     this->fov = fov;
     viewMatrix = glm::mat4(1.0f);
