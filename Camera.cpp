@@ -1,6 +1,8 @@
 #include "Camera.h"
 #include "eventActions.h"
 
+#include <iostream>
+
 Camera::Camera(float fov, int width, int height) {
     this->fov = fov;
     viewMatrix = glm::mat4(1.0f);
@@ -41,13 +43,13 @@ void Camera::updatePositionFromKeyboardInput(bool *actionCameraRegister, float d
     glm::vec3 deltaPos = glm::vec3(0.0f, 0.0f, 0.0f);
 
     if(actionCameraRegister[cameraForward])
-        deltaPos += speed * deltaTime * frontVecWithoutY;
+        deltaPos += speed * deltaTime * glm::normalize(frontVecWithoutY);
     if(actionCameraRegister[cameraBackward])
-        deltaPos -= speed * deltaTime * frontVecWithoutY;
+        deltaPos -= speed * deltaTime * glm::normalize(frontVecWithoutY);
     if(actionCameraRegister[cameraLeft])
-        deltaPos -= speed * deltaTime * glm::cross(frontVec, upVec);
+        deltaPos -= speed * deltaTime * glm::normalize(glm::cross(frontVec, upVec));
     if(actionCameraRegister[cameraRight])
-        deltaPos += speed * deltaTime * glm::cross(frontVec, upVec);
+        deltaPos += speed * deltaTime * glm::normalize(glm::cross(frontVec, upVec));
     if(actionCameraRegister[cameraUp])
         deltaPos += speed * deltaTime * upVec;
     if(actionCameraRegister[cameraDown])
@@ -57,6 +59,7 @@ void Camera::updatePositionFromKeyboardInput(bool *actionCameraRegister, float d
 }
 
 void Camera::updateDirectionFromMouseInput(float deltaCursorX, float deltaCursorY) {
+    if(deltaCursorX==0 && deltaCursorY==0) return;
     yaw += deltaCursorX;
     pitch += deltaCursorY;
     

@@ -92,7 +92,7 @@ void Controller::run() {
         // ...
         model = glm::rotate(model, (float)(this->deltaTime*0.0005), glm::vec3(0.0f, 1.0f, 0.0f));
 
-        camera->lookAtTarget(glm::vec3(0.0f, 0.0f, 0.0f));
+        //camera->lookAtTarget(glm::vec3(0.0f, 0.0f, 0.0f));
         camera->lookForward();
         camera->updateVPM();
         glm::mat4 modelViewProj = camera->getViewProj() * model;
@@ -115,15 +115,16 @@ void Controller::run() {
         vertexBuffer.unbind();
 
         glfwSwapBuffers(gameWindow->getGLFWwindow());
+            
+        // Update window size
+        if(gameWindow->checkWindowWasResized())
+            updateWindowSize();
 
         // Check events, handle input
         gameEventHandler->handleEvents();
+
         camera->updatePositionFromKeyboardInput(gameEventHandler->getCameraActionRegister(), deltaTime);
         camera->updateDirectionFromMouseInput(gameEventHandler->getCursorDeltaX(), gameEventHandler->getCursorDeltaY());
-
-        // Update window size
-        if(gameWindow->getWindowWasResized()) 
-            updateWindowSize();
     }
 
 }
@@ -156,10 +157,6 @@ void Controller::error_callback(int error, const char* description) {
 }
 
 void Controller::updateWindowSize() {
-    int new_window_width, new_window_height;
-    glfwGetFramebufferSize(gameWindow->getGLFWwindow(), &new_window_width, &new_window_height);
-    gameWindow->setWindowDimensions(new_window_width, new_window_height);
-    glViewport(0, 0, new_window_width, new_window_height);
-    camera->updateAspectRatio(new_window_width, new_window_height);
+    camera->updateAspectRatio(gameWindow->getWindowWidth(), gameWindow->getWindowHeight());
     gameEventHandler->setFirstMouseInput(1);
 }

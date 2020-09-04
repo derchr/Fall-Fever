@@ -11,26 +11,21 @@ public:
 
     GLFWwindow * getGLFWwindow() { return window; }
 
-    void setWindowDimensions(int width, int height) {this->width = width; this->height = height;}
-
     int getWindowWidth() { return width; }
     int getWindowHeight() { return height; }
 
     // Beware: side effect!
-    bool getWindowWasResized() {
-        bool temp = windowWasResized;
-        windowWasResized = 0;
-        return temp;
-    }
+    bool checkWindowWasResized();
 
 private:
     static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
     static void openGLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
 
-    static bool windowWasResized;
+    void setGrabbedCursor(bool value);
 
     GLFWwindow *window;
 
+    int posX, posY;
     int width, height;
 
 };

@@ -1,5 +1,7 @@
 #include "EventHandler.h"
 
+#include <iostream>
+
 bool EventHandler::wireFrameMode = 0;
 
 EventHandler::EventHandler(GLFWwindow *window)
@@ -58,37 +60,18 @@ void EventHandler::updateMouseDelta() {
     double xPos, yPos;
     glfwGetCursorPos(window, &xPos, &yPos);
 
-    if(firstMouseInput) {
-        firstMouseInput = 0;
-        lastCursorPosX = xPos;
-        lastCursorPosY = yPos;
-    }
-
     deltaCursorPosX = xPos - lastCursorPosX;
     deltaCursorPosY = -(yPos - lastCursorPosY);
     lastCursorPosX = xPos;
     lastCursorPosY = yPos;
 
-    deltaCursorPosX *= mouseSensitivity;
-    deltaCursorPosY *= mouseSensitivity;
-
-}
-
-/*void EventHandler::mouse_callback(GLFWwindow* window, double xpos, double ypos) {
-    // Silence warnings of unused variables.
-    (void)window;
-
-    if(firstMouseInput) {
+    // Check if this is the first VALID mouse event after window being resized
+    if(firstMouseInput && !(deltaCursorPosX == 0 && deltaCursorPosY == 0)) {
         firstMouseInput = 0;
-        lastCursorPosX = xpos;
-        lastCursorPosY = ypos;
+        deltaCursorPosX = 0.0f;
+        deltaCursorPosY = 0.0f;
     }
 
-    deltaCursorPosX = xpos - lastCursorPosX;
-    deltaCursorPosY = lastCursorPosY - ypos;
-    lastCursorPosX = xpos;
-    lastCursorPosY = ypos;
-
     deltaCursorPosX *= mouseSensitivity;
     deltaCursorPosY *= mouseSensitivity;
-}*/
+}

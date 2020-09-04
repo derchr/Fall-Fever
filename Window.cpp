@@ -4,7 +4,6 @@
 #include "Window.h"
 #include "defines.h"
 
-bool Window::windowWasResized = 0;
 
 Window::Window() {
     width = INIT_WINDOW_WIDTH; height = INIT_WINDOW_HEIGHT;
@@ -13,6 +12,8 @@ Window::Window() {
     if(!window) {
         std::cout << "Failed to create window" << std::endl;
     }
+
+    glfwGetWindowPos(window, &posX, &posY);
 
     // Create OpenGL context
     glfwMakeContextCurrent(window);
@@ -27,7 +28,7 @@ Window::Window() {
     glEnable(GL_DEPTH_TEST);
 
     // Disable mouse cursor
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    setGrabbedCursor(1);
 
     #ifdef _DEBUG
     std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
@@ -39,8 +40,7 @@ Window::Window() {
     glViewport(0, 0, width, height);
 
     // Tell GLFW which function to call when window is resized
-    // Currently not used...
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    //glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
 }
 
@@ -48,10 +48,30 @@ Window::~Window() {
     glfwDestroyWindow(window);
 }
 
-// This function is called when the window gets resized
+bool Window::checkWindowWasResized() {
+    int new_width, new_height, new_posx, new_posy;
+    glfwGetFramebufferSize(window, &new_width, &new_height);
+    glfwGetWindowPos(window, &new_posx, &new_posy);
+    if(new_width == width && new_height == height && new_posx == posX && new_posy == posY)
+        return 0;
+
+    width = new_width; height = new_height; posX = new_posx; posY = new_posy;
+    glViewport(0, 0, width, height);
+    
+    return 1;
+}
+
+void Window::setGrabbedCursor(bool value) {
+    if(value) {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    } else {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
+}
+
+// This function is called when the window gets resized (currently not used)
 void Window::framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     (void)window;
-    windowWasResized = 1;
     glViewport(0, 0, width, height);
 }  
 

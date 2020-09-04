@@ -18,6 +18,7 @@ public:
     float getCursorDeltaY() { return deltaCursorPosY; }
 
     void setFirstMouseInput(bool val) { firstMouseInput = val; }
+    void setLastCursorPos(float posX, float posY) { lastCursorPosX=posX; lastCursorPosY=posY; }
 
 private:
 
@@ -32,10 +33,10 @@ private:
 
     static bool wireFrameMode;
 
-    float lastCursorPosX;
-    float lastCursorPosY;
-    float deltaCursorPosX;
-    float deltaCursorPosY;
+    float lastCursorPosX = 0.0f;
+    float lastCursorPosY = 0.0f;
+    float deltaCursorPosX = 0.0f;
+    float deltaCursorPosY = 0.0f;
 
     float mouseSensitivity = 0.08f;
 
