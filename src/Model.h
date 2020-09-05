@@ -13,7 +13,7 @@ class Model {
 public:
 
     Model(const char* pathToModel);
-    ~Model() = default;
+    ~Model();
 
     void draw(ShaderProgram *shaderProgram);
 
@@ -30,7 +30,7 @@ private:
 
     std::vector<Mesh> meshes;
 
-    std::vector<Texture> loadedTextures;
+    std::vector<Texture*> loadedTextures;
 
     void textureFromFile(aiMaterial *mat, aiTextureType type);
 

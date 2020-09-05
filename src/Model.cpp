@@ -6,6 +6,13 @@ Model::Model(const char* pathToModel) {
     loadModel(pathToModel);
 }
 
+Model::~Model() {
+    // Go through all loaded textures and delete them
+    for(auto it = loadedTextures.begin(); it != loadedTextures.end(); it++) {
+        delete (*it);
+    }
+}
+
 void Model::draw(ShaderProgram *shaderProgram) {
 
     // Iterate through every mesh and call the draw function
@@ -106,20 +113,24 @@ std::vector<Texture*> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType
         aiString filename;
         mat->GetTexture(type, i, &filename);
 
+        std::string currentPath = directory + '/' + filename.C_Str();
+
         bool skip = 0;
-        for(uint32_t j = 0; j < loadedTextures.size(); j++) {
-            if(std::strcmp(loadedTextures[j].getPath().data(), filename.C_Str()) == 0) {
-                textures.push_back(&loadedTextures[j]);
+        for(uint j = 0; j < loadedTextures.size(); j++) {
+            if(std::strcmp(loadedTextures[j]->getPath().c_str(), currentPath.c_str()) == 0) {
+                textures.push_back(loadedTextures[j]);
                 skip = 1;
                 break;
             }
         }
 
         if(!skip) {
-            std::string path = directory + '/' + filename.C_Str();
-            Texture texture(path.c_str(), textureType);
-            textures.push_back(&texture);
+            Texture *texture = new Texture(currentPath.c_str(), textureType);
             loadedTextures.push_back(texture);
+
+            // Add newest texture pointer to the mesh's texture vector
+            Texture *new_tex = loadedTextures.back();
+            textures.push_back(new_tex);
         }
     }
 
