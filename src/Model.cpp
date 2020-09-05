@@ -116,7 +116,7 @@ std::vector<Texture*> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType
         std::string currentPath = directory + '/' + filename.C_Str();
 
         bool skip = 0;
-        for(uint j = 0; j < loadedTextures.size(); j++) {
+        for(uint32_t j = 0; j < loadedTextures.size(); j++) {
             if(std::strcmp(loadedTextures[j]->getPath().c_str(), currentPath.c_str()) == 0) {
                 textures.push_back(loadedTextures[j]);
                 skip = 1;

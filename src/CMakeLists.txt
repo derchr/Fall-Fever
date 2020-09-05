@@ -15,7 +15,7 @@ target_link_libraries(
     Fall-Fever PRIVATE 
     glad
     stb
-    glfw
+    ${GLFW3_LIBRARY}
     ${OPENGL_LIBRARIES}
     assimp
 )

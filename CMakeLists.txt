@@ -2,8 +2,15 @@ cmake_minimum_required(VERSION 3.10)
 
 project(Fall-Fever)
 
+#if(WIN32)
+    set(GLFW3_ROOT "${PROJECT_SOURCE_DIR}/glfw")
+#endif(WIN32)
+
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+
 set(OpenGL_GL_PREFERENCE "GLVND")
 
+find_package(GLFW3 REQUIRED)
 find_package(OpenGL REQUIRED)
 
 # Specify the C++ standard

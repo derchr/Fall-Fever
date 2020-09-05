@@ -86,7 +86,7 @@ void Controller::run() {
         new Texture("res/textures/tex1.png", texture_diffuse)
     };
 
-    Model model1("res/models/backpack.obj");
+    Model model1("res/models/cube.obj");
 
     //Mesh mesh1(vertices, indices, textures);
 
