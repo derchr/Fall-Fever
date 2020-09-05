@@ -4,7 +4,6 @@ project(Fall-Fever)
 
 set(OpenGL_GL_PREFERENCE "GLVND")
 
-find_package(glfw3 3.3 REQUIRED)
 find_package(OpenGL REQUIRED)
 
 # Specify the C++ standard

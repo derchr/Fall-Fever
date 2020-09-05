@@ -13,9 +13,9 @@ add_executable(Fall-Fever
 
 target_link_libraries(
     Fall-Fever PRIVATE 
-    glfw
     glad
     stb
+    glfw
     ${OPENGL_LIBRARIES}
     assimp
 )

@@ -9,7 +9,7 @@ Texture::Texture(const char* texturePath, uint8_t textureType) {
     this->textureType = textureType;
 
     stbi_set_flip_vertically_on_load(1);
-    auto *textureBuffer = stbi_load(texturePath, &textureWidth, &textureHeight, &bitsPerPixel, 4);
+    auto *textureBuffer = stbi_load(texturePath, &textureWidth, &textureHeight, &bitsPerPixel, STBI_rgb_alpha);
 
     // Push texture to grahics card;
     glGenTextures(1, &textureId);
