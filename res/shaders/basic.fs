@@ -3,6 +3,8 @@
 struct Material {
     sampler2D u_texture_diffuse0;
     sampler2D u_texture_diffuse1;
+    sampler2D u_texture_specular0;
+    sampler2D u_texture_specular1;
 };
 
 layout(location = 0) out vec4 f_color;

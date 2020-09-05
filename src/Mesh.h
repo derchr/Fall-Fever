@@ -11,7 +11,7 @@ class Mesh {
 
 public:
 
-    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
+    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture*> textures);
     ~Mesh() = default;
 
     void draw(ShaderProgram *shaderProgram);
@@ -20,7 +20,7 @@ private:
 
     std::vector<Vertex> vertices;
     std::vector<uint32_t> indices;
-    std::vector<Texture> textures;
+    std::vector<Texture*> textures;
 
     VertexBuffer vertexBuffer;
 

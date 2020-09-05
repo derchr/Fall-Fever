@@ -47,7 +47,7 @@ void Model::processNode(aiNode *node, const aiScene *scene) {
 Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
     std::vector<Vertex> vertices;
     std::vector<uint32_t> indices;
-    std::vector<Texture> textures;
+    std::vector<Texture*> textures;
 
     for(uint i = 0; i < mesh->mNumVertices; i++) {
         Vertex vertex;
@@ -65,7 +65,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
         vector.z = mesh->mNormals[i].z;
         vertex.normalVec = vector;
 
-        // Texture
+        // Texture UV mapping
         if(mesh->mTextureCoords[0]) {
             glm::vec2 vec;
             vec.x = mesh->mTextureCoords[0][i].x; 
@@ -89,19 +89,19 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
     // Material
     if(mesh->mMaterialIndex >= 0) {
         aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
-        std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, texture_diffuse);
+        std::vector<Texture*> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, texture_diffuse);
         textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
-        std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, texture_specular);
+        std::vector<Texture*> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, texture_specular);
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
     }
 
     return Mesh(vertices, indices, textures);
 }
 
-std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type, uint8_t textureType) {
+std::vector<Texture*> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type, uint8_t textureType) {
 
-    std::vector<Texture> textures;
+    std::vector<Texture*> textures;
     for(uint i = 0; i < mat->GetTextureCount(type); i++) {
         aiString filename;
         mat->GetTexture(type, i, &filename);
@@ -109,7 +109,7 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType 
         bool skip = 0;
         for(uint j = 0; j < loadedTextures.size(); j++) {
             if(std::strcmp(loadedTextures[j].getPath().data(), filename.C_Str()) == 0) {
-                textures.push_back(loadedTextures[j]);
+                textures.push_back(&loadedTextures[j]);
                 skip = 1;
                 break;
             }
@@ -118,11 +118,10 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType 
         if(!skip) {
             std::string path = directory + '/' + filename.C_Str();
             Texture texture(path.c_str(), textureType);
-            textures.push_back(texture);
+            textures.push_back(&texture);
+            loadedTextures.push_back(texture);
         }
     }
-
-    loadedTextures.clear();
 
     return textures;
 }

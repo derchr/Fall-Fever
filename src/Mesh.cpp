@@ -1,6 +1,6 @@
 #include "Mesh.h"
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, std::vector<Texture> textures)
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, std::vector<Texture*> textures)
     : vertices(vertices),
       indices(indices),
       textures(textures),
@@ -17,9 +17,9 @@ void Mesh::draw(ShaderProgram *shaderProgram) {
     for(auto it = textures.begin(); it != textures.end(); it++) {
         int i = it - textures.begin();
 
-        uint8_t currentTextureType = (*it).getTextureType();
+        uint8_t currentTextureType = (*it)->getTextureType();
 
-        (*it).bind(i, shaderProgram, typeNumberCount[currentTextureType]);
+        (*it)->bind(i, shaderProgram, typeNumberCount[currentTextureType]);
 
         typeNumberCount[currentTextureType] += 1;
     }
@@ -31,7 +31,7 @@ void Mesh::draw(ShaderProgram *shaderProgram) {
 
     // Unbind all textures
     for(auto it = textures.begin(); it != textures.end(); it++) {
-        (*it).unbind();
+        (*it)->unbind();
     }
     
 

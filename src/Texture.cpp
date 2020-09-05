@@ -9,7 +9,7 @@ Texture::Texture(const char* texturePath, uint8_t textureType) {
     this->textureType = textureType;
 
     stbi_set_flip_vertically_on_load(1);
-    stbi_uc *textureBuffer = stbi_load(texturePath, &textureWidth, &textureHeight, &bitsPerPixel, 4);
+    auto *textureBuffer = stbi_load(texturePath, &textureWidth, &textureHeight, &bitsPerPixel, 4);
 
     // Push texture to grahics card;
     glGenTextures(1, &textureId);
@@ -41,7 +41,7 @@ Texture::Texture(const char* texturePath, uint8_t textureType) {
 }
 
 Texture::~Texture() {
-    //glDeleteTextures(1, &textureId);
+    glDeleteTextures(1, &textureId);
 }
 
 void Texture::bind(uint8_t textureUnit, ShaderProgram* shaderProgram, uint8_t textureTypeNum) {

@@ -15,7 +15,6 @@
 #include "Controller.h"
 #include "Texture.h"
 #include "Model.h"
-//#include "Mesh.h"
 
 Controller::Controller() {
     if(!glfwInit()) exit(-1);
@@ -82,9 +81,9 @@ void Controller::run() {
         1, 2, 3
     };
 
-    std::vector<Texture> textures {
-        Texture("res/textures/tex2.png", texture_diffuse),
-        Texture("res/textures/tex1.png", texture_diffuse)
+    std::vector<Texture*> textures {
+        new Texture("res/textures/tex2.png", texture_diffuse),
+        new Texture("res/textures/tex1.png", texture_diffuse)
     };
 
     Model model1("res/models/backpack.obj");
@@ -111,9 +110,7 @@ void Controller::run() {
         // Update game
         // ...
         shaderProgram.setUniform("mix_val", (float) (sin(glfwGetTime()*0.25)*sin(glfwGetTime()*0.25)));
-        //model = glm::rotate(model, (float)(this->deltaTime*0.005), glm::vec3(0.0f, 1.0f, 0.0f));
 
-        //camera->lookAtTarget(glm::vec3(0.0f, 0.0f, 0.0f));
         camera->lookForward();
         camera->updateVPM();
         glm::mat4 modelViewProj = camera->getViewProj() * model;
@@ -125,12 +122,10 @@ void Controller::run() {
         for(int i=0;i<20;i++) {
             //mesh1.draw(&shaderProgram);
             model1.draw(&shaderProgram);
-            //model = glm::translate(model, glm::vec3(0.0f, 0.0f, -1.0f));
             camera->updateVPM();
             glm::mat4 modelViewProj = camera->getViewProj() * model;
             shaderProgram.setUniform("u_modelViewProj", modelViewProj);
         }
-        //model = glm::translate(model, glm::vec3(0.0f, 0.0f, 20.0f));
 
         glfwSwapBuffers(gameWindow->getGLFWwindow());
             
