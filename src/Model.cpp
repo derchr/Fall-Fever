@@ -32,13 +32,13 @@ void Model::loadModel(std::string pathToModel) {
 void Model::processNode(aiNode *node, const aiScene *scene) {
 
     // Push the node's meshes into the mesh vector
-    for(uint i = 0; i < node->mNumMeshes; i++) {
+    for(uint32_t i = 0; i < node->mNumMeshes; i++) {
         aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
         meshes.push_back(processMesh(mesh, scene));
     }
 
     // Process child nodes too
-    for(uint i = 0; i < node->mNumChildren; i++) {
+    for(uint32_t i = 0; i < node->mNumChildren; i++) {
         processNode(node->mChildren[i], scene);
     }
 
@@ -49,7 +49,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
     std::vector<uint32_t> indices;
     std::vector<Texture*> textures;
 
-    for(uint i = 0; i < mesh->mNumVertices; i++) {
+    for(uint32_t i = 0; i < mesh->mNumVertices; i++) {
         Vertex vertex;
 
         // Position
@@ -79,9 +79,9 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
     }
 
     // Indices
-    for(uint i = 0; i < mesh->mNumFaces; i++) {
+    for(uint32_t i = 0; i < mesh->mNumFaces; i++) {
         aiFace face = mesh->mFaces[i];
-        for(uint j = 0; j < face.mNumIndices; j++) {
+        for(uint32_t j = 0; j < face.mNumIndices; j++) {
             indices.push_back(face.mIndices[j]);
         }
     }
@@ -102,12 +102,12 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
 std::vector<Texture*> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type, uint8_t textureType) {
 
     std::vector<Texture*> textures;
-    for(uint i = 0; i < mat->GetTextureCount(type); i++) {
+    for(uint32_t i = 0; i < mat->GetTextureCount(type); i++) {
         aiString filename;
         mat->GetTexture(type, i, &filename);
 
         bool skip = 0;
-        for(uint j = 0; j < loadedTextures.size(); j++) {
+        for(uint32_t j = 0; j < loadedTextures.size(); j++) {
             if(std::strcmp(loadedTextures[j].getPath().data(), filename.C_Str()) == 0) {
                 textures.push_back(&loadedTextures[j]);
                 skip = 1;
