@@ -16,16 +16,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
 
 add_executable(Fall-Fever
-    main.cpp
-    Controller.cpp
-    Window.cpp
-    EventHandler.cpp
-    ShaderProgram.cpp
-    VertexBuffer.cpp
-    Texture.cpp
-    Camera.cpp
-    Mesh.cpp
-    Model.cpp
+    src/main.cpp
+    src/Controller.cpp
+    src/Window.cpp
+    src/EventHandler.cpp
+    src/ShaderProgram.cpp
+    src/VertexBuffer.cpp
+    src/Texture.cpp
+    src/Camera.cpp
+    src/Mesh.cpp
+    src/Model.cpp
 )
 
 target_link_libraries(
