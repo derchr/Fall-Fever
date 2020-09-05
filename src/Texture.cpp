@@ -27,7 +27,6 @@ Texture::Texture(const char* texturePath, uint8_t textureType) {
 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureBuffer);
         //glGenerateMipmap(GL_TEXTURE_2D);
-        
 
     } else {
 
