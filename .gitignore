@@ -1,4 +1,4 @@
 build
 .directory
 lib/assimp/libassimp.so.5.0.0
-
+res/models
