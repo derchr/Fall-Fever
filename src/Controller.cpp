@@ -103,6 +103,12 @@ void Controller::run() {
 
         // Update game
         // ...
+        shaderProgram.bind();
+        shaderProgram.setUniform("u_light.position", camera->getPosition());
+        shaderProgram.setUniform("u_light.direction", camera->getDirection());
+        shaderProgram.setUniform("u_light.innerCutOff", glm::cos(glm::radians(12.5f)));
+        shaderProgram.setUniform("u_light.outerCutOff", glm::cos(glm::radians(25.0f)));
+        shaderProgram.unbind();
 
         // Render and buffer swap
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

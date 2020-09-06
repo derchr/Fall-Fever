@@ -17,7 +17,9 @@ uniform Material u_material;
 
 struct Light {
     vec3 position;
-    //vec3 direction;
+    vec3 direction;
+    float innerCutOff;
+    float outerCutOff;
 
     vec3 ambient;
     vec3 diffuse;
@@ -50,15 +52,23 @@ void main() {
     // Specular lighting
     vec3 viewDir = normalize(u_viewPosition - v_fragmentPosition);
     vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), u_material.shininess);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0f), u_material.shininess);
     vec3 specular = u_light.specular * spec * vec3(texture(u_material.texture_specular0, v_texCoord));
 
     float distanceLightFragment = length(vecLightToFragment);
-    float attenuation = 1.0 / (u_light.K_c + u_light.K_l * distanceLightFragment + u_light.K_q * distanceLightFragment * distanceLightFragment);    
+    float attenuation = 1.0f / (u_light.K_c + u_light.K_l * distanceLightFragment + u_light.K_q * distanceLightFragment * distanceLightFragment);    
 
     ambient *= attenuation;
     diffuse *= attenuation;
     specular *= attenuation;
 
-    f_color = vec4((ambient + diffuse + specular), 1.0f);
+    float theta = dot(lightDir, normalize(-u_light.direction));
+    float epsilon = u_light.innerCutOff - u_light.outerCutOff;
+    float intensity = clamp((theta - u_light.outerCutOff) / epsilon, 0.0f, 1.0f);
+
+    diffuse *= intensity;
+    specular *= intensity;
+
+    f_color = vec4(ambient + diffuse + specular, 1.0f);
+
 }

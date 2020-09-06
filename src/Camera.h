@@ -22,6 +22,7 @@ public:
     
     glm::mat4 getViewProj() { return viewProjectionMatrix; }
     glm::vec3 getPosition() { return position; }
+    glm::vec3 getDirection() { return frontVec; }
 
 private:
 
@@ -31,7 +32,6 @@ private:
     glm::mat4 viewProjectionMatrix;
 
     glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::vec3 direction = glm::vec3(0.0f, 0.0f, 1.0f);
     glm::vec3 frontVec = glm::vec3(0.0f, 0.0f, -1.0f);
     glm::vec3 upVec = glm::vec3(0.0f, 1.0f,  0.0f);
 
