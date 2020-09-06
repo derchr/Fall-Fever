@@ -52,10 +52,14 @@ void Controller::run() {
     //Model model_backpack("res/models/backpack.obj");
     Model model_container("res/models/container.obj");
     Model model_cube("res/models/cube.obj");
+    Model model_sphere("res/models/sphere.obj");
 
     //Entity backpack1(&model_backpack, &shaderProgram);
+    Entity sphere(&model_sphere, &shaderProgram);
     Entity cube(&model_container, &shaderProgram);
     Entity lightSource(&model_cube, &lightProgram);
+
+    sphere.translate(glm::vec3(3.0f, 0.0f, 2.0f));
 
     lightSource.translate(glm::vec3(-5.0f, 1.0f, 0.0f));
     lightSource.scale(0.2f);
@@ -66,15 +70,21 @@ void Controller::run() {
 
     shaderProgram.bind();
     shaderProgram.setUniform("u_light.position", lightSource.getPosition());
+    //shaderProgram.setUniform("u_light.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
     shaderProgram.setUniform("u_light.ambient", ambientColor);
     shaderProgram.setUniform("u_light.diffuse", diffuseColor);
     shaderProgram.setUniform("u_light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+
+    shaderProgram.setUniform("u_light.K_c", 1.0f);
+    shaderProgram.setUniform("u_light.K_l", 0.09f);
+    shaderProgram.setUniform("u_light.K_q", 0.032f);
 
     shaderProgram.setUniform("u_material.shininess", 32.0f);
     shaderProgram.unbind();
 
     scene.push_back(cube);
     scene.push_back(lightSource);
+    scene.push_back(sphere);
     
     camera->translate(glm::vec3(0.0f, 0.0f, 7.5f));
 
