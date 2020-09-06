@@ -11,10 +11,6 @@ Camera::Camera(float fov, int width, int height) {
     updateVPM();
 }
 
-glm::mat4 Camera::getViewProj() {
-    return viewProjectionMatrix;
-}
-
 void Camera::updateVPM() {
     viewProjectionMatrix = projectionMatrix * viewMatrix;
 }

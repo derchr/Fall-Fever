@@ -7,10 +7,10 @@ layout(location = 2) in vec4 a_color;
 out vec4 v_color;
 out vec2 v_texCoord;
 
-uniform mat4 u_modelViewProj;
+uniform mat4 u_modelViewProjMatrix;
 
 void main() {
-    gl_Position = u_modelViewProj * vec4(a_position, 1.0f);
+    gl_Position = u_modelViewProjMatrix * vec4(a_position, 1.0f);
     v_texCoord = a_texCoord;
     v_color = a_color;
 }

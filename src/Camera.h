@@ -9,7 +9,6 @@ public:
     Camera(float fov, int width, int height);
     ~Camera() = default;
 
-    glm::mat4 getViewProj();
     void updateVPM();
     void updateAspectRatio(int width, int height);
     void updatePositionFromKeyboardInput(bool *actionCameraRegister, float deltaTime);
@@ -21,6 +20,8 @@ public:
     void lookAtTarget(glm::vec3 target);
     void lookForward();
     
+    glm::mat4 getViewProj() { return viewProjectionMatrix; }
+    glm::vec3 getPosition() { return position; }
 
 private:
 

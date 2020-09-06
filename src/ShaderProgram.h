@@ -19,6 +19,7 @@ public:
     void setUniform(const char *name, int value) const;   
     void setUniform(const char *name, float value) const;
     void setUniform(const char *name, glm::vec3 vector) const;
+    void setUniform(const char *name, glm::mat3 matrix) const;
     void setUniform(const char *name, glm::mat4 matrix) const;
 
     GLuint getShaderProgramId() { return shaderProgramId; }

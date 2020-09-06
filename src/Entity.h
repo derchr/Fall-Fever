@@ -11,10 +11,14 @@ public:
     Entity(Model *model, ShaderProgram *shaderProgram);
     ~Entity() = default;
 
-    void draw(glm::mat4 viewProjMatrix);
+    void draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition);
 
     void translate(glm::vec3 vector);
     void rotate(glm::vec3 axis, float radians);
+    void scale(float scaleFactor);
+
+    glm::vec3 getPosition() { return position; }
+
 
     glm::mat4 getModelMatrix() { return modelMatrix; }
 
@@ -26,6 +30,8 @@ private:
     glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::vec3 orientation = glm::vec3(0.0f, 1.0f, 0.0f);
     glm::vec3 velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+
+    float modelScale = 1.0f;
 
     Model *model;
 
