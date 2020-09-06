@@ -50,41 +50,45 @@ void Controller::run() {
     std::vector<Entity> scene;
 
     //Model model_backpack("res/models/backpack.obj");
-    Model model_container("res/models/container.obj");
+    Model model_plant("res/models/plant.obj");
+    //Model model_container("res/models/container.obj");
     Model model_cube("res/models/cube.obj");
-    Model model_sphere("res/models/sphere.obj");
+    //Model model_sphere("res/models/sphere.obj");
 
     //Entity backpack1(&model_backpack, &shaderProgram);
-    Entity sphere(&model_sphere, &shaderProgram);
-    Entity cube(&model_container, &shaderProgram);
+    //Entity sphere(&model_sphere, &shaderProgram);
+    //Entity cube(&model_container, &shaderProgram);
+    Entity plant(&model_plant, &shaderProgram);
     Entity lightSource(&model_cube, &lightProgram);
-
-    sphere.translate(glm::vec3(3.0f, 0.0f, 2.0f));
 
     lightSource.translate(glm::vec3(-5.0f, 1.0f, 0.0f));
     lightSource.scale(0.2f);
+    plant.scale(5.0f);
 
     glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
     glm::vec3 diffuseColor = lightColor * glm::vec3(1.0f);
     glm::vec3 ambientColor = diffuseColor * glm::vec3(0.1f);
+    glm::vec3 specularColor = glm::vec3(1.0f);
 
     shaderProgram.bind();
-    shaderProgram.setUniform("u_light.position", lightSource.getPosition());
-    //shaderProgram.setUniform("u_light.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
-    shaderProgram.setUniform("u_light.ambient", ambientColor);
-    shaderProgram.setUniform("u_light.diffuse", diffuseColor);
-    shaderProgram.setUniform("u_light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+    shaderProgram.setUniform("u_directionalLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+    shaderProgram.setUniform("u_directionalLight.ambient", ambientColor * 0.25f);
+    shaderProgram.setUniform("u_directionalLight.diffuse", diffuseColor * 0.25f);
+    shaderProgram.setUniform("u_directionalLight.specular", specularColor * 0.25f);
 
-    shaderProgram.setUniform("u_light.K_c", 1.0f);
-    shaderProgram.setUniform("u_light.K_l", 0.09f);
-    shaderProgram.setUniform("u_light.K_q", 0.032f);
+    shaderProgram.setUniform("u_pointLight[0].position", lightSource.getPosition());
+    shaderProgram.setUniform("u_pointLight[0].ambient", ambientColor);
+    shaderProgram.setUniform("u_pointLight[0].diffuse", diffuseColor);
+    shaderProgram.setUniform("u_pointLight[0].specular", specularColor);
+    shaderProgram.setUniform("u_pointLight[0].K_c", 1.0f);
+    shaderProgram.setUniform("u_pointLight[0].K_l", 0.09f);
+    shaderProgram.setUniform("u_pointLight[0].K_q", 0.032f);
 
     shaderProgram.setUniform("u_material.shininess", 32.0f);
     shaderProgram.unbind();
 
-    scene.push_back(cube);
+    scene.push_back(plant);
     scene.push_back(lightSource);
-    scene.push_back(sphere);
     
     camera->translate(glm::vec3(0.0f, 0.0f, 7.5f));
 
@@ -103,12 +107,6 @@ void Controller::run() {
 
         // Update game
         // ...
-        shaderProgram.bind();
-        shaderProgram.setUniform("u_light.position", camera->getPosition());
-        shaderProgram.setUniform("u_light.direction", camera->getDirection());
-        shaderProgram.setUniform("u_light.innerCutOff", glm::cos(glm::radians(12.5f)));
-        shaderProgram.setUniform("u_light.outerCutOff", glm::cos(glm::radians(25.0f)));
-        shaderProgram.unbind();
 
         // Render and buffer swap
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
