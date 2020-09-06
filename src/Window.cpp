@@ -28,7 +28,9 @@ Window::Window() {
     glEnable(GL_DEPTH_TEST);
 
     // Disable mouse cursor
+    #ifndef _DEBUG
     setGrabbedCursor(1);
+    #endif
 
     #ifdef _DEBUG
     std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;

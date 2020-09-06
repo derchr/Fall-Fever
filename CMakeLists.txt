@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.10)
 
 project(Fall-Fever)
 
-#if(WIN32)
+if(WIN32)
     set(GLFW3_ROOT "${PROJECT_SOURCE_DIR}/glfw")
-#endif(WIN32)
+endif(WIN32)
 
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
@@ -21,3 +21,5 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/lib)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src)
+
+add_subdirectory(${PROJECT_SOURCE_DIR}/tools)

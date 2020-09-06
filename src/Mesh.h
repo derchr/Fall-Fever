@@ -18,8 +18,7 @@ public:
 
 private:
 
-    std::vector<Vertex> vertices;
-    std::vector<uint32_t> indices;
+    uint32_t numElements;
     std::vector<Texture*> textures;
 
     VertexBuffer vertexBuffer;

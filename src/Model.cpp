@@ -3,6 +3,8 @@
 #include <iostream>
 
 Model::Model(const char* pathToModel) {
+    // Todo: check if model isn't already loaded --> will boost startup time drastically
+    // actually all models should be loaded at startup and only a handle should be given to the entites...
     loadModel(pathToModel);
 }
 
@@ -128,7 +130,7 @@ std::vector<Texture*> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType
             Texture *texture = new Texture(currentPath.c_str(), textureType);
             loadedTextures.push_back(texture);
 
-            // Add newest texture pointer to the mesh's texture vector
+            // Add newest texture pointer to the mesh's texture-pointer vector
             Texture *new_tex = loadedTextures.back();
             textures.push_back(new_tex);
         }

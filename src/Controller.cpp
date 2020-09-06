@@ -15,6 +15,7 @@
 #include "Controller.h"
 #include "Texture.h"
 #include "Model.h"
+#include "Entity.h"
 
 Controller::Controller() {
     if(!glfwInit()) exit(-1);
@@ -24,9 +25,8 @@ Controller::Controller() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     #ifdef _DEBUG
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
-    #endif
-
     glfwSetErrorCallback(error_callback);
+    #endif
 
     gameWindow = new Window();
     gameEventHandler = new EventHandler(gameWindow->getGLFWwindow());
@@ -36,6 +36,7 @@ Controller::Controller() {
 Controller::~Controller() {
     delete gameWindow;
     delete gameEventHandler;
+    delete camera;
     glfwTerminate();
 }
 
@@ -43,56 +44,22 @@ void Controller::run() {
     glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
 
     ShaderProgram shaderProgram("res/shaders/basic.vs", "res/shaders/basic.fs");
-    shaderProgram.bind();
 
-    std::vector<Vertex> vertices {
-        Vertex{
-            glm::vec3(-0.5f, -0.5f, 0.0f),
-            glm::vec2(0.0f, 0.0f),
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)},
-        Vertex{
-            glm::vec3(0.5f, -0.5f, 0.0f),
-            glm::vec2(1.0f, 0.0f),
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)},
-        Vertex{
-            glm::vec3(-0.5f, 0.5f, 0.0f),
-            glm::vec2(0.0f, 1.0f),
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec4(0.0f, 0.0f, 1.0f, 1.0f)},
-        Vertex{
-            glm::vec3(0.5f, 0.5f, 0.0f),
-            glm::vec2(1.0f, 1.0f),
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec4(0.0f, 0.0f, 1.0f, 1.0f)}
-    };
+    ShaderProgram lightProgram("res/shaders/light.vs", "res/shaders/light.fs");
 
-    std::vector<uint32_t> indices {
-        0, 1, 2,
-        1, 2, 3
-    };
+    std::vector<Entity> scene;
 
-    std::vector<Texture*> textures {
-        new Texture("res/textures/tex2.png", texture_diffuse),
-        new Texture("res/textures/tex1.png", texture_diffuse)
-    };
+    //Model model_backpack("res/models/backpack.obj");
+    Model model_cube("res/models/cube.obj");
 
-    Model model1("res/models/cube.obj");
+    //Entity backpack1(&model_backpack, &shaderProgram);
+    Entity cube(&model_cube, &shaderProgram);
+    Entity lightSource(&model_cube, &lightProgram);
 
-    //Mesh mesh1(vertices, indices, textures);
-
-    glm::mat4 model = glm::mat4(1.0f);
+    //scene.push_back(backpack1);
+    scene.push_back(cube);
     
-    camera->translate(glm::vec3(0.0f, 0.0f, 2.5f));
+    camera->translate(glm::vec3(0.0f, 0.0f, 7.5f));
 
     // This is the game loop
     while(!glfwWindowShouldClose(gameWindow->getGLFWwindow())) {
@@ -109,23 +76,15 @@ void Controller::run() {
 
         // Update game
         // ...
-        shaderProgram.setUniform("mix_val", (float) (sin(glfwGetTime()*0.25)*sin(glfwGetTime()*0.25)));
-
-        camera->lookForward();
-        camera->updateVPM();
-        glm::mat4 modelViewProj = camera->getViewProj() * model;
-        shaderProgram.setUniform("u_modelViewProj", modelViewProj);
 
         // Render and buffer swap
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        
+        camera->lookForward();
+        camera->updateVPM();
 
-        for(int i=0;i<20;i++) {
-            //mesh1.draw(&shaderProgram);
-            model1.draw(&shaderProgram);
-            camera->updateVPM();
-            glm::mat4 modelViewProj = camera->getViewProj() * model;
-            shaderProgram.setUniform("u_modelViewProj", modelViewProj);
-        }
+        //backpack1.draw(camera->getViewProj());
+        cube.draw(camera->getViewProj());
 
         glfwSwapBuffers(gameWindow->getGLFWwindow());
             

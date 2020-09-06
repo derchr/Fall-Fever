@@ -9,6 +9,7 @@ add_executable(Fall-Fever
     Camera.cpp
     Mesh.cpp
     Model.cpp
+    Entity.cpp
 )
 
 target_link_libraries(

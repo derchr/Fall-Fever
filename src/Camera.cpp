@@ -1,6 +1,9 @@
 #include "Camera.h"
 #include "eventActions.h"
 
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/ext/matrix_transform.hpp>
+
 Camera::Camera(float fov, int width, int height) {
     this->fov = fov;
     viewMatrix = glm::mat4(1.0f);
