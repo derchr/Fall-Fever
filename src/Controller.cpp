@@ -53,7 +53,7 @@ void Controller::run() {
     Model model_container("res/models/container.obj");
     Model model_cube("res/models/cube.obj");
 
-    //Entity backpack1(&model_cube, &shaderProgram);
+    //Entity backpack1(&model_backpack, &shaderProgram);
     Entity cube(&model_container, &shaderProgram);
     Entity lightSource(&model_cube, &lightProgram);
 
@@ -73,8 +73,8 @@ void Controller::run() {
     shaderProgram.setUniform("u_material.shininess", 32.0f);
     shaderProgram.unbind();
 
-    scene.push_back(lightSource);
     scene.push_back(cube);
+    scene.push_back(lightSource);
     
     camera->translate(glm::vec3(0.0f, 0.0f, 7.5f));
 

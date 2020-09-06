@@ -2,6 +2,10 @@
 
 layout(location = 0) out vec4 f_color;
 
+in vec3 v_normal;
+in vec2 v_texCoord;
+in vec3 v_fragmentPosition;
+
 struct Material {
     sampler2D texture_diffuse0;
     sampler2D texture_diffuse1;
@@ -19,10 +23,6 @@ struct Light {
     vec3 specular;
 };
 uniform Light u_light;
-
-in vec3 v_normal;
-in vec2 v_texCoord;
-in vec3 v_fragmentPosition;
 
 uniform mat3 u_normalMatrix;
 uniform vec3 u_viewPosition;
@@ -45,7 +45,6 @@ void main() {
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), u_material.shininess);
     vec3 specular = u_light.specular * spec * vec3(texture(u_material.texture_specular0, v_texCoord));
 
-    //f_color = v_color;
     //vec4 texColor1 = texture(u_material.u_texture_diffuse0, v_texCoord);
     //vec4 texColor2 = texture(u_material.u_texture_diffuse1, v_texCoord);
     //f_color = texColor1;
