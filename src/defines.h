@@ -19,7 +19,4 @@ struct Vertex {
 
     // Bittangent vector
     glm::vec3 bitangentVec;
-
-    // Color
-    glm::vec4 color;
 };

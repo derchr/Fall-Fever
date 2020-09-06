@@ -50,15 +50,12 @@ void Controller::run() {
     std::vector<Entity> scene;
 
     //Model model_backpack("res/models/backpack.obj");
+    Model model_container("res/models/container.obj");
     Model model_cube("res/models/cube.obj");
-    Model model_sphere("res/models/sphere.obj");
 
     //Entity backpack1(&model_cube, &shaderProgram);
-    Entity cube(&model_cube, &shaderProgram);
-    Entity sphere(&model_sphere, &shaderProgram);
+    Entity cube(&model_container, &shaderProgram);
     Entity lightSource(&model_cube, &lightProgram);
-
-    sphere.translate(glm::vec3(5.0f, 0.0f, 2.5f));
 
     lightSource.translate(glm::vec3(-5.0f, 1.0f, 0.0f));
     lightSource.scale(0.2f);
@@ -68,20 +65,16 @@ void Controller::run() {
     glm::vec3 ambientColor = diffuseColor * glm::vec3(0.1f);
 
     shaderProgram.bind();
-    shaderProgram.setUniform("light.position", lightSource.getPosition());
-    shaderProgram.setUniform("light.ambient", ambientColor);
-    shaderProgram.setUniform("light.diffuse", diffuseColor);
-    shaderProgram.setUniform("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+    shaderProgram.setUniform("u_light.position", lightSource.getPosition());
+    shaderProgram.setUniform("u_light.ambient", ambientColor);
+    shaderProgram.setUniform("u_light.diffuse", diffuseColor);
+    shaderProgram.setUniform("u_light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 
-    shaderProgram.setUniform("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
-    shaderProgram.setUniform("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
-    shaderProgram.setUniform("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
-    shaderProgram.setUniform("material.shininess", 32.0f);
+    shaderProgram.setUniform("u_material.shininess", 32.0f);
     shaderProgram.unbind();
 
     scene.push_back(lightSource);
     scene.push_back(cube);
-    scene.push_back(sphere);
     
     camera->translate(glm::vec3(0.0f, 0.0f, 7.5f));
 
@@ -110,8 +103,6 @@ void Controller::run() {
         for(auto it = scene.begin(); it != scene.end(); it++) {
             it->draw(camera->getViewProj(), camera->getPosition());
         }
-        //backpack1.draw(camera->getViewProj());
-        //cube.draw(camera->getViewProj());
 
         glfwSwapBuffers(gameWindow->getGLFWwindow());
             

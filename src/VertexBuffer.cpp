@@ -27,10 +27,6 @@ VertexBuffer::VertexBuffer(void *vertexData, void *indexData, uint32_t numVertic
     // UV Texture Mapping
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(struct Vertex, textureCoords));
-
-    // Color
-    glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(struct Vertex, color));
     
     // This will also unbind the vertex buffer and index buffer
     glBindVertexArray(0);

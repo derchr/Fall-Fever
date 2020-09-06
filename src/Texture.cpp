@@ -44,7 +44,7 @@ Texture::~Texture() {
 }
 
 void Texture::bind(uint8_t textureUnit, ShaderProgram* shaderProgram, uint8_t textureTypeNum) {
-    std::string uniformName = "u_texture_";
+    std::string uniformName = "texture_";
 
     switch(textureType) {
 
@@ -62,11 +62,10 @@ void Texture::bind(uint8_t textureUnit, ShaderProgram* shaderProgram, uint8_t te
             break;
     }
 
-    // Add material. as we store textures in a struct
-    uniformName = "material." + uniformName;
+    // Add u_material as we store textures in a struct
+    uniformName = "u_material." + uniformName;
 
-    shaderProgram->setUniform(uniformName.c_str(), textureTypeNum);
-
+    shaderProgram->setUniform(uniformName.c_str(), textureUnit);
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_2D, textureId);
 }
