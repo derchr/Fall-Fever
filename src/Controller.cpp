@@ -43,9 +43,8 @@ Controller::~Controller() {
 void Controller::run() {
     glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
 
-    ShaderProgram shaderProgram("res/shaders/basic.vs", "res/shaders/basic.fs");
-
-    ShaderProgram lightProgram("res/shaders/light.vs", "res/shaders/light.fs");
+    ShaderProgram shaderProgram("res/shaders/basic.vert", "res/shaders/basic.frag");
+    ShaderProgram lightProgram("res/shaders/light.vert", "res/shaders/light.frag");
 
     std::vector<Entity> scene;
 
