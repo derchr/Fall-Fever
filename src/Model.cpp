@@ -1,7 +1,6 @@
 #include "Model.h"
 
 #include <iostream>
-#include <cassert>
 #include <fstream>
 
 Model::Model(const char* pathToModel) {
@@ -69,9 +68,9 @@ void Model::loadModel(std::string pathToModel) {
 
     // Here starts the first mesh
     uint32_t numMeshes;
-    for(unsigned int j = 0; j < numMeshes; j++) {
+    input.read((char*) &numMeshes, sizeof(uint32_t));
 
-        input.read((char*) &numMeshes, sizeof(uint32_t));
+    for(unsigned int j = 0; j < numMeshes; j++) {
 
         uint32_t numMeshVertices, numMeshIndices, numMeshTextureIds;
 
@@ -79,21 +78,18 @@ void Model::loadModel(std::string pathToModel) {
         input.read((char*) &numMeshIndices, sizeof(uint32_t));
         input.read((char*) &numMeshTextureIds, sizeof(uint32_t));
 
+        uint32_t vertexBlockSize = numMeshVertices * sizeof(Vertex);
+        uint32_t indexBlockSize = numMeshIndices * sizeof(uint32_t);
+
         // Here starts the first Vertex data
 
         std::vector<Vertex> meshVertices;
-        for(unsigned int i = 0; i < numMeshVertices; i++) {
-            Vertex currentVertex;
-            input.read((char*) &currentVertex, sizeof(Vertex));
-            meshVertices.push_back(currentVertex);
-        }
+        meshVertices.resize(numMeshVertices);
+        input.read((char*) meshVertices.data(), vertexBlockSize);
 
         std::vector<uint32_t> meshIndices;
-        for(unsigned int i = 0; i < numMeshIndices; i++) {
-            uint32_t currentIndex;
-            input.read((char*) &currentIndex, sizeof(uint32_t));
-            meshIndices.push_back(currentIndex);
-        }
+        meshIndices.resize(numMeshIndices);
+        input.read((char*) meshIndices.data(), indexBlockSize);
 
         std::vector<Texture*> meshTextures;
         for(unsigned int i = 0; i < numMeshTextureIds; i++) {

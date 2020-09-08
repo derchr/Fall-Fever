@@ -18,7 +18,6 @@ target_link_libraries(
     stb
     ${GLFW3_LIBRARY}
     ${OPENGL_LIBRARIES}
-    assimp
 )
 
 target_compile_options(Fall-Fever PRIVATE -Wall -Wextra -pedantic)
