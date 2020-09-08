@@ -48,21 +48,21 @@ void Controller::run() {
 
     std::vector<Entity> scene;
 
-    //Model model_backpack("res/models/backpack.obj");
-    Model model_plant("res/models/plant.obj");
-    //Model model_container("res/models/container.obj");
-    Model model_cube("res/models/cube.obj");
-    //Model model_sphere("res/models/sphere.obj");
+    Model model_backpack("res/models/backpack.ffo");
+    //Model model_plant("res/models/plant.obj");
+    //Model model_container("res/models/container.ffo");
+    Model model_cube("res/models/cube.ffo");
+    //Model model_sphere("res/models/sphere.ffo");
 
-    //Entity backpack1(&model_backpack, &shaderProgram);
+    Entity backpack(&model_backpack, &shaderProgram);
     //Entity sphere(&model_sphere, &shaderProgram);
-    //Entity cube(&model_container, &shaderProgram);
-    Entity plant(&model_plant, &shaderProgram);
+    //Entity container(&model_container, &shaderProgram);
+    //Entity plant(&model_plant, &shaderProgram);
     Entity lightSource(&model_cube, &lightProgram);
 
     lightSource.translate(glm::vec3(-5.0f, 1.0f, 0.0f));
     lightSource.scale(0.2f);
-    plant.scale(5.0f);
+    //plant.scale(5.0f);
 
     glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
     glm::vec3 diffuseColor = lightColor * glm::vec3(1.0f);
@@ -86,7 +86,7 @@ void Controller::run() {
     shaderProgram.setUniform("u_material.shininess", 32.0f);
     shaderProgram.unbind();
 
-    scene.push_back(plant);
+    scene.push_back(backpack);
     scene.push_back(lightSource);
     
     camera->translate(glm::vec3(0.0f, 0.0f, 7.5f));
