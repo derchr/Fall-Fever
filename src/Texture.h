@@ -2,11 +2,10 @@
 
 #include "ShaderProgram.h"
 
+#include "defines.h"
 #include <cstdint>
 #include <glad/glad.h>
 #include <string>
-
-enum textureType{texture_diffuse, texture_specular, texture_normal, texture_height, TEXTURE_TYPE_NUM_ITEMS};
 
 class Texture {
 

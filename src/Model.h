@@ -1,10 +1,7 @@
 #pragma once
 
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-
 #include <string>
+#include <vector>
 
 #include "Mesh.h"
 
@@ -22,17 +19,10 @@ private:
 
     void loadModel(std::string pathToModel);
 
-    void processNode(aiNode *node, const aiScene *scene);
-    Mesh processMesh(aiMesh *mesh, const aiScene *scene);
-
-    std::vector<Texture*> loadMaterialTextures(aiMaterial *mat, aiTextureType type, uint8_t textureType);
-
-
     std::vector<Mesh> meshes;
 
     std::vector<Texture*> loadedTextures;
 
-    void textureFromFile(aiMaterial *mat, aiTextureType type);
-
     std::string directory;
+
 };
