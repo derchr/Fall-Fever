@@ -157,7 +157,7 @@ void Controller::run() {
 
         camera->updatePositionFromKeyboardInput(gameEventHandler->getCameraActionRegister(), deltaTime);
         if(gameWindow->getMouseIsCatched())
-            camera->updateDirectionFromMouseInput(gameEventHandler->getCursorDeltaX(), gameEventHandler->getCursorDeltaY());
+            camera->updateDirectionFromMouseInput(gameEventHandler->getCursorDelta());
 
         gameWindow->handleActionRegister(gameEventHandler->getWindowActionRegister());
     }

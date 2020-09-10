@@ -12,7 +12,7 @@ public:
     void updateVPM();
     void updateAspectRatio(int width, int height);
     void updatePositionFromKeyboardInput(bool *actionCameraRegister, float deltaTime);
-    void updateDirectionFromMouseInput(float deltaCursorX, float deltaCursorY);
+    void updateDirectionFromMouseInput(double *cameraMouseActionRegister);
 
     void translate(glm::vec3 translateVector);
 

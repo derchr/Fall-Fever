@@ -55,10 +55,13 @@ void Camera::updatePositionFromKeyboardInput(bool *cameraActionRegister, float d
     position += deltaPos;
 }
 
-void Camera::updateDirectionFromMouseInput(float deltaCursorX, float deltaCursorY) {
-    if(deltaCursorX==0 && deltaCursorY==0) return;
-    yaw += deltaCursorX;
-    pitch += deltaCursorY;
+void Camera::updateDirectionFromMouseInput(double *cameraMouseActionRegister) {
+
+    if(cameraMouseActionRegister[cameraMouseDeltaX]==0 && cameraMouseActionRegister[cameraMouseDeltaY]==0)
+        return;
+
+    yaw += cameraMouseActionRegister[cameraMouseDeltaX];
+    pitch += cameraMouseActionRegister[cameraMouseDeltaY];
     
     if(pitch > 89.0f)
         pitch =  89.0f;
