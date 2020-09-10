@@ -15,14 +15,17 @@ public:
 
     void translate(glm::vec3 vector);
     void rotate(glm::vec3 axis, float radians);
-    void scale(float scaleFactor);
+
+    void setPosition(glm::vec3 position);
+    void setOrientiation(glm::vec3 orientation);
+    void setScale(float scaleFactor);
 
     glm::vec3 getPosition() { return position; }
-
-
     glm::mat4 getModelMatrix() { return modelMatrix; }
 
 private:
+
+    void updateModelMatrix();
 
     // May be used later...
     uint32_t id;

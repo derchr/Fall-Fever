@@ -1,9 +1,16 @@
 #include <iostream>
 #include <vector>
+
 #include <glad/glad.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
+#ifdef _DEBUG
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+#endif
 
 #ifdef __linux__
 #include <unistd.h>
@@ -23,21 +30,44 @@ Controller::Controller() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    #ifdef _DEBUG
-    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
-    glfwSetErrorCallback(error_callback);
+
+    #ifndef _DEBUG
+    glfwWindowHint(GLFW_MAXIMIZED, GL_TRUE);
     #endif
 
     gameWindow = new Window();
     gameEventHandler = new EventHandler(gameWindow->getGLFWwindow());
     camera = new Camera(90.0f, gameWindow->getWindowWidth(), gameWindow->getWindowHeight());
+
+    #ifdef _DEBUG
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+    glfwSetErrorCallback(error_callback);
+
+    // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO &io = ImGui::GetIO(); (void)io;
+    // Setup Platform/Renderer bindings
+    ImGui_ImplGlfw_InitForOpenGL(gameWindow->getGLFWwindow(), true);
+    ImGui_ImplOpenGL3_Init("#version 150");
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+    #endif
 }
 
 Controller::~Controller() {
+
+    #ifdef _DEBUG
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+    #endif
+
     delete gameWindow;
     delete gameEventHandler;
     delete camera;
     glfwTerminate();
+
 }
 
 void Controller::run() {
@@ -48,21 +78,24 @@ void Controller::run() {
 
     std::vector<Entity> scene;
 
-    Model model_backpack("res/models/backpack.ffo");
-    //Model model_plant("res/models/plant.obj");
-    //Model model_container("res/models/container.ffo");
+    //Model model_backpack("res/models/backpack.ffo");
+    //Model model_plant("res/models/plant.ffo");
+    Model model_container("res/models/container.ffo");
     Model model_cube("res/models/cube.ffo");
+    Model model_dragon("res/models/dragon.ffo");
     //Model model_sphere("res/models/sphere.ffo");
 
-    Entity backpack(&model_backpack, &shaderProgram);
+    //Entity backpack(&model_backpack, &shaderProgram);
     //Entity sphere(&model_sphere, &shaderProgram);
-    //Entity container(&model_container, &shaderProgram);
+    Entity container(&model_container, &shaderProgram);
+    Entity dragon(&model_dragon, &shaderProgram);
     //Entity plant(&model_plant, &shaderProgram);
     Entity lightSource(&model_cube, &lightProgram);
 
     lightSource.translate(glm::vec3(-5.0f, 1.0f, 0.0f));
-    lightSource.scale(0.2f);
+    lightSource.setScale(0.2f);
     //plant.scale(5.0f);
+    dragon.setScale(0.2f);
 
     glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
     glm::vec3 diffuseColor = lightColor * glm::vec3(1.0f);
@@ -86,7 +119,7 @@ void Controller::run() {
     shaderProgram.setUniform("u_material.shininess", 32.0f);
     shaderProgram.unbind();
 
-    scene.push_back(backpack);
+    scene.push_back(dragon);
     scene.push_back(lightSource);
     
     camera->translate(glm::vec3(0.0f, 0.0f, 7.5f));
@@ -95,14 +128,6 @@ void Controller::run() {
     while(!glfwWindowShouldClose(gameWindow->getGLFWwindow())) {
         // Timing
         limit_framerate();
-
-        #ifdef _DEBUG
-        static uint8_t frameCount = 250;
-        if(frameCount++ == 255) {
-            std::cout << "FPS: " << 1/deltaTime << std::endl;
-            frameCount = 0;
-        }
-        #endif
 
         // Update game
         // ...
@@ -117,6 +142,10 @@ void Controller::run() {
             it->draw(camera->getViewProj(), camera->getPosition());
         }
 
+        #ifdef _DEBUG
+        renderImGui(&scene[0]);
+        #endif
+
         glfwSwapBuffers(gameWindow->getGLFWwindow());
             
         // Update window size
@@ -127,7 +156,10 @@ void Controller::run() {
         gameEventHandler->handleEvents();
 
         camera->updatePositionFromKeyboardInput(gameEventHandler->getCameraActionRegister(), deltaTime);
-        camera->updateDirectionFromMouseInput(gameEventHandler->getCursorDeltaX(), gameEventHandler->getCursorDeltaY());
+        if(gameWindow->getMouseIsCatched())
+            camera->updateDirectionFromMouseInput(gameEventHandler->getCursorDeltaX(), gameEventHandler->getCursorDeltaY());
+
+        gameWindow->handleActionRegister(gameEventHandler->getWindowActionRegister());
     }
 
 }
@@ -163,3 +195,33 @@ void Controller::updateWindowSize() {
     camera->updateAspectRatio(gameWindow->getWindowWidth(), gameWindow->getWindowHeight());
     gameEventHandler->setFirstMouseInput(1);
 }
+
+#ifdef _DEBUG
+void Controller::renderImGui(Entity *entity) {
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+
+
+    // render your GUI
+    ImGui::Begin("Object Modifier");
+    static float rotation = 0.0;
+    ImGui::SliderFloat("Rotation", &rotation, 0, 2 * M_PI);
+    static float translation[] = {0.0f, 0.0f};
+    ImGui::SliderFloat2("Position", translation, -3.0, 3.0);
+    static float color[4] = { 1.0f,1.0f,1.0f,1.0f };
+
+    entity->setPosition(glm::vec3(translation[0], 0.0f, translation[1]));
+    //entity->setRotation()
+
+    // color picker
+    ImGui::ColorEdit3("Color", color);
+    ImGui::End();
+
+
+
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+} 
+#endif

@@ -2,6 +2,7 @@
 #include <glad/glad.h>
 
 #include "Window.h"
+#include "eventActions.h"
 #include "defines.h"
 
 
@@ -28,9 +29,10 @@ Window::Window() {
     glEnable(GL_DEPTH_TEST);
 
     // Disable mouse cursor
-    #ifndef _DEBUG
-    setGrabbedCursor(1);
+    #ifdef _DEBUG
+    mouseCatched = false;
     #endif
+    setCatchedCursor(mouseCatched);
 
     #ifdef _DEBUG
     std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
@@ -63,12 +65,31 @@ bool Window::checkWindowWasResized() {
     return 1;
 }
 
-void Window::setGrabbedCursor(bool value) {
+void Window::setCatchedCursor(bool value) {
     if(value) {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     } else {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
+}
+
+void Window::handleActionRegister(bool *windowActionRegister) {
+    if(windowActionRegister[wireFrameToggle]) {
+        windowActionRegister[wireFrameToggle] = 0;
+        wireFrameMode = !wireFrameMode;
+        if(wireFrameMode) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        } else {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
+    }
+
+    if(windowActionRegister[mouseCatchToggle]) {
+        windowActionRegister[mouseCatchToggle] = 0;
+        mouseCatched = !mouseCatched;
+        setCatchedCursor(mouseCatched);
+    }
+
 }
 
 // This function is called when the window gets resized (currently not used)

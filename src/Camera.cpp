@@ -34,22 +34,22 @@ void Camera::lookForward() {
     viewMatrix = glm::lookAt(position, position + frontVec, upVec);
 }
 
-void Camera::updatePositionFromKeyboardInput(bool *actionCameraRegister, float deltaTime) {
+void Camera::updatePositionFromKeyboardInput(bool *cameraActionRegister, float deltaTime) {
     glm::vec3 frontVecWithoutY = glm::vec3(frontVec.x, 0.0f, frontVec.z);
 
     glm::vec3 deltaPos = glm::vec3(0.0f, 0.0f, 0.0f);
 
-    if(actionCameraRegister[cameraForward])
+    if(cameraActionRegister[cameraForward])
         deltaPos += speed * deltaTime * glm::normalize(frontVecWithoutY);
-    if(actionCameraRegister[cameraBackward])
+    if(cameraActionRegister[cameraBackward])
         deltaPos -= speed * deltaTime * glm::normalize(frontVecWithoutY);
-    if(actionCameraRegister[cameraLeft])
+    if(cameraActionRegister[cameraLeft])
         deltaPos -= speed * deltaTime * glm::normalize(glm::cross(frontVec, upVec));
-    if(actionCameraRegister[cameraRight])
+    if(cameraActionRegister[cameraRight])
         deltaPos += speed * deltaTime * glm::normalize(glm::cross(frontVec, upVec));
-    if(actionCameraRegister[cameraUp])
+    if(cameraActionRegister[cameraUp])
         deltaPos += speed * deltaTime * upVec;
-    if(actionCameraRegister[cameraDown])
+    if(cameraActionRegister[cameraDown])
         deltaPos -= speed * deltaTime * upVec;
 
     position += deltaPos;

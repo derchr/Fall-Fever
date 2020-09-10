@@ -2,7 +2,11 @@
 
 #include <iostream>
 
-bool EventHandler::wireFrameMode = 0;
+bool EventHandler::cameraActionRegister[CAMERA_ACTION_NUM_ITEMS] = {0};
+bool EventHandler::windowActionRegister[WINDOW_ACTION_NUM_ITEMS] = {0};
+
+bool EventHandler::firstMouseInput = 1;
+
 
 EventHandler::EventHandler(GLFWwindow *window)
     : window(window) {
@@ -19,7 +23,7 @@ void EventHandler::handleEvents() {
     glfwPollEvents();
 
     for(int i=0; i<CAMERA_ACTION_NUM_ITEMS; i++) {
-        actionCameraRegister[i] = 0;
+        cameraActionRegister[i] = 0;
     }
 
     updateMouseDelta();
@@ -28,32 +32,31 @@ void EventHandler::handleEvents() {
         glfwSetWindowShouldClose(window, true);
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        actionCameraRegister[cameraForward] = 1;
+        cameraActionRegister[cameraForward] = 1;
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        actionCameraRegister[cameraBackward] = 1;
+        cameraActionRegister[cameraBackward] = 1;
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-        actionCameraRegister[cameraUp] = 1;
+        cameraActionRegister[cameraUp] = 1;
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-        actionCameraRegister[cameraDown] = 1;
+        cameraActionRegister[cameraDown] = 1;
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        actionCameraRegister[cameraLeft] = 1;
+        cameraActionRegister[cameraLeft] = 1;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        actionCameraRegister[cameraRight] = 1;
+        cameraActionRegister[cameraRight] = 1;
 
 }
 
 void EventHandler::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
     // Silence warnings of unused variables.
-    (void)window; (void)scancode; (void)mods;
+    (void)window; (void)scancode; (void)mods; (void)key; (void)action;
 
-    if (key == GLFW_KEY_O && action == GLFW_PRESS) {
-        wireFrameMode = !wireFrameMode;
-        if(wireFrameMode) {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        } else {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        }
+    if(key==GLFW_KEY_O && action == GLFW_PRESS)
+        windowActionRegister[wireFrameToggle] = 1;
+    if(key==GLFW_KEY_LEFT_CONTROL && action == GLFW_PRESS) {
+        windowActionRegister[mouseCatchToggle] = 1;
+        firstMouseInput = 1;
     }
+
 }
 
 void EventHandler::updateMouseDelta() {

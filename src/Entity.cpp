@@ -11,6 +11,7 @@ Entity::Entity(Model *model, ShaderProgram *shaderProgram)
 }
 
 void Entity::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition) {
+
     shaderProgram->bind();
 
     glm::mat4 modelViewProj = viewProjMatrix * modelMatrix;
@@ -27,18 +28,50 @@ void Entity::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition) {
     model->draw(shaderProgram);
 
     shaderProgram->unbind();
+
 }
 
 void Entity::translate(glm::vec3 vector) {
     position += vector;
-    modelMatrix = glm::translate(modelMatrix, vector);
+    updateModelMatrix();
 }
 
 void Entity::rotate(glm::vec3 axis, float radians) {
-    modelMatrix = glm::rotate(modelMatrix, radians, axis);
+    glm::mat4 rotationMatrix(1.0f);
+    rotationMatrix = glm::rotate(rotationMatrix, radians, axis);
+
+    // Rotate orientation vector
+    orientation = glm::normalize(glm::vec3(rotationMatrix * glm::vec4(orientation, 1.0)));
+    updateModelMatrix();
 }
 
-void Entity::scale(float scaleFactor) {
+void Entity::setPosition(glm::vec3 position) {
+    this->position = position;
+    updateModelMatrix();
+}
+
+void Entity::setScale(float scaleFactor) {
     modelScale = scaleFactor;
-    modelMatrix = glm::scale(modelMatrix, glm::vec3(scaleFactor, scaleFactor, scaleFactor));
+    updateModelMatrix();
+}
+
+void Entity::updateModelMatrix() {
+    
+    glm::mat4 newModelMatrix(1.0f);
+
+    // Translate * Rotate * Scale * vertex_vec;
+    // First scaling, then rotation, then translation
+
+    // Translate
+    newModelMatrix = glm::translate(newModelMatrix, position);
+
+    // Rotate
+    glm::vec3 const up(0.0f, 0.0f, 1.0f);
+    //newModelMatrix = glm::rotate(newModelMatrix, , )
+
+    // Scale
+    newModelMatrix = glm::scale(newModelMatrix, glm::vec3(modelScale, modelScale, modelScale));
+
+    modelMatrix = newModelMatrix;
+
 }

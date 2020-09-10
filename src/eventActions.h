@@ -1,4 +1,4 @@
-enum cameraActions{
+enum cameraActions {
     cameraUp,
     cameraDown,
     cameraForward,
@@ -6,4 +6,10 @@ enum cameraActions{
     cameraLeft,
     cameraRight,
     CAMERA_ACTION_NUM_ITEMS
+};
+
+enum windowActions {
+    wireFrameToggle,
+    mouseCatchToggle,
+    WINDOW_ACTION_NUM_ITEMS
 };

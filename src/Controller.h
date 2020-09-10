@@ -7,7 +7,9 @@
 #include "Camera.h"
 #include "ShaderProgram.h"
 #include "VertexBuffer.h"
+#include "Entity.h"
 #include "defines.h"
+
 
 class Controller {
 
@@ -24,6 +26,8 @@ private:
     void limit_framerate();
 
     void updateWindowSize();
+
+    void renderImGui(Entity *entity);
 
     Window *gameWindow;
     EventHandler *gameEventHandler;

@@ -13,7 +13,9 @@ public:
 
     void handleEvents();
 
-    bool * getCameraActionRegister() { return actionCameraRegister; }
+    bool * getCameraActionRegister() { return cameraActionRegister; }
+    bool * getWindowActionRegister() { return windowActionRegister; }
+
     float getCursorDeltaX() { return deltaCursorPosX; }
     float getCursorDeltaY() { return deltaCursorPosY; }
 
@@ -27,11 +29,10 @@ private:
 
     void updateMouseDelta();
 
-    bool actionCameraRegister[CAMERA_ACTION_NUM_ITEMS] = {0};
+    static bool cameraActionRegister[CAMERA_ACTION_NUM_ITEMS];
+    static bool windowActionRegister[WINDOW_ACTION_NUM_ITEMS];
 
     GLFWwindow *window;
-
-    static bool wireFrameMode;
 
     float lastCursorPosX = 0.0f;
     float lastCursorPosY = 0.0f;
@@ -40,6 +41,6 @@ private:
 
     float mouseSensitivity = 0.08f;
 
-    bool firstMouseInput = 1;
+    static bool firstMouseInput;
 
 };
