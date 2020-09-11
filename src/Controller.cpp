@@ -23,6 +23,7 @@
 #include "Texture.h"
 #include "Model.h"
 #include "Entity.h"
+#include "Scene.h"
 
 Controller::Controller() {
     if(!glfwInit()) exit(-1);
@@ -108,16 +109,10 @@ void Controller::run() {
     shaderProgram.setUniform("u_directionalLight.diffuse", diffuseColor * 0.25f);
     shaderProgram.setUniform("u_directionalLight.specular", specularColor * 0.25f);
 
-    shaderProgram.setUniform("u_pointLight[0].position", lightSource.getPosition());
-    shaderProgram.setUniform("u_pointLight[0].ambient", ambientColor);
-    shaderProgram.setUniform("u_pointLight[0].diffuse", diffuseColor);
-    shaderProgram.setUniform("u_pointLight[0].specular", specularColor);
-    shaderProgram.setUniform("u_pointLight[0].K_c", 1.0f);
-    shaderProgram.setUniform("u_pointLight[0].K_l", 0.09f);
-    shaderProgram.setUniform("u_pointLight[0].K_q", 0.032f);
-
     shaderProgram.setUniform("u_material.shininess", 32.0f);
     shaderProgram.unbind();
+
+    Scene scene(&shaderProgram);
 
     scene.push_back(dragon);
     scene.push_back(lightSource);
@@ -209,8 +204,8 @@ void Controller::renderImGui(Entity *entity) {
     static float rotation = 0.0;
     ImGui::SliderFloat("Rotation", &rotation, 0, 2 * M_PI);
     static float translation[] = {0.0f, 0.0f};
-    ImGui::SliderFloat2("Position", translation, -3.0, 3.0);
-    static float color[4] = { 1.0f,1.0f,1.0f,1.0f };
+    ImGui::SliderFloat2("Position", translation, -4.0, 4.0);
+    static float color[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 
     entity->setPosition(glm::vec3(translation[0], 0.0f, translation[1]));
     //entity->setRotation()

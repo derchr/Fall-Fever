@@ -14,8 +14,6 @@ EventHandler::EventHandler(GLFWwindow *window)
     : window(window) {
 
     glfwSetKeyCallback(window, key_callback);
-
-    // Currently disabled because callbacks are shitty
     glfwSetCursorPosCallback(window, mouse_callback);
 
 }
@@ -31,7 +29,7 @@ void EventHandler::handleEvents() {
 
 void EventHandler::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
     // Silence warnings of unused variables.
-    (void)window; (void)scancode; (void)mods; (void)key; (void)action;
+    (void)window; (void)scancode; (void)mods;
 
     if(key==GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);

@@ -16,6 +16,7 @@ struct Material {
 uniform Material u_material;
 
 struct DirectionalLight {
+    bool isActive;
     vec3 direction;
 
     vec3 ambient;
@@ -25,6 +26,7 @@ struct DirectionalLight {
 uniform DirectionalLight u_directionalLight;
 
 struct PointLight {
+    bool isActive;
     vec3 position;
     
     float K_c;
@@ -35,10 +37,11 @@ struct PointLight {
     vec3 diffuse;
     vec3 specular;
 };
-#define NR_POINT_LIGHTS 1
-uniform PointLight u_pointLight[NR_POINT_LIGHTS];
+#define NUM_POINT_LIGHTS 16
+uniform PointLight u_pointLight[NUM_POINT_LIGHTS];
 
 struct SpotLight {
+    bool isActive;
     vec3 position;
     vec3 direction;
 
@@ -71,7 +74,7 @@ void main() {
 
     fragmentColor += directionalLightContribution(u_directionalLight, normal, viewDir);
 
-    for(int i = 0; i < NR_POINT_LIGHTS; i++) {
+    for(int i = 0; i < NUM_POINT_LIGHTS; i++) {
         fragmentColor += pointLightContribution(u_pointLight[i], normal, v_fragmentPosition, viewDir);
     }
 
@@ -82,6 +85,10 @@ void main() {
 }
 
 vec3 directionalLightContribution(DirectionalLight light, vec3 normal, vec3 viewDir) {
+
+    // Only compute if light source is active
+    if(!light.isActive)
+        return vec3(0.0f);
 
     vec3 lightDir = normalize(-light.direction);
 
@@ -103,6 +110,10 @@ vec3 directionalLightContribution(DirectionalLight light, vec3 normal, vec3 view
 }
 
 vec3 pointLightContribution(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
+
+    // Only compute if light source is active
+    if(!light.isActive)
+        return vec3(0.0f);
 
     vec3 lightDir = normalize(light.position - fragPos);
 
@@ -132,6 +143,10 @@ vec3 pointLightContribution(PointLight light, vec3 normal, vec3 fragPos, vec3 vi
 }
 
 vec3 spotLightContribution(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
+
+    // Only compute if light source is active
+    if(!light.isActive)
+        return vec3(0.0f);
 
     vec3 lightDir = normalize(light.position - fragPos);
 

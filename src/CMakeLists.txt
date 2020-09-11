@@ -10,6 +10,8 @@ add_executable(Fall-Fever
     Mesh.cpp
     Model.cpp
     Entity.cpp
+    Light.cpp
+    Scene.cpp
 )
 
 target_link_libraries(
