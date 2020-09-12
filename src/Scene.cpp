@@ -10,10 +10,9 @@ Scene::Scene(ShaderProgram *shaderProgram)
     : shaderProgram(shaderProgram) {
 
     for(unsigned int i = 0; i < NUM_POINT_LIGHTS; i++) {
+        pointLights[i].setId(i);
         pointLights[i].setShaderProgram(shaderProgram);
     }
-
-    pointLights[0].setActive(true);
 
 }
 
@@ -31,7 +30,13 @@ void Scene::removeEntity(uint32_t id) {
         }
     }
 
-    std::cout << "[Warning] No Entity found with ID " << id << std::endl;
+    std::cout << "[Warning] Entity with ID " << id << " could not be removed." << std::endl;
+}
+
+void Scene::updateLight(unsigned int lightId, glm::vec3 position, glm::vec3 color) {
+    pointLights[lightId].setActive(true);
+    pointLights[lightId].setPosition(position);
+    pointLights[lightId].setColor(color);
 }
 
 void Scene::drawScene(glm::mat4 viewProjMatrix, glm::vec3 viewPosition) {

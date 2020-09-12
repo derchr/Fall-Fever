@@ -13,6 +13,10 @@ public:
     virtual void update() = 0;
 
     void setActive(bool active) { isActive = active; }
+    void setColor(glm::vec3 color) {
+        lightColor = color; 
+        update();
+    }
     void setShaderProgram(ShaderProgram *shaderProgram) {
         this->shaderProgram = shaderProgram;
         update();
@@ -25,7 +29,7 @@ protected:
 
     ShaderProgram *shaderProgram;
 
-    bool isActive;
+    bool isActive = false;
 
     // Color
     glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -46,6 +50,7 @@ public:
         this->position = position;
         update();
     }
+    void setId(unsigned int id) { lightId = id; }
 
     void update();
 

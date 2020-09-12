@@ -114,6 +114,8 @@ void Controller::run() {
     Scene scene(&shaderProgram);
     scene.addEntity(dragon);
     scene.addEntity(lightSource);
+
+    scene.updateLight(0, lightSource.getPosition(), glm::vec3(1.0f));
     
     camera->translate(glm::vec3(0.0f, 0.0f, 7.5f));
 
@@ -134,7 +136,7 @@ void Controller::run() {
         scene.drawScene(camera->getViewProj(), camera->getPosition());
 
         #ifdef _DEBUG
-        renderImGui(scene.getEntities().data());
+        renderImGui(scene.getEntities());
         #endif
 
         glfwSwapBuffers(gameWindow->getGLFWwindow());
@@ -188,7 +190,7 @@ void Controller::updateWindowSize() {
 }
 
 #ifdef _DEBUG
-void Controller::renderImGui(Entity *entity) {
+void Controller::renderImGui(std::vector<Entity> *entites) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
@@ -203,7 +205,7 @@ void Controller::renderImGui(Entity *entity) {
     ImGui::SliderFloat2("Position", translation, -4.0, 4.0);
     static float color[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 
-    entity->setPosition(glm::vec3(translation[0], 0.0f, translation[1]));
+    entites->operator[](0).setPosition(glm::vec3(translation[0], 0.0f, translation[1]));
     //entity->setRotation()
 
     // color picker

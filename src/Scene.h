@@ -16,7 +16,9 @@ public:
     void addEntity(Entity entity);
     void removeEntity(uint32_t id);
 
-    std::vector<Entity> getEntities() { return entities; }
+    void updateLight(unsigned int lightId, glm::vec3 position, glm::vec3 color);
+
+    std::vector<Entity> * getEntities() { return &entities; }
 
     void drawScene(glm::mat4 viewProjMatrix, glm::vec3 viewPosition);
 
