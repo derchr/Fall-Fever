@@ -38,7 +38,8 @@ Controller::Controller() {
 
     gameWindow = new Window();
     gameEventHandler = new EventHandler(gameWindow->getGLFWwindow());
-    camera = new Camera(90.0f, gameWindow->getWindowWidth(), gameWindow->getWindowHeight());
+
+    camera = new Camera(90.0f, gameWindow->getWindowAspectRatio());
 
     #ifdef _DEBUG
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
@@ -77,8 +78,6 @@ void Controller::run() {
     ShaderProgram shaderProgram("res/shaders/basic.vert", "res/shaders/basic.frag");
     ShaderProgram lightProgram("res/shaders/light.vert", "res/shaders/light.frag");
 
-    std::vector<Entity> scene;
-
     //Model model_backpack("res/models/backpack.ffo");
     //Model model_plant("res/models/plant.ffo");
     Model model_container("res/models/container.ffo");
@@ -113,9 +112,8 @@ void Controller::run() {
     shaderProgram.unbind();
 
     Scene scene(&shaderProgram);
-
-    scene.push_back(dragon);
-    scene.push_back(lightSource);
+    scene.addEntity(dragon);
+    scene.addEntity(lightSource);
     
     camera->translate(glm::vec3(0.0f, 0.0f, 7.5f));
 
@@ -133,12 +131,10 @@ void Controller::run() {
         camera->lookForward();
         camera->updateVPM();
 
-        for(auto it = scene.begin(); it != scene.end(); it++) {
-            it->draw(camera->getViewProj(), camera->getPosition());
-        }
+        scene.drawScene(camera->getViewProj(), camera->getPosition());
 
         #ifdef _DEBUG
-        renderImGui(&scene[0]);
+        renderImGui(scene.getEntities().data());
         #endif
 
         glfwSwapBuffers(gameWindow->getGLFWwindow());
@@ -187,7 +183,7 @@ void Controller::error_callback(int error, const char* description) {
 }
 
 void Controller::updateWindowSize() {
-    camera->updateAspectRatio(gameWindow->getWindowWidth(), gameWindow->getWindowHeight());
+    camera->updateAspectRatio(gameWindow->getWindowAspectRatio());
     gameEventHandler->setFirstMouseInput(1);
 }
 

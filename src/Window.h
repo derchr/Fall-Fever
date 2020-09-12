@@ -13,6 +13,7 @@ public:
 
     int getWindowWidth() { return width; }
     int getWindowHeight() { return height; }
+    float getWindowAspectRatio() { return (float) width / (float) height; }
 
     bool getMouseIsCatched() { return mouseCatched; }
 

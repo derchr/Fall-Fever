@@ -5,6 +5,7 @@
 PointLight::PointLight(ShaderProgram *shaderProgram)
     : Light(shaderProgram) {
 
+    isActive = false;
 
 }
 

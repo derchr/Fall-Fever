@@ -6,11 +6,11 @@ class Camera {
 
 public:
 
-    Camera(float fov, int width, int height);
+    Camera(float fov, float aspectRatio);
     ~Camera() = default;
 
     void updateVPM();
-    void updateAspectRatio(int width, int height);
+    void updateAspectRatio(float aspectRatio);
     void updatePositionFromKeyboardInput(bool *actionCameraRegister, float deltaTime);
     void updateDirectionFromMouseInput(double *cameraMouseActionRegister);
 

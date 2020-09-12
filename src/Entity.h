@@ -20,6 +20,9 @@ public:
     void setOrientiation(glm::vec3 orientation);
     void setScale(float scaleFactor);
 
+    void setId(uint32_t id) { this->id = id; }
+    uint32_t getId() { return id; }
+
     glm::vec3 getPosition() { return position; }
     glm::mat4 getModelMatrix() { return modelMatrix; }
 
@@ -27,7 +30,6 @@ private:
 
     void updateModelMatrix();
 
-    // May be used later...
     uint32_t id;
 
     glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
