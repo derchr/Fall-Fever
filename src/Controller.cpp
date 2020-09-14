@@ -79,23 +79,23 @@ void Controller::run() {
     ShaderProgram lightProgram("res/shaders/light.vert", "res/shaders/light.frag");
 
     //Model model_backpack("res/models/backpack.ffo");
-    Model model_plant("res/models/plant.ffo");
+    //Model model_plant("res/models/plant.ffo");
     Model model_container("res/models/container.ffo");
     Model model_cube("res/models/cube.ffo");
-    //Model model_dragon("res/models/dragon.ffo");
+    Model model_dragon("res/models/dragon.ffo");
     //Model model_sphere("res/models/sphere.ffo");
 
     //Entity backpack(&model_backpack, &shaderProgram);
     //Entity sphere(&model_sphere, &shaderProgram);
     Entity container(&model_container, &shaderProgram);
-    //Entity dragon(&model_dragon, &shaderProgram);
-    Entity plant(&model_plant, &shaderProgram);
+    Entity dragon(&model_dragon, &shaderProgram);
+    //Entity plant(&model_plant, &shaderProgram);
     Entity lightSource(&model_cube, &lightProgram);
 
     lightSource.translate(glm::vec3(-5.0f, 1.0f, 0.0f));
     lightSource.setScale(0.2f);
-    plant.setScale(5.0f);
-    //dragon.setScale(0.2f);
+    //plant.setScale(5.0f);
+    dragon.setScale(0.2f);
 
     glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
     glm::vec3 diffuseColor = lightColor * glm::vec3(1.0f);
@@ -113,7 +113,7 @@ void Controller::run() {
     shaderProgram.unbind();
 
     World world(&shaderProgram);
-    world.addEntity(plant);
+    world.addEntity(dragon);
     world.addEntity(lightSource);
 
     world.updateLight(0, lightSource.getPosition(), glm::vec3(1.0f));

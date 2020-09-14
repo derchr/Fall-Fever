@@ -101,4 +101,7 @@ void Model::loadModel(std::string pathToModel) {
         Mesh currentMesh(meshVertices, meshIndices, meshTextures);
         meshes.push_back(currentMesh);
     }
+
+    input.close();
+
 }
