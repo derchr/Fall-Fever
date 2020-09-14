@@ -23,7 +23,7 @@
 #include "Texture.h"
 #include "Model.h"
 #include "Entity.h"
-#include "Scene.h"
+#include "World.h"
 
 Controller::Controller() {
     if(!glfwInit()) exit(-1);
@@ -79,23 +79,23 @@ void Controller::run() {
     ShaderProgram lightProgram("res/shaders/light.vert", "res/shaders/light.frag");
 
     //Model model_backpack("res/models/backpack.ffo");
-    //Model model_plant("res/models/plant.ffo");
+    Model model_plant("res/models/plant.ffo");
     Model model_container("res/models/container.ffo");
     Model model_cube("res/models/cube.ffo");
-    Model model_dragon("res/models/dragon.ffo");
+    //Model model_dragon("res/models/dragon.ffo");
     //Model model_sphere("res/models/sphere.ffo");
 
     //Entity backpack(&model_backpack, &shaderProgram);
     //Entity sphere(&model_sphere, &shaderProgram);
     Entity container(&model_container, &shaderProgram);
-    Entity dragon(&model_dragon, &shaderProgram);
-    //Entity plant(&model_plant, &shaderProgram);
+    //Entity dragon(&model_dragon, &shaderProgram);
+    Entity plant(&model_plant, &shaderProgram);
     Entity lightSource(&model_cube, &lightProgram);
 
     lightSource.translate(glm::vec3(-5.0f, 1.0f, 0.0f));
     lightSource.setScale(0.2f);
-    //plant.scale(5.0f);
-    dragon.setScale(0.2f);
+    plant.setScale(5.0f);
+    //dragon.setScale(0.2f);
 
     glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
     glm::vec3 diffuseColor = lightColor * glm::vec3(1.0f);
@@ -103,6 +103,7 @@ void Controller::run() {
     glm::vec3 specularColor = glm::vec3(1.0f);
 
     shaderProgram.bind();
+    shaderProgram.setUniform("u_directionalLight.isActive", 1);
     shaderProgram.setUniform("u_directionalLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
     shaderProgram.setUniform("u_directionalLight.ambient", ambientColor * 0.25f);
     shaderProgram.setUniform("u_directionalLight.diffuse", diffuseColor * 0.25f);
@@ -111,11 +112,11 @@ void Controller::run() {
     shaderProgram.setUniform("u_material.shininess", 32.0f);
     shaderProgram.unbind();
 
-    Scene scene(&shaderProgram);
-    scene.addEntity(dragon);
-    scene.addEntity(lightSource);
+    World world(&shaderProgram);
+    world.addEntity(plant);
+    world.addEntity(lightSource);
 
-    scene.updateLight(0, lightSource.getPosition(), glm::vec3(1.0f));
+    world.updateLight(0, lightSource.getPosition(), glm::vec3(1.0f));
     
     camera->translate(glm::vec3(0.0f, 0.0f, 7.5f));
 
@@ -133,10 +134,10 @@ void Controller::run() {
         camera->lookForward();
         camera->updateVPM();
 
-        scene.drawScene(camera->getViewProj(), camera->getPosition());
+        world.draw(camera->getViewProj(), camera->getPosition());
 
         #ifdef _DEBUG
-        renderImGui(scene.getEntities());
+        renderImGui(world.getEntities());
         #endif
 
         glfwSwapBuffers(gameWindow->getGLFWwindow());

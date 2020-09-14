@@ -6,12 +6,12 @@
 #include "Camera.h"
 #include "Entity.h"
 
-class Scene {
+class World {
 
 public:
 
-    Scene(ShaderProgram *shaderProgram);
-    ~Scene() = default;
+    World(ShaderProgram *shaderProgram);
+    ~World() = default;
 
     void addEntity(Entity entity);
     void removeEntity(uint32_t id);
@@ -20,7 +20,7 @@ public:
 
     std::vector<Entity> * getEntities() { return &entities; }
 
-    void drawScene(glm::mat4 viewProjMatrix, glm::vec3 viewPosition);
+    void draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition);
 
 private:
 

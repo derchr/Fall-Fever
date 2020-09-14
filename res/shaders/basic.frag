@@ -99,12 +99,12 @@ vec3 directionalLightContribution(DirectionalLight light, vec3 normal, vec3 view
     vec3 reflectDir = reflect(-lightDir, normal);
     float specularShading = pow(max(dot(viewDir, reflectDir), 0.0f), u_material.shininess);
 
-    vec3 diffuseTex = vec3(texture(u_material.texture_diffuse0, v_texCoord));
-    vec3 specularTex = vec3(texture(u_material.texture_specular0, v_texCoord));
+    vec4 diffuseTex = texture(u_material.texture_diffuse0, v_texCoord);
+    vec4 specularTex = texture(u_material.texture_specular0, v_texCoord);
 
-    vec3 ambient = light.ambient * diffuseTex;
-    vec3 diffuse = light.diffuse * diffuseShading * diffuseTex;
-    vec3 specular = light.specular * specularShading * specularTex;
+    vec3 ambient = light.ambient * vec3(diffuseTex);
+    vec3 diffuse = light.diffuse * diffuseShading * vec3(diffuseTex);
+    vec3 specular = light.specular * specularShading * vec3(specularTex);
 
     return (ambient + diffuse + specular);
 }
@@ -128,12 +128,12 @@ vec3 pointLightContribution(PointLight light, vec3 normal, vec3 fragPos, vec3 vi
     float distanceLightFragment = length(light.position - fragPos);
     float attenuation = 1.0f / (light.K_c + light.K_l * distanceLightFragment + light.K_q * distanceLightFragment * distanceLightFragment);    
 
-    vec3 diffuseTex = vec3(texture(u_material.texture_diffuse0, v_texCoord));
-    vec3 specularTex = vec3(texture(u_material.texture_specular0, v_texCoord));
+    vec4 diffuseTex = texture(u_material.texture_diffuse0, v_texCoord);
+    vec4 specularTex = texture(u_material.texture_specular0, v_texCoord);
 
-    vec3 ambient = light.ambient * diffuseTex;
-    vec3 diffuse = light.diffuse * diffuseShading * diffuseTex;
-    vec3 specular = light.specular * specularShading * specularTex;
+    vec3 ambient = light.ambient * vec3(diffuseTex);
+    vec3 diffuse = light.diffuse * diffuseShading * vec3(diffuseTex);
+    vec3 specular = light.specular * specularShading * vec3(specularTex);
 
     ambient *= attenuation;
     diffuse *= attenuation;
@@ -165,12 +165,12 @@ vec3 spotLightContribution(SpotLight light, vec3 normal, vec3 fragPos, vec3 view
     float epsilon = light.innerCutOff - light.outerCutOff;
     float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0f, 1.0f);
 
-    vec3 diffuseTex = vec3(texture(u_material.texture_diffuse0, v_texCoord));
-    vec3 specularTex = vec3(texture(u_material.texture_specular0, v_texCoord));
-    
-    vec3 ambient = light.ambient * diffuseTex;
-    vec3 diffuse = light.diffuse * diffuseShading * diffuseTex;
-    vec3 specular = light.specular * specularShading * specularTex;
+    vec4 diffuseTex = texture(u_material.texture_diffuse0, v_texCoord);
+    vec4 specularTex = texture(u_material.texture_specular0, v_texCoord);
+
+    vec3 ambient = light.ambient * vec3(diffuseTex);
+    vec3 diffuse = light.diffuse * diffuseShading * vec3(diffuseTex);
+    vec3 specular = light.specular * specularShading * vec3(specularTex);
 
     diffuse *= intensity;
     specular *= intensity;

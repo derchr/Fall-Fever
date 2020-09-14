@@ -11,7 +11,7 @@ add_executable(Fall-Fever
     Model.cpp
     Entity.cpp
     Light.cpp
-    Scene.cpp
+    World.cpp
 )
 
 target_link_libraries(
