@@ -23,7 +23,7 @@ void Model::draw(ShaderProgram *shaderProgram) {
 
     // Iterate through every mesh and call the draw function
     for(auto it = meshes.begin(); it != meshes.end(); it++) {
-        it->draw(shaderProgram);
+        (*it)->draw(shaderProgram);
     }
 
 }
@@ -98,7 +98,7 @@ void Model::loadModel(std::string pathToModel) {
             meshTextures.push_back(loadedTextures[currentTextureId]);
         }
 
-        Mesh currentMesh(meshVertices, meshIndices, meshTextures);
+        Mesh *currentMesh = new Mesh(meshVertices, meshIndices, meshTextures);
         meshes.push_back(currentMesh);
     }
 }

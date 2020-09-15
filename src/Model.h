@@ -19,7 +19,7 @@ private:
 
     void loadModel(std::string pathToModel);
 
-    std::vector<Mesh> meshes;
+    std::vector<Mesh*> meshes;
 
     std::vector<Texture*> loadedTextures;
 

@@ -20,11 +20,15 @@ EventHandler::EventHandler(GLFWwindow *window)
 
 void EventHandler::handleEvents() {
 
-    for(int i = 0; i < CAMERA_MOUSE_ACTION_NUM_ITEMS; i++)
-        cameraMouseActionRegister[i] = 0.0;
-
+    clearActionRegisters();
     glfwPollEvents();
 
+}
+
+void EventHandler::clearActionRegisters() {
+    //std::fill_n(cameraActionRegister, CAMERA_ACTION_NUM_ITEMS, 0);
+    std::fill_n(cameraMouseActionRegister, CAMERA_MOUSE_ACTION_NUM_ITEMS, 0.0);
+    std::fill_n(windowActionRegister, WINDOW_ACTION_NUM_ITEMS, 0);
 }
 
 void EventHandler::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {

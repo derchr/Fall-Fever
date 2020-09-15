@@ -22,6 +22,8 @@ public:
 
 private:
 
+    void clearActionRegisters();
+    
     static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
     static void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
