@@ -17,6 +17,7 @@ add_executable(Fall-Fever
 target_link_libraries(
     Fall-Fever PRIVATE 
     glad
+    glm
     stb
     ${GLFW3_LIBRARY}
     ${OPENGL_LIBRARIES}

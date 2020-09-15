@@ -7,7 +7,7 @@ double EventHandler::cameraMouseActionRegister[CAMERA_MOUSE_ACTION_NUM_ITEMS] = 
 bool EventHandler::windowActionRegister[WINDOW_ACTION_NUM_ITEMS] = {0};
 
 bool EventHandler::firstMouseInput = 1;
-float EventHandler::mouseSensitivity = 0.08f;
+float EventHandler::mouseSensitivity = 0.5f;
 
 
 EventHandler::EventHandler(GLFWwindow *window)
