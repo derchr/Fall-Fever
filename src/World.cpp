@@ -9,10 +9,19 @@
 World::World(ShaderProgram *shaderProgram)
     : shaderProgram(shaderProgram) {
 
+    // PointLights
     for(unsigned int i = 0; i < NUM_POINT_LIGHTS; i++) {
         pointLights[i].setId(i);
         pointLights[i].setShaderProgram(shaderProgram);
     }
+
+    // DirectionalLight
+    directionalLight.setShaderProgram(shaderProgram);
+
+    // This will be removed in future when gloss maps are implemented
+    shaderProgram->bind();
+    shaderProgram->setUniform("u_material.shininess", 32.0f);
+    shaderProgram->unbind();
 
 }
 
@@ -33,8 +42,8 @@ void World::removeEntity(uint32_t id) {
     std::cout << "[Warning] Entity with ID " << id << " could not be removed." << std::endl;
 }
 
-void World::updateLight(unsigned int lightId, glm::vec3 position, glm::vec3 color) {
-    pointLights[lightId].setActive(true);
+void World::updatePointLight(unsigned int lightId, bool active, glm::vec3 position, glm::vec3 color) {
+    pointLights[lightId].setActive(active);
     pointLights[lightId].setPosition(position);
     pointLights[lightId].setColor(color);
 }

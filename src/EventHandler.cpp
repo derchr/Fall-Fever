@@ -91,8 +91,8 @@ void EventHandler::mouse_callback(GLFWwindow* window, double xpos, double ypos) 
     // Check if this is the first VALID mouse event after window being resized
     if(firstMouseInput && !(deltaCursorPosX == 0 && deltaCursorPosY == 0)) {
         firstMouseInput = 0;
-        deltaCursorPosX = 0.0f;
-        deltaCursorPosY = 0.0f;
+        deltaCursorPosX = 0.0;
+        deltaCursorPosY = 0.0;
     }
 
     deltaCursorPosX *= mouseSensitivity;

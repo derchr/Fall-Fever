@@ -16,7 +16,7 @@ public:
     void addEntity(Entity entity);
     void removeEntity(uint32_t id);
 
-    void updateLight(unsigned int lightId, glm::vec3 position, glm::vec3 color);
+    void updatePointLight(unsigned int lightId, bool active, glm::vec3 position, glm::vec3 color);
 
     std::vector<Entity> * getEntities() { return &entities; }
 
@@ -28,7 +28,7 @@ private:
 
     std::vector<Entity> entities;
 
-    //DirectionalLight directionalLight;
+    DirectionalLight directionalLight;
     PointLight pointLights[NUM_POINT_LIGHTS];
     //SpotLight spotLight;
 
