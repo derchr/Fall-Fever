@@ -27,7 +27,7 @@ private:
 
     void updateWindowSize();
 
-    void renderImGui(std::vector<Entity> *entites);
+    void renderImGui(std::vector<Entity> *entites, glm::vec3 *lightColor);
 
     Window *gameWindow;
     EventHandler *gameEventHandler;

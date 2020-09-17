@@ -36,10 +36,10 @@ protected:
     bool isActive = false;
 
     // Color
-    glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
-    glm::vec3 diffuseColor = lightColor * glm::vec3(1.0f);
-    glm::vec3 ambientColor = diffuseColor * glm::vec3(0.1f);
-    glm::vec3 specularColor = glm::vec3(1.0f);
+    glm::vec3 lightColor;
+    glm::vec3 diffuseColor;
+    glm::vec3 ambientColor;
+    glm::vec3 specularColor;
 
 };
 

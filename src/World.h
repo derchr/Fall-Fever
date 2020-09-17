@@ -17,6 +17,7 @@ public:
     void removeEntity(uint32_t id);
 
     void updatePointLight(unsigned int lightId, bool active, glm::vec3 position, glm::vec3 color);
+    void updateDirectionalLight(bool active, glm::vec3 direction, glm::vec3 color);
 
     std::vector<Entity> * getEntities() { return &entities; }
 

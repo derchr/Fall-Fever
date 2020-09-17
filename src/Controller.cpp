@@ -97,7 +97,7 @@ void Controller::run() {
     lightSource.translate(glm::vec3(-5.0f, 1.0f, 0.0f));
     lightSource.setScale(0.2f);
     //plant.setScale(5.0f);
-    dragon.setScale(0.2f);
+    //dragon.setScale(0.2f);
 
     World world(&shaderProgram);
     world.addEntity(dragon);
@@ -116,7 +116,12 @@ void Controller::run() {
         float radius = 4.0;
         glm::vec3 newPos = glm::vec3(cos(glfwGetTime()*0.2), 0.f, sin(glfwGetTime()*0.2)) * radius;
         world.getEntities()->operator[](1).setPosition(newPos);
-        world.updatePointLight(0, true, world.getEntities()->operator[](1).getPosition(), glm::vec3(1.0f));
+        static glm::vec3 lightColor = glm::vec3(1.f);
+        world.updatePointLight(0, true, world.getEntities()->operator[](1).getPosition(), lightColor);
+        world.updateDirectionalLight(true, glm::vec3(1.0f), lightColor);
+        lightProgram.bind();
+        lightProgram.setUniform("v_lightColor", lightColor);
+        lightProgram.unbind();
 
         // Render and buffer swap
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -127,7 +132,7 @@ void Controller::run() {
         world.draw(camera->getViewProj(), camera->getPosition());
 
         #ifdef _DEBUG
-        renderImGui(world.getEntities());
+        renderImGui(world.getEntities(), &lightColor);
         #endif
 
         glfwSwapBuffers(gameWindow->getGLFWwindow());
@@ -181,7 +186,7 @@ void Controller::updateWindowSize() {
 }
 
 #ifdef _DEBUG
-void Controller::renderImGui(std::vector<Entity> *entites) {
+void Controller::renderImGui(std::vector<Entity> *entites, glm::vec3 *lightColor) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
@@ -194,14 +199,19 @@ void Controller::renderImGui(std::vector<Entity> *entites) {
     ImGui::SliderFloat("Rotation", &rotation, 0, 2 * M_PI);
     static float translation[] = {0.0f, 0.0f};
     ImGui::SliderFloat2("Position", translation, -4.0, 4.0);
-    static float color[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+    static float scale = 0.2f;
+    ImGui::SliderFloat("Scale", &scale, 0.02, 2.0);
 
     entites->operator[](0).setPosition(glm::vec3(translation[0], 0.0f, translation[1]));
     entites->operator[](0).setRotation(glm::vec3(0.f,1.0f,0.f) * rotation);
-    //entity->setRotation()
+    entites->operator[](0).setScale(scale);
 
     // color picker
+    static float color[4] = {1.0f, 1.0f, 1.0f, 1.0f};
     ImGui::ColorEdit3("Color", color);
+    lightColor->x = color[0];
+    lightColor->y = color[1];
+    lightColor->z = color[2];
     ImGui::End();
 
 

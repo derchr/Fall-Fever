@@ -16,7 +16,6 @@ void Entity::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition) {
 
     glm::mat4 modelViewProj = viewProjMatrix * modelMatrix;
     shaderProgram->setUniform("u_modelViewProjMatrix", modelViewProj);
-
     shaderProgram->setUniform("u_modelMatrix", modelMatrix);
 
     glm::mat3 normalMatrix = glm::mat3(modelMatrix);

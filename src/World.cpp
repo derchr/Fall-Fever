@@ -48,6 +48,13 @@ void World::updatePointLight(unsigned int lightId, bool active, glm::vec3 positi
     pointLights[lightId].setColor(color);
 }
 
+void World::updateDirectionalLight(bool active, glm::vec3 direction, glm::vec3 color) {
+    directionalLight.setActive(active);
+    directionalLight.setDirection(glm::vec3(-0.2f, -1.0f, -0.3f));
+    //directionalLight.setDirection(direction);
+    directionalLight.setColor(color);
+}
+
 void World::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition) {
 
     for(auto it = entities.begin(); it != entities.end(); it++) {
