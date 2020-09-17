@@ -3,6 +3,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/ext/matrix_transform.hpp>
 
+
 Entity::Entity(Model *model, ShaderProgram *shaderProgram)
     : model(model), shaderProgram(shaderProgram) {
     
@@ -37,7 +38,8 @@ void Entity::translate(glm::vec3 vector) {
 }
 
 void Entity::rotate(glm::vec3 axis, float radians) {
-    orientation += axis * radians;
+    glm::quat rotation = glm::angleAxis(radians, axis);
+    quaternion = rotation * quaternion;
     updateModelMatrix();
 }
 
@@ -46,8 +48,13 @@ void Entity::setPosition(glm::vec3 position) {
     updateModelMatrix();
 }
 
-void Entity::setRotation(glm::vec3 orientation) {
-    this->orientation = orientation;
+void Entity::setRotation(glm::vec3 eulerAngles) {
+    quaternion = glm::quat(eulerAngles);
+    updateModelMatrix();
+}
+
+void Entity::setRotation(glm::vec3 axis, float radians) {
+    quaternion = glm::angleAxis(radians, axis);
     updateModelMatrix();
 }
 
@@ -58,22 +65,18 @@ void Entity::setScale(float scaleFactor) {
 
 void Entity::updateModelMatrix() {
     
-    glm::mat4 newModelMatrix(1.0f);
-
     // Translate * Rotate * Scale * vertex_vec;
     // First scaling, then rotation, then translation
 
     // Translate
-    newModelMatrix = glm::translate(newModelMatrix, position);
+    glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), position);
 
     // Rotate
-    newModelMatrix = glm::rotate(newModelMatrix, orientation.x, glm::vec3(1.f, 0.f, 0.f));
-    newModelMatrix = glm::rotate(newModelMatrix, orientation.y, glm::vec3(0.f, 1.f, 0.f));
-    newModelMatrix = glm::rotate(newModelMatrix, orientation.z, glm::vec3(0.f, 0.f, 1.f));
+    glm::mat4 rotationMatrix = glm::toMat4(quaternion);
 
     // Scale
-    newModelMatrix = glm::scale(newModelMatrix, glm::vec3(modelScale, modelScale, modelScale));
+    glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(modelScale, modelScale, modelScale));
 
-    modelMatrix = newModelMatrix;
+    modelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
 
 }

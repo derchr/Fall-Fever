@@ -17,7 +17,10 @@ public:
         update();
     }
     void setColor(glm::vec3 color) {
-        lightColor = color; 
+        lightColor = color;
+        diffuseColor = lightColor * glm::vec3(1.0f);
+        ambientColor = diffuseColor * glm::vec3(0.1f);
+        specularColor = lightColor * glm::vec3(1.0f);
         update();
     }
 

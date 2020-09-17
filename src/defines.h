@@ -1,8 +1,8 @@
- #pragma once
+#pragma once
 
 #include <glm/glm.hpp>
 
-#define INIT_WINDOW_WIDTH 960
+#define INIT_WINDOW_WIDTH 1280
 #define INIT_WINDOW_HEIGHT 720 
 
 enum textureType{

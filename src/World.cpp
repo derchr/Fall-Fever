@@ -50,8 +50,8 @@ void World::updatePointLight(unsigned int lightId, bool active, glm::vec3 positi
 
 void World::updateDirectionalLight(bool active, glm::vec3 direction, glm::vec3 color) {
     directionalLight.setActive(active);
+    directionalLight.setDirection(direction);
     directionalLight.setDirection(glm::vec3(-0.2f, -1.0f, -0.3f));
-    //directionalLight.setDirection(direction);
     directionalLight.setColor(color);
 }
 

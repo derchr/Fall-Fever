@@ -80,9 +80,10 @@ void Controller::run() {
 
     //Model model_backpack("res/models/backpack.ffo");
     //Model model_plant("res/models/plant.ffo");
-    Model model_container("res/models/container.ffo");
+    //Model model_container("res/models/container.ffo");
     Model model_cube("res/models/cube.ffo");
     Model model_dragon("res/models/dragon.ffo");
+    //Model model_moon("res/models/moon.ffo");
     //Model model_hut("res/models/hut.ffo");
     //Model model_sphere("res/models/sphere.ffo");
 
@@ -91,19 +92,18 @@ void Controller::run() {
     //Entity container(&model_container, &shaderProgram);
     //Entity hut(&model_hut, &shaderProgram);
     Entity dragon(&model_dragon, &shaderProgram);
+    //Entity moon(&model_moon, &shaderProgram);
     //Entity plant(&model_plant, &shaderProgram);
     Entity lightSource(&model_cube, &lightProgram);
 
-    lightSource.translate(glm::vec3(-5.0f, 1.0f, 0.0f));
-    lightSource.setScale(0.2f);
-    //plant.setScale(5.0f);
-    //dragon.setScale(0.2f);
+    dragon.setScale(0.2f);
+    lightSource.setScale(0.1f);
 
     World world(&shaderProgram);
     world.addEntity(dragon);
     world.addEntity(lightSource);
     
-    camera->translate(glm::vec3(0.0f, 0.0f, 7.5f));
+    camera->translate(glm::vec3(0.0f, 1.5f, 5.0f));
 
     // This is the game loop
     while(!glfwWindowShouldClose(gameWindow->getGLFWwindow())) {
@@ -112,9 +112,8 @@ void Controller::run() {
 
         // Update game
         // ...
-        //world.getEntities()->operator[](0).rotate(glm::vec3(0.f,1.0f,0.f), deltaTime*0.2);
         float radius = 4.0;
-        glm::vec3 newPos = glm::vec3(cos(glfwGetTime()*0.2), 0.f, sin(glfwGetTime()*0.2)) * radius;
+        glm::vec3 newPos = glm::vec3(-cos(glfwGetTime()*0.2), 0.5f, sin(glfwGetTime()*0.2)) * radius;
         world.getEntities()->operator[](1).setPosition(newPos);
         static glm::vec3 lightColor = glm::vec3(1.f);
         world.updatePointLight(0, true, world.getEntities()->operator[](1).getPosition(), lightColor);
@@ -203,7 +202,7 @@ void Controller::renderImGui(std::vector<Entity> *entites, glm::vec3 *lightColor
     ImGui::SliderFloat("Scale", &scale, 0.02, 2.0);
 
     entites->operator[](0).setPosition(glm::vec3(translation[0], 0.0f, translation[1]));
-    entites->operator[](0).setRotation(glm::vec3(0.f,1.0f,0.f) * rotation);
+    entites->operator[](0).setRotation(glm::vec3(0.f,1.0f,0.f), rotation);
     entites->operator[](0).setScale(scale);
 
     // color picker

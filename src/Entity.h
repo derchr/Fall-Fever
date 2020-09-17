@@ -2,7 +2,9 @@
 
 #include "Model.h"
 #include "ShaderProgram.h"
+
 #include <glm/glm.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 class Entity {
 
@@ -17,7 +19,8 @@ public:
     void rotate(glm::vec3 axis, float radians);
 
     void setPosition(glm::vec3 position);
-    void setRotation(glm::vec3 orientation);
+    void setRotation(glm::vec3 eulerAngles);
+    void setRotation(glm::vec3 axis, float radians);
     void setScale(float scaleFactor);
 
     void setId(uint32_t id) { this->id = id; }
@@ -33,8 +36,9 @@ private:
     uint32_t id;
 
     glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::vec3 orientation = glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::quat quaternion;
     glm::vec3 velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+
 
     float modelScale = 1.0f;
 

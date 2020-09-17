@@ -28,11 +28,21 @@ Window::Window() {
     // Enable z buffer
     glEnable(GL_DEPTH_TEST);
 
+    // Enable face culling
+    glEnable(GL_CULL_FACE);
+    glFrontFace(GL_CW);
+    glCullFace(GL_FRONT);
+
     // Disable mouse cursor
     #ifdef _DEBUG
     mouseCatched = false;
     #endif
     setCatchedCursor(mouseCatched);
+
+    // Maximize in release build
+    #ifndef _DEBUG
+    glfwMaximizeWindow(window);
+    #endif
 
     #ifdef _DEBUG
     std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;

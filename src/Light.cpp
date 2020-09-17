@@ -11,11 +11,6 @@ PointLight::PointLight(ShaderProgram *shaderProgram)
 
 void PointLight::update() {
 
-    // Only temp
-    glm::vec3 diffuseColor = lightColor * glm::vec3(1.0f);
-    glm::vec3 ambientColor = diffuseColor * glm::vec3(0.1f);
-    glm::vec3 specularColor = lightColor * glm::vec3(1.0f);
-
     shaderProgram->bind();
 
     shaderProgram->setUniform((_getStructMemberName() + "isActive").c_str(), isActive);
@@ -45,11 +40,6 @@ DirectionalLight::DirectionalLight(ShaderProgram *shaderProgram)
 }
 
 void DirectionalLight::update() {
-
-    // Only temp
-    glm::vec3 diffuseColor = lightColor * glm::vec3(1.0f);
-    glm::vec3 ambientColor = diffuseColor * glm::vec3(0.1f);
-    glm::vec3 specularColor = lightColor * glm::vec3(1.0f);
 
     shaderProgram->bind();
 
