@@ -5,7 +5,14 @@
 #define INIT_WINDOW_WIDTH 960
 #define INIT_WINDOW_HEIGHT 720 
 
-enum textureType{texture_diffuse, texture_specular, texture_normal, texture_height, TEXTURE_TYPE_NUM_ITEMS};
+enum textureType{
+    texture_diffuse,
+    texture_specular,
+    texture_normal,
+    texture_height,
+    texture_gloss,
+    TEXTURE_TYPE_NUM_ITEMS
+};
 
 struct Vertex {
     // Postition

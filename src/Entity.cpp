@@ -19,7 +19,8 @@ void Entity::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition) {
 
     shaderProgram->setUniform("u_modelMatrix", modelMatrix);
 
-    glm::mat3 normalMatrix = glm::mat3(glm::transpose(glm::inverse(modelMatrix)));
+    glm::mat3 normalMatrix = glm::mat3(modelMatrix);
+    normalMatrix = glm::transpose(glm::inverse(normalMatrix));
     shaderProgram->setUniform("u_normalMatrix", normalMatrix);
 
     shaderProgram->setUniform("u_viewPosition", viewPosition);
@@ -37,16 +38,17 @@ void Entity::translate(glm::vec3 vector) {
 }
 
 void Entity::rotate(glm::vec3 axis, float radians) {
-    glm::mat4 rotationMatrix(1.0f);
-    rotationMatrix = glm::rotate(rotationMatrix, radians, axis);
-
-    // Rotate orientation vector
-    orientation = glm::normalize(glm::vec3(rotationMatrix * glm::vec4(orientation, 1.0)));
+    orientation += axis * radians;
     updateModelMatrix();
 }
 
 void Entity::setPosition(glm::vec3 position) {
     this->position = position;
+    updateModelMatrix();
+}
+
+void Entity::setRotation(glm::vec3 orientation) {
+    this->orientation = orientation;
     updateModelMatrix();
 }
 
@@ -66,8 +68,9 @@ void Entity::updateModelMatrix() {
     newModelMatrix = glm::translate(newModelMatrix, position);
 
     // Rotate
-    glm::vec3 const up(0.0f, 0.0f, 1.0f);
-    //newModelMatrix = glm::rotate(newModelMatrix, , )
+    newModelMatrix = glm::rotate(newModelMatrix, orientation.x, glm::vec3(1.f, 0.f, 0.f));
+    newModelMatrix = glm::rotate(newModelMatrix, orientation.y, glm::vec3(0.f, 1.f, 0.f));
+    newModelMatrix = glm::rotate(newModelMatrix, orientation.z, glm::vec3(0.f, 0.f, 1.f));
 
     // Scale
     newModelMatrix = glm::scale(newModelMatrix, glm::vec3(modelScale, modelScale, modelScale));

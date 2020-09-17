@@ -54,11 +54,14 @@ void Texture::bind(uint8_t textureUnit, ShaderProgram* shaderProgram, uint8_t te
         case texture_specular:
             uniformName += "specular" + std::to_string(textureTypeNum);
             break;
+        case texture_normal:
+            uniformName += "normal" + std::to_string(textureTypeNum);
+            break;
         case texture_height:
             uniformName += "height" + std::to_string(textureTypeNum);
             break;
-        case texture_normal:
-            uniformName += "normal" + std::to_string(textureTypeNum);
+        case texture_gloss:
+            uniformName += "gloss" + std::to_string(textureTypeNum);
             break;
     }
 

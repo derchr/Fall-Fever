@@ -82,28 +82,26 @@ void Controller::run() {
     //Model model_plant("res/models/plant.ffo");
     Model model_container("res/models/container.ffo");
     Model model_cube("res/models/cube.ffo");
-    //Model model_dragon("res/models/dragon.ffo");
-    Model model_hut("res/models/hut.ffo");
+    Model model_dragon("res/models/dragon.ffo");
+    //Model model_hut("res/models/hut.ffo");
     //Model model_sphere("res/models/sphere.ffo");
 
     //Entity backpack(&model_backpack, &shaderProgram);
     //Entity sphere(&model_sphere, &shaderProgram);
     //Entity container(&model_container, &shaderProgram);
-    Entity hut(&model_hut, &shaderProgram);
-    //Entity dragon(&model_dragon, &shaderProgram);
+    //Entity hut(&model_hut, &shaderProgram);
+    Entity dragon(&model_dragon, &shaderProgram);
     //Entity plant(&model_plant, &shaderProgram);
     Entity lightSource(&model_cube, &lightProgram);
 
     lightSource.translate(glm::vec3(-5.0f, 1.0f, 0.0f));
     lightSource.setScale(0.2f);
     //plant.setScale(5.0f);
-    //dragon.setScale(0.2f);
+    dragon.setScale(0.2f);
 
     World world(&shaderProgram);
-    world.addEntity(hut);
+    world.addEntity(dragon);
     world.addEntity(lightSource);
-
-    world.updatePointLight(0, true, lightSource.getPosition(), glm::vec3(1.0f));
     
     camera->translate(glm::vec3(0.0f, 0.0f, 7.5f));
 
@@ -114,6 +112,11 @@ void Controller::run() {
 
         // Update game
         // ...
+        //world.getEntities()->operator[](0).rotate(glm::vec3(0.f,1.0f,0.f), deltaTime*0.2);
+        float radius = 4.0;
+        glm::vec3 newPos = glm::vec3(cos(glfwGetTime()*0.2), 0.f, sin(glfwGetTime()*0.2)) * radius;
+        world.getEntities()->operator[](1).setPosition(newPos);
+        world.updatePointLight(0, true, world.getEntities()->operator[](1).getPosition(), glm::vec3(1.0f));
 
         // Render and buffer swap
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -194,6 +197,7 @@ void Controller::renderImGui(std::vector<Entity> *entites) {
     static float color[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 
     entites->operator[](0).setPosition(glm::vec3(translation[0], 0.0f, translation[1]));
+    entites->operator[](0).setRotation(glm::vec3(0.f,1.0f,0.f) * rotation);
     //entity->setRotation()
 
     // color picker

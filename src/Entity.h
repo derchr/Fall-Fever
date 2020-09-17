@@ -17,7 +17,7 @@ public:
     void rotate(glm::vec3 axis, float radians);
 
     void setPosition(glm::vec3 position);
-    void setOrientiation(glm::vec3 orientation);
+    void setRotation(glm::vec3 orientation);
     void setScale(float scaleFactor);
 
     void setId(uint32_t id) { this->id = id; }

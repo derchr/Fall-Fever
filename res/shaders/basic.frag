@@ -13,6 +13,8 @@ struct Material {
     sampler2D texture_specular1;
     sampler2D texture_normal0;
     sampler2D texture_normal1;
+    sampler2D texture_height0;
+    sampler2D texture_height1;
     sampler2D texture_gloss0;
     sampler2D texture_gloss1;
     float shininess;
@@ -73,7 +75,7 @@ void main() {
 
     vec3 fragmentColor = vec3(0.0f);
 
-    vec3 normal = normalize(v_normal);
+    vec3 normal = normalize(u_normalMatrix * v_normal);
     vec3 viewDir = normalize(u_viewPosition - v_fragmentPosition);
 
     fragmentColor += directionalLightContribution(u_directionalLight, normal, viewDir);

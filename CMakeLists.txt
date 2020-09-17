@@ -5,7 +5,7 @@ project(Fall-Fever)
 if(WIN32)
     set(GLFW3_ROOT "${PROJECT_SOURCE_DIR}/glfw")
     include_directories(${PROJECT_SOURCE_DIR}/glfw/include)
-endif(WIN32)
+endif()
 
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
@@ -23,6 +23,6 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
 add_subdirectory(${PROJECT_SOURCE_DIR}/lib)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src)
 
-if(!WIN32)
+if(NOT WIN32)
     add_subdirectory(${PROJECT_SOURCE_DIR}/tools)
-endif(!WIN32)
+endif()

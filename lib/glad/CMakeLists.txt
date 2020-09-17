@@ -7,4 +7,4 @@ target_include_directories(glad PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 if(UNIX)
     target_link_libraries(glad dl)
-endif(UNIX)
+endif()
