@@ -36,7 +36,7 @@ void Mesh::draw(ShaderProgram *shaderProgram) {
     
 }
 
-void Mesh::drawWithoutTextures(ShaderProgram *shaderProgram) {
+void Mesh::drawWithoutTextures() {
 
     vertexArray.bind();
     glDrawElements(GL_TRIANGLES, numElements, GL_UNSIGNED_INT, 0);

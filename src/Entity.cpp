@@ -103,12 +103,13 @@ void Skybox::draw(glm::mat4 viewMatrix, glm::mat4 projectionMatrix) {
     glDepthMask(GL_FALSE);
     shaderProgram->bind();
 
+    // Delete any translation from the skybox cube
     glm::mat4 viewProjectionMatrix = projectionMatrix * glm::mat4(glm::mat3(viewMatrix));
 
     shaderProgram->setUniform("u_viewProjectionMatrix", viewProjectionMatrix);
 
     cubeMap.bind(shaderProgram);
-    cubeModel->getMesh(0)->drawWithoutTextures(shaderProgram);
+    cubeModel->getMesh(0)->drawWithoutTextures();
     cubeMap.unbind();
 
     shaderProgram->unbind();
