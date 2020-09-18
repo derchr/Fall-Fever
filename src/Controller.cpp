@@ -83,6 +83,7 @@ void Controller::run() {
     //Model model_container("res/models/container.ffo");
     Model model_cube("res/models/cube.ffo");
     Model model_dragon("res/models/dragon.ffo");
+    Model model_ground("res/models/ground.ffo");
     //Model model_moon("res/models/moon.ffo");
     //Model model_hut("res/models/hut.ffo");
     //Model model_sphere("res/models/sphere.ffo");
@@ -91,17 +92,21 @@ void Controller::run() {
     //Entity sphere(&model_sphere, &shaderProgram);
     //Entity container(&model_container, &shaderProgram);
     //Entity hut(&model_hut, &shaderProgram);
-    Entity dragon(&model_dragon, &shaderProgram);
     //Entity moon(&model_moon, &shaderProgram);
     //Entity plant(&model_plant, &shaderProgram);
+    Entity dragon(&model_dragon, &shaderProgram);
+    Entity ground(&model_ground, &shaderProgram);
     Entity lightSource(&model_cube, &lightProgram);
 
     dragon.setScale(0.2f);
     lightSource.setScale(0.1f);
+    lightSource.setRotation(glm::vec3(0.f));
+    lightSource.setPosition(glm::vec3(-2.f, 1.5f, 2.f));
 
     World world(&shaderProgram);
     world.addEntity(dragon);
     world.addEntity(lightSource);
+    world.addEntity(ground);
     
     camera->translate(glm::vec3(0.0f, 1.5f, 5.0f));
 
@@ -112,9 +117,12 @@ void Controller::run() {
 
         // Update game
         // ...
-        float radius = 4.0;
-        glm::vec3 newPos = glm::vec3(-cos(glfwGetTime()*0.2), 0.5f, sin(glfwGetTime()*0.2)) * radius;
-        world.getEntities()->operator[](1).setPosition(newPos);
+        static bool rotateLightSource = 0;
+        if(rotateLightSource) {
+            float radius = 4.0;
+            glm::vec3 newPos = glm::vec3(-cos(glfwGetTime()*0.5), 0.5f, sin(glfwGetTime()*0.5)) * radius;
+            world.getEntities()->operator[](1).setPosition(newPos);
+        }
         static glm::vec3 lightColor = glm::vec3(1.f);
         world.updatePointLight(0, true, world.getEntities()->operator[](1).getPosition(), lightColor);
         world.updateDirectionalLight(true, glm::vec3(1.0f), lightColor);
@@ -131,7 +139,7 @@ void Controller::run() {
         world.draw(camera->getViewProj(), camera->getPosition());
 
         #ifdef _DEBUG
-        renderImGui(world.getEntities(), &lightColor);
+        renderImGui(world.getEntities(), &lightColor, &rotateLightSource);
         #endif
 
         glfwSwapBuffers(gameWindow->getGLFWwindow());
@@ -185,15 +193,15 @@ void Controller::updateWindowSize() {
 }
 
 #ifdef _DEBUG
-void Controller::renderImGui(std::vector<Entity> *entites, glm::vec3 *lightColor) {
+void Controller::renderImGui(std::vector<Entity> *entites, glm::vec3 *lightColor, bool *rotateLightSource) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
 
-
     // render your GUI
-    ImGui::Begin("Object Modifier");
+    ImGui::Begin("Debug Utils");
+    ImGui::Text("Dragon");
     static float rotation = 0.0;
     ImGui::SliderFloat("Rotation", &rotation, 0, 2 * M_PI);
     static float translation[] = {0.0f, 0.0f};
@@ -206,13 +214,19 @@ void Controller::renderImGui(std::vector<Entity> *entites, glm::vec3 *lightColor
     entites->operator[](0).setScale(scale);
 
     // color picker
+    ImGui::Text("Light Source");
     static float color[4] = {1.0f, 1.0f, 1.0f, 1.0f};
     ImGui::ColorEdit3("Color", color);
     lightColor->x = color[0];
     lightColor->y = color[1];
     lightColor->z = color[2];
-    ImGui::End();
 
+    ImGui::Checkbox("Rotate Lightsource", rotateLightSource);
+
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
+        1000.0/ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+
+    ImGui::End();
 
 
     ImGui::Render();

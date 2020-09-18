@@ -27,7 +27,7 @@ private:
 
     void updateWindowSize();
 
-    void renderImGui(std::vector<Entity> *entites, glm::vec3 *lightColor);
+    void renderImGui(std::vector<Entity> *entites, glm::vec3 *lightColor, bool *rotateLightSource);
 
     Window *gameWindow;
     EventHandler *gameEventHandler;
