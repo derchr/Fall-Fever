@@ -78,6 +78,7 @@ void Controller::run() {
 
     ShaderProgram shaderProgram("res/shaders/basic.vert", "res/shaders/basic.frag");
     ShaderProgram lightProgram("res/shaders/light.vert", "res/shaders/light.frag");
+    ShaderProgram skyboxProgram("res/shaders/skybox.vert", "res/shaders/skybox.frag");
 
     //Model model_backpack("res/models/backpack.ffo");
     //Model model_plant("res/models/plant.ffo");
@@ -103,6 +104,8 @@ void Controller::run() {
     lightSource.setScale(0.1f);
     lightSource.setRotation(glm::vec3(0.f));
     lightSource.setPosition(glm::vec3(-2.f, 1.5f, 2.f));
+
+    Skybox skybox(&model_cube, &skyboxProgram, "res/textures/skybox/");
 
     World world(&shaderProgram);
     world.addEntity(dragon);
@@ -136,6 +139,8 @@ void Controller::run() {
         
         camera->lookForward();
         camera->updateVPM();
+
+        skybox.draw(camera->getView(), camera->getProj());
 
         world.draw(camera->getViewProj(), camera->getPosition());
 

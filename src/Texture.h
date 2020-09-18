@@ -3,9 +3,14 @@
 #include "ShaderProgram.h"
 
 #include "defines.h"
+
 #include <cstdint>
 #include <glad/glad.h>
 #include <string>
+#include <vector>
+
+// Order is important!
+enum cubeMapFaces{cm_right, cm_left, cm_top, cm_bottom, cm_back, cm_front, CUBEMAP_FACES_NUM_ITEMS};
 
 class Texture {
 
@@ -31,5 +36,29 @@ private:
     GLuint textureId;
 
     uint8_t textureType;
+
+};
+
+class CubeMap {
+
+public:
+
+    CubeMap(const char* texturePseudoPath);
+    ~CubeMap();
+
+    void bind(ShaderProgram *shaderProgram);
+    void unbind();
+
+private:
+
+    void fillTexturePathVector(const char* texturePseudoPath);
+
+    std::vector<std::string> texturePaths;
+
+    GLuint textureId;
+
+    int32_t textureWidth;
+    int32_t textureHeight;
+    int32_t bitsPerPixel;
 
 };

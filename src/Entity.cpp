@@ -80,3 +80,44 @@ void Entity::updateModelMatrix() {
     modelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
 
 }
+
+
+
+Skybox::Skybox(Model *cubeModel, ShaderProgram *shaderProgram, const char *texturePseudoPath) 
+    :   cubeModel(cubeModel),
+        shaderProgram(shaderProgram),
+        cubeMap(texturePseudoPath),
+        vertexArray(cubeModel->getMesh(0)->getVertexArray()) {
+
+    // Empty
+
+}
+
+void Skybox::draw(glm::mat4 viewMatrix, glm::mat4 projectionMatrix) {
+
+    // To disable face culling first get current state
+    GLboolean active;
+    glGetBooleanv(GL_CULL_FACE_MODE, &active);
+    glDisable(GL_CULL_FACE);
+
+    glDepthMask(GL_FALSE);
+    shaderProgram->bind();
+
+    glm::mat4 viewProjectionMatrix = projectionMatrix * glm::mat4(glm::mat3(viewMatrix));
+
+    shaderProgram->setUniform("u_viewProjectionMatrix", viewProjectionMatrix);
+
+    cubeMap.bind(shaderProgram);
+    cubeModel->getMesh(0)->drawWithoutTextures(shaderProgram);
+    cubeMap.unbind();
+
+    shaderProgram->unbind();
+    glDepthMask(GL_TRUE);
+
+    // Restore face culling
+    if(active)
+        glEnable(GL_CULL_FACE);
+    else
+        glDisable(GL_CULL_FACE);
+
+}

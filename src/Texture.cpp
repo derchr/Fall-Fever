@@ -23,16 +23,13 @@ Texture::Texture(const char* texturePath, uint8_t textureType) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 
-    if(textureBuffer) {
-
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureBuffer);
-        //glGenerateMipmap(GL_TEXTURE_2D);
-
-    } else {
-
+    if(!textureBuffer) {
         std::cout << "[Warning] Texture " << texturePath << " not found!" << std::endl;
-
+        return;
     }
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureBuffer);
+    //glGenerateMipmap(GL_TEXTURE_2D);
 
     stbi_image_free(textureBuffer);
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -75,4 +72,73 @@ void Texture::bind(uint8_t textureUnit, ShaderProgram* shaderProgram, uint8_t te
 
 void Texture::unbind() {
     glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+
+
+CubeMap::CubeMap(const char* texturePseudoPath) {
+
+    // Reserve space in vector so that elements can be accessed explicitly.
+    texturePaths.resize(CUBEMAP_FACES_NUM_ITEMS);
+    fillTexturePathVector(texturePseudoPath);
+
+    stbi_set_flip_vertically_on_load(0);
+
+    glGenTextures(1, &textureId);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
+
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);    
+
+    for(unsigned int i = 0; i < CUBEMAP_FACES_NUM_ITEMS; i++) {
+
+        auto *textureBuffer = stbi_load(texturePaths[i].c_str(), &textureWidth, &textureHeight, &bitsPerPixel, STBI_rgb_alpha);
+
+        if(!textureBuffer) {
+            std::cout << "[Warning] CubeMap Texture " << texturePaths[i].c_str() << " not found!" << std::endl;
+            return;
+        }
+
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA8, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureBuffer);
+        
+        stbi_image_free(textureBuffer);
+
+    }
+
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
+}
+
+CubeMap::~CubeMap() {
+    glDeleteTextures(1, &textureId);
+}
+
+void CubeMap::bind(ShaderProgram *shaderProgram) {
+    std::string uniformName = "u_skybox";
+
+    shaderProgram->setUniform(uniformName.c_str(), 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
+}
+
+void CubeMap::unbind() {
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+}
+
+void CubeMap::fillTexturePathVector(const char* texturePseudoPath) {
+
+    for(unsigned int i = 0; i < CUBEMAP_FACES_NUM_ITEMS; i++) {
+
+        texturePaths[cm_front]  = std::string(texturePseudoPath) + "front.png";
+        texturePaths[cm_back]   = std::string(texturePseudoPath) + "back.png";
+        texturePaths[cm_top]    = std::string(texturePseudoPath) + "top.png";
+        texturePaths[cm_bottom] = std::string(texturePseudoPath) + "bottom.png";
+        texturePaths[cm_left]   = std::string(texturePseudoPath) + "left.png";
+        texturePaths[cm_right]  = std::string(texturePseudoPath) + "right.png";
+
+    }
+
 }

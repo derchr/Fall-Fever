@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Model.h"
+#include "Texture.h"
 #include "ShaderProgram.h"
 
 #include <glm/glm.hpp>
@@ -46,6 +47,26 @@ private:
 
     glm::mat4 modelMatrix = glm::mat4(1.0f);
 
-    ShaderProgram* shaderProgram;
+    ShaderProgram *shaderProgram;
+
+};
+
+class Skybox {
+
+public:
+
+    Skybox(Model *cubeModel, ShaderProgram *shaderProgram, const char *texturePseudoPath);
+    ~Skybox() = default;
+
+    void draw(glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
+
+private:
+
+    Model *cubeModel;
+    ShaderProgram *shaderProgram;
+
+    CubeMap cubeMap;
+
+    VertexArray *vertexArray;
 
 };

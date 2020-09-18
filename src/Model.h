@@ -14,6 +14,8 @@ public:
 
     void draw(ShaderProgram *shaderProgram);
 
+    Mesh * getMesh(unsigned int index) { return meshes[index]; }
+
 
 private:
 

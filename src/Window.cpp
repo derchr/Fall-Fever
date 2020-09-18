@@ -9,7 +9,7 @@
 Window::Window() {
     width = INIT_WINDOW_WIDTH; height = INIT_WINDOW_HEIGHT;
 
-    window = glfwCreateWindow(width, height, "Fall-Fever", NULL, NULL);
+    window = glfwCreateWindow(width, height, "OpenGL", NULL, NULL);
     if(!window) {
         std::cout << "Failed to create window" << std::endl;
     }

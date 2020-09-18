@@ -20,6 +20,8 @@ public:
     void lookAtTarget(glm::vec3 target);
     void lookForward();
     
+    glm::mat4 getView() { return viewMatrix; }
+    glm::mat4 getProj() { return projectionMatrix; }
     glm::mat4 getViewProj() { return viewProjectionMatrix; }
     glm::vec3 getPosition() { return position; }
     glm::vec3 getDirection() { return frontVec; }

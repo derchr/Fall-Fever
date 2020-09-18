@@ -15,6 +15,9 @@ public:
     ~Mesh() = default;
 
     void draw(ShaderProgram *shaderProgram);
+    void drawWithoutTextures(ShaderProgram *shaderProgram);
+
+    VertexArray * getVertexArray() { return &vertexArray; }
 
 private:
 
