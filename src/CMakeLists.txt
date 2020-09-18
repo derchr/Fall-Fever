@@ -4,7 +4,7 @@ add_executable(Fall-Fever
     Window.cpp
     EventHandler.cpp
     ShaderProgram.cpp
-    VertexBuffer.cpp
+    VertexArray.cpp
     Texture.cpp
     Camera.cpp
     Mesh.cpp

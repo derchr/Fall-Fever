@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "ShaderProgram.h"
-#include "VertexBuffer.h"
+#include "VertexArray.h"
 #include "Texture.h"
 #include "defines.h"
 
@@ -21,7 +21,7 @@ private:
     uint32_t numElements;
     std::vector<Texture*> textures;
 
-    VertexBuffer vertexBuffer;
+    VertexArray vertexArray;
 
     void setupMesh();
 

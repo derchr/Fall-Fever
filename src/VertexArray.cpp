@@ -1,15 +1,15 @@
 #include <cstddef>
 
-#include "VertexBuffer.h"
+#include "VertexArray.h"
 #include "defines.h"
 
-VertexBuffer::VertexBuffer(void *vertexData, void *indexData, uint32_t numVertices, uint32_t numIndices) {
+VertexArray::VertexArray(void *vertexData, void *indexData, uint32_t numVertices, uint32_t numIndices) {
 
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
     
-    glGenBuffers(1, &bufferId);
-    glBindBuffer(GL_ARRAY_BUFFER, bufferId);
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, numVertices * sizeof(Vertex), vertexData, GL_STATIC_DRAW);
 
     glGenBuffers(1, &EBO);
@@ -32,14 +32,14 @@ VertexBuffer::VertexBuffer(void *vertexData, void *indexData, uint32_t numVertic
     glBindVertexArray(0);
 }
 
-VertexBuffer::~VertexBuffer() {
-    glDeleteBuffers(1, &bufferId);
+VertexArray::~VertexArray() {
+    glDeleteBuffers(1, &VBO);
 }
 
-void VertexBuffer::bind() {
+void VertexArray::bind() {
     glBindVertexArray(VAO);
 }
 
-void VertexBuffer::unbind() {
+void VertexArray::unbind() {
     glBindVertexArray(0);
 }

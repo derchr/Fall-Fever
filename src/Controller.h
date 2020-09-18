@@ -6,7 +6,6 @@
 #include "EventHandler.h"
 #include "Camera.h"
 #include "ShaderProgram.h"
-#include "VertexBuffer.h"
 #include "Entity.h"
 #include "defines.h"
 

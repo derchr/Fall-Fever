@@ -3,7 +3,7 @@
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, std::vector<Texture*> textures)
     : numElements(indices.size()),
       textures(textures),
-      vertexBuffer(static_cast<void*>(vertices.data()), static_cast<void*>(indices.data()), vertices.size(), indices.size()) {
+      vertexArray(static_cast<void*>(vertices.data()), static_cast<void*>(indices.data()), vertices.size(), indices.size()) {
 
     // Empty...
 
@@ -25,9 +25,9 @@ void Mesh::draw(ShaderProgram *shaderProgram) {
     }
     
     // Draw elements
-    vertexBuffer.bind();
+    vertexArray.bind();
     glDrawElements(GL_TRIANGLES, numElements, GL_UNSIGNED_INT, 0);
-    vertexBuffer.unbind();
+    vertexArray.unbind();
 
     // Unbind all textures
     for(auto it = textures.begin(); it != textures.end(); it++) {
