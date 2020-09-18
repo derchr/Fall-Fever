@@ -33,6 +33,9 @@ Window::Window() {
     glFrontFace(GL_CW);
     glCullFace(GL_FRONT);
 
+    // Enable multisampling (a bit redundant because most graphics drivers do this automatically)
+    glEnable(GL_MULTISAMPLE);
+
     // Disable mouse cursor
     #ifdef _DEBUG
     mouseCatched = false;
