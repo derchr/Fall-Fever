@@ -166,8 +166,8 @@ void computeShading(
     float diffuseShading = max(dot(normal, lightDir), 0.0f);
 
     // Specular shading
-    vec3 reflectDir = reflect(-lightDir, normal);
-    float specularShading = pow(max(dot(viewDir, reflectDir), 0.0f), u_material.shininess);
+    vec3 halfwayDir = normalize(lightDir + viewDir);
+    float specularShading = pow(max(dot(normal, halfwayDir), 0.0f), u_material.shininess);
     
     vec4 diffuseTex = texture(u_material.texture_diffuse0, v_texCoord);
     vec4 specularTex = texture(u_material.texture_specular0, v_texCoord);
