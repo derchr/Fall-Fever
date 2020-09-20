@@ -45,9 +45,9 @@ void DirectionalLight::update() {
 
     shaderProgram->setUniform("u_directionalLight.isActive", isActive);
     shaderProgram->setUniform("u_directionalLight.direction", direction);
-    shaderProgram->setUniform("u_directionalLight.ambient", ambientColor * 0.25f);
-    shaderProgram->setUniform("u_directionalLight.diffuse", diffuseColor * 0.25f);
-    shaderProgram->setUniform("u_directionalLight.specular", specularColor * 0.25f);
+    shaderProgram->setUniform("u_directionalLight.ambient", ambientColor);
+    shaderProgram->setUniform("u_directionalLight.diffuse", diffuseColor);
+    shaderProgram->setUniform("u_directionalLight.specular", specularColor);
 
     shaderProgram->unbind();
 

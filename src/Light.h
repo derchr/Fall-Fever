@@ -19,7 +19,7 @@ public:
     void setColor(glm::vec3 color) {
         lightColor = color;
         diffuseColor = lightColor * glm::vec3(1.0f);
-        ambientColor = diffuseColor * glm::vec3(0.1f);
+        ambientColor = diffuseColor * glm::vec3(0.002f);
         specularColor = lightColor * glm::vec3(1.0f);
         update();
     }
@@ -28,6 +28,8 @@ public:
         this->shaderProgram = shaderProgram;
         update();
     }
+
+    glm::vec3 getColor() { return lightColor; }
 
 protected:
 
@@ -57,6 +59,8 @@ public:
         this->position = position;
         update();
     }
+
+    void setParameters(float K_c, float K_l, float K_q) { this->K_c = K_c; this->K_l = K_l; this->K_q = K_q; }
 
     void setId(unsigned int id) { lightId = id; }
 
@@ -90,8 +94,6 @@ private:
 
     void update() override;
 
-    bool isActive = true;
-
-    glm::vec3 direction = glm::vec3(-0.2f, -1.0f, -0.3f);
+    glm::vec3 direction;
 
 };

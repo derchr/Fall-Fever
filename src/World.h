@@ -21,6 +21,8 @@ public:
 
     std::vector<Entity> * getEntities() { return &entities; }
 
+    PointLight * getPointLights() { return pointLights; }
+
     void draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition);
 
 private:

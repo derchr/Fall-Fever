@@ -109,7 +109,7 @@ vec3 directionalLightContribution(DirectionalLight light, vec3 normal, vec3 view
     vec3 ambient, diffuse, specular;
     computeShading(light.ambient, light.diffuse, light.specular, lightDir, viewDir, normal, ambient, diffuse, specular);
 
-    return (ambient + diffuse + specular) * 0.5f;
+    return (ambient + diffuse + specular) * 1.0f;
 }
 
 vec3 pointLightContribution(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
@@ -181,6 +181,7 @@ void computeShading(
 float computeAttenuation(vec3 lightPos, vec3 fragPos, float K_c, float K_l, float K_q) {
 
     float distanceLightFragment = length(lightPos - fragPos);
-    return 1.0f / (K_c + K_l * distanceLightFragment + K_q * distanceLightFragment * distanceLightFragment);
+    //return 1.0f / (K_c + K_l * distanceLightFragment + K_q * distanceLightFragment * distanceLightFragment);#
+    return 1.0f / (K_q * distanceLightFragment * distanceLightFragment);
 
 }

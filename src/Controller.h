@@ -8,6 +8,8 @@
 #include "ShaderProgram.h"
 #include "Entity.h"
 #include "defines.h"
+#include "Light.h"
+#include "Framebuffer.h"
 
 
 class Controller {
@@ -26,11 +28,13 @@ private:
 
     void updateWindowSize();
 
-    void renderImGui(std::vector<Entity> *entites, glm::vec3 *lightColor, bool *rotateLightSource);
+    void renderImGui(std::vector<Entity> *entites, PointLight *pointLight, glm::vec3 *lightColor, bool *rotateLightSource);
 
     Window *gameWindow;
     EventHandler *gameEventHandler;
     Camera *camera;
+
+    Framebuffer *pp_framebuffer;
 
     const uint16_t MAX_FPS = 60;
     double deltaTime;
