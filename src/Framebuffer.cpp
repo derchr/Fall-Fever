@@ -2,7 +2,9 @@
 
 #include <cstddef>
 
-Framebuffer::Framebuffer(uint32_t width, uint32_t height) {
+Framebuffer::Framebuffer(uint32_t width, uint32_t height, ShaderProgram *shaderProgram) {
+
+    this->shaderProgram = shaderProgram;
 
     glGenFramebuffers(1, &FBO);
 
@@ -36,4 +38,20 @@ void Framebuffer::bind() {
 
 void Framebuffer::unbind() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Framebuffer::render() {
+        shaderProgram->bind();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, getTextureId());
+        GLint location = glGetUniformLocation(shaderProgram->getShaderProgramId(), "u_texture");
+        glUniform1i(location, 0);
+
+        // A VAO is necessary although no data is stored in it
+        GLuint temp_vao;
+        glGenVertexArrays(1, &temp_vao);
+        glBindVertexArray(temp_vao);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glBindVertexArray(0);
+        shaderProgram->unbind();
 }
