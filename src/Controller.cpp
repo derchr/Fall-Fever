@@ -155,11 +155,16 @@ void Controller::run() {
         glBindTexture(GL_TEXTURE_2D, pp_framebuffer->getTextureId());
         GLint location = glGetUniformLocation(postProcessingProgram.getShaderProgramId(), "u_texture");
         glUniform1i(location, 0);
+        // Disable wireframe mode
+        GLint wireframe;
+        glGetIntegerv(GL_POLYGON_MODE, &wireframe);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         GLuint temp_vao;
         glGenVertexArrays(1, &temp_vao);
         glBindVertexArray(temp_vao);
         glDrawArrays(GL_TRIANGLES, 0, 3);
         glBindVertexArray(0);
+        glPolygonMode(GL_FRONT_AND_BACK, wireframe);
         postProcessingProgram.unbind();
 
         #ifdef _DEBUG

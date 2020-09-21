@@ -108,7 +108,7 @@ void Skybox::draw(glm::mat4 viewMatrix, glm::mat4 projectionMatrix) {
     shaderProgram->setUniform("u_viewProjectionMatrix", viewProjectionMatrix);
 
     cubeMap.bind(shaderProgram);
-    cubeModel->getMesh(0)->drawWithoutTextures(shaderProgram);
+    cubeModel->getMesh(0)->drawWithoutTextures();
     cubeMap.unbind();
 
     shaderProgram->unbind();
