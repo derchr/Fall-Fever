@@ -1,6 +1,6 @@
 #version 330 core
 
-const float GAMMA = 2.0f;
+const float GAMMA = 2.2f;
 
 layout(location = 0) out vec4 f_color;
 

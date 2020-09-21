@@ -20,7 +20,7 @@ World::World(ShaderProgram *shaderProgram)
 
     // This will be removed in future when gloss maps are implemented
     shaderProgram->bind();
-    shaderProgram->setUniform("u_material.shininess", 64.0f);
+    shaderProgram->setUniform("u_material.shininess", 100.0f);
     shaderProgram->unbind();
 
 }

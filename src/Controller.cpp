@@ -115,7 +115,7 @@ void Controller::run() {
     
     camera->translate(glm::vec3(0.0f, 1.5f, 5.0f));
 
-    pp_framebuffer = new Framebuffer(INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT);
+    pp_framebuffer = new Framebuffer(INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT, &postProcessingProgram);
 
     // This is the game loop
     while(!glfwWindowShouldClose(gameWindow->getGLFWwindow())) {
@@ -150,22 +150,7 @@ void Controller::run() {
         world.draw(camera->getViewProj(), camera->getPosition());
         pp_framebuffer->unbind();
 
-        postProcessingProgram.bind();
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, pp_framebuffer->getTextureId());
-        GLint location = glGetUniformLocation(postProcessingProgram.getShaderProgramId(), "u_texture");
-        glUniform1i(location, 0);
-        // Disable wireframe mode
-        GLint wireframe;
-        glGetIntegerv(GL_POLYGON_MODE, &wireframe);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        GLuint temp_vao;
-        glGenVertexArrays(1, &temp_vao);
-        glBindVertexArray(temp_vao);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-        glBindVertexArray(0);
-        glPolygonMode(GL_FRONT_AND_BACK, wireframe);
-        postProcessingProgram.unbind();
+        pp_framebuffer->render();
 
         #ifdef _DEBUG
         renderImGui(world.getEntities(), &world.getPointLights()[0], &lightColor, &rotateLightSource);
@@ -175,7 +160,7 @@ void Controller::run() {
             
         // Update window size
         if(gameWindow->checkWindowWasResized())
-            updateWindowSize();
+            updateWindowSize(&postProcessingProgram);
 
         // Check events, handle input
         gameEventHandler->handleEvents();
@@ -216,12 +201,12 @@ void Controller::error_callback(int error, const char* description) {
     fprintf(stderr, "Error: %s\n", description);
 }
 
-void Controller::updateWindowSize() {
+void Controller::updateWindowSize(ShaderProgram *pp_program) {
     camera->updateAspectRatio(gameWindow->getWindowAspectRatio());
     gameEventHandler->setFirstMouseInput(1);
 
     delete pp_framebuffer;
-    pp_framebuffer = new Framebuffer(gameWindow->getWindowWidth(), gameWindow->getWindowHeight());
+    pp_framebuffer = new Framebuffer(gameWindow->getWindowWidth(), gameWindow->getWindowHeight(), pp_program);
 }
 
 #ifdef _DEBUG

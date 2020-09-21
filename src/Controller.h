@@ -26,7 +26,7 @@ private:
 
     void limit_framerate();
 
-    void updateWindowSize();
+    void updateWindowSize(ShaderProgram *pp_program);
 
     void renderImGui(std::vector<Entity> *entites, PointLight *pointLight, glm::vec3 *lightColor, bool *rotateLightSource);
 
