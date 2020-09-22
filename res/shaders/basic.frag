@@ -35,8 +35,6 @@ struct PointLight {
     bool isActive;
     vec3 position;
     
-    float K_c;
-    float K_l;
     float K_q;
 
     vec3 ambient;
@@ -54,8 +52,6 @@ struct SpotLight {
     float innerCutOff;
     float outerCutOff;
 
-    float K_c;
-    float K_l;
     float K_q;
 
     vec3 ambient;
@@ -77,7 +73,7 @@ void computeShading(
     out vec3 ambient, out vec3 diffuse, out vec3 specular
 );
 
-float computeAttenuation(vec3 lightPos, vec3 fragPos, float K_c, float K_l, float K_q);
+float computeAttenuation(vec3 lightPos, vec3 fragPos, float K_q);
 
 void main() {
 
@@ -123,7 +119,7 @@ vec3 pointLightContribution(PointLight light, vec3 normal, vec3 fragPos, vec3 vi
     vec3 ambient, diffuse, specular;
     computeShading(light.ambient, light.diffuse, light.specular, lightDir, viewDir, normal, ambient, diffuse, specular);
 
-    float attenuation = computeAttenuation(light.position, fragPos, light.K_c, light.K_l, light.K_q);
+    float attenuation = computeAttenuation(light.position, fragPos, light.K_q);
     ambient *= attenuation;
     diffuse *= attenuation;
     specular *= attenuation;
@@ -142,7 +138,7 @@ vec3 spotLightContribution(SpotLight light, vec3 normal, vec3 fragPos, vec3 view
     vec3 ambient, diffuse, specular;
     computeShading(light.ambient, light.diffuse, light.specular, lightDir, viewDir, normal, ambient, diffuse, specular);
 
-    float attenuation = computeAttenuation(light.position, fragPos, light.K_c, light.K_l, light.K_q);
+    float attenuation = computeAttenuation(light.position, fragPos, light.K_q);
     ambient *= attenuation;
     diffuse *= attenuation;
     specular *= attenuation;
@@ -178,10 +174,10 @@ void computeShading(
 
 }
 
-float computeAttenuation(vec3 lightPos, vec3 fragPos, float K_c, float K_l, float K_q) {
+float computeAttenuation(vec3 lightPos, vec3 fragPos, float K_q) {
 
     float distanceLightFragment = length(lightPos - fragPos);
-    //return 1.0f / (K_c + K_l * distanceLightFragment + K_q * distanceLightFragment * distanceLightFragment);#
+
     return 1.0f / (K_q * distanceLightFragment * distanceLightFragment);
 
 }

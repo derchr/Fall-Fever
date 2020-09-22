@@ -81,6 +81,8 @@ void Controller::run() {
     ShaderProgram skyboxProgram("res/shaders/skybox.vert", "res/shaders/skybox.frag");
     ShaderProgram postProcessingProgram("res/shaders/postprocessing.vert", "res/shaders/postprocessing.frag");
 
+    updateExposure(&postProcessingProgram);
+
     Model model_backpack("res/models/backpack.ffo");
     //Model model_plant("res/models/plant.ffo");
     //Model model_container("res/models/container.ffo");
@@ -126,15 +128,15 @@ void Controller::run() {
         // ...
         static bool rotateLightSource = 0;
         if(rotateLightSource) {
-            float radius = 25.0;
+            float radius = 4.0;
             glm::vec3 newPos = glm::vec3(-cos(glfwGetTime()*0.5), 0.5f, sin(glfwGetTime()*0.5)) * radius;
             world.getEntities()->operator[](1).setPosition(newPos);
         }
-        static glm::vec3 lightColor = glm::vec3(1.f);
-        world.updatePointLight(0, true, world.getEntities()->operator[](1).getPosition(), lightColor);
-        world.updateDirectionalLight(true, glm::vec3(-0.2f, -1.0f, -0.3f), lightColor * 0.001f);
+        static glm::vec3 lightColor = glm::vec3(1.f); static float intensity = 1.0f;
+        world.updatePointLight(0, true, world.getEntities()->operator[](1).getPosition(), lightColor * intensity);
+        world.updateDirectionalLight(true, glm::vec3(-0.2f, -1.0f, -0.3f), lightColor * 0.1f);
         lightProgram.bind();
-        lightProgram.setUniform("v_lightColor", lightColor);
+        lightProgram.setUniform("v_lightColor", lightColor * 100.0f);
         lightProgram.unbind();
 
         // Render and buffer swap
@@ -146,6 +148,10 @@ void Controller::run() {
         camera->lookForward();
         camera->updateVPM();
 
+        // Calc shadows
+        // ...
+
+        glViewport(0, 0, gameWindow->getWindowWidth(), gameWindow->getWindowHeight());
         skybox.draw(camera->getView(), camera->getProj());
         world.draw(camera->getViewProj(), camera->getPosition());
         pp_framebuffer->unbind();
@@ -153,7 +159,7 @@ void Controller::run() {
         pp_framebuffer->render();
 
         #ifdef _DEBUG
-        renderImGui(world.getEntities(), &world.getPointLights()[0], &lightColor, &rotateLightSource);
+        renderImGui(world.getEntities(), &world.getPointLights()[0], &lightColor, &rotateLightSource, &postProcessingProgram, &intensity);
         #endif
 
         glfwSwapBuffers(gameWindow->getGLFWwindow());
@@ -209,8 +215,14 @@ void Controller::updateWindowSize(ShaderProgram *pp_program) {
     pp_framebuffer = new Framebuffer(gameWindow->getWindowWidth(), gameWindow->getWindowHeight(), pp_program);
 }
 
+void Controller::updateExposure(ShaderProgram *shaderProgram) {
+    shaderProgram->bind();
+    shaderProgram->setUniform("u_exposure", exposure);
+    shaderProgram->unbind();
+}
+
 #ifdef _DEBUG
-void Controller::renderImGui(std::vector<Entity> *entites, PointLight *pointLight, glm::vec3 *lightColor, bool *rotateLightSource) {
+void Controller::renderImGui(std::vector<Entity> *entites, PointLight *pointLight, glm::vec3 *lightColor, bool *rotateLightSource, ShaderProgram *postProcessingProgram, float *intensity) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
@@ -218,7 +230,7 @@ void Controller::renderImGui(std::vector<Entity> *entites, PointLight *pointLigh
 
     // render your GUI
     ImGui::Begin("Debug Utils");
-    ImGui::Text("Dragon");
+    ImGui::Text("Object");
     static float rotation = 0.0;
     ImGui::SliderFloat("Rotation", &rotation, 0, 2 * M_PI);
     static float translation[] = {0.0f, 0.0f, 0.0f};
@@ -232,20 +244,23 @@ void Controller::renderImGui(std::vector<Entity> *entites, PointLight *pointLigh
 
     // color picker
     ImGui::Text("\nLight Source");
-    ImGui::Text("Attenuation");
-    static float K_c = 1.0f, K_l = 0.09f, K_q = 0.062f;
-    ImGui::SliderFloat("Constant Term", &K_c, 0, 1.0f*5);
-    ImGui::SliderFloat("Linear Term", &K_l, 0, 0.09f*5);
-    ImGui::SliderFloat("Quadratic Term", &K_q, 0, 0.032f*10);
+    static float K_q = 0.062f;
+    ImGui::SliderFloat("Attenuation Parameter", &K_q, 0, 1.5f);
 
-    pointLight->setParameters(K_c, K_l, K_q);
+    updateExposure(postProcessingProgram);
+    pointLight->setParameters(K_q);
 
     static float color[4] = {1.0f, 1.0f, 1.0f, 1.0f};
-    ImGui::Text("Color");
+
+    ImGui::SliderFloat("Intensity", intensity, 0, 50.f);
+
     ImGui::ColorEdit3("Color", color);
     lightColor->x = color[0];
     lightColor->y = color[1];
     lightColor->z = color[2];
+
+    ImGui::Text("\nMiscellaneous");
+    ImGui::SliderFloat("Exposure", &exposure, 0, 5.0f);
 
     ImGui::Checkbox("Rotate Lightsource", rotateLightSource);
 

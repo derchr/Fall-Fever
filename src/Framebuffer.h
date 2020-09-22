@@ -27,3 +27,19 @@ private:
     ShaderProgram *shaderProgram;
 
 };
+
+
+class DepthMap {
+
+public:
+
+    DepthMap(int resolution);
+
+    void bind();
+    void unbind();
+
+private:
+
+    GLuint depthMapFBO;
+
+};

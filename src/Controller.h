@@ -27,8 +27,9 @@ private:
     void limit_framerate();
 
     void updateWindowSize(ShaderProgram *pp_program);
+    void updateExposure(ShaderProgram *shaderProgram);
 
-    void renderImGui(std::vector<Entity> *entites, PointLight *pointLight, glm::vec3 *lightColor, bool *rotateLightSource);
+    void renderImGui(std::vector<Entity> *entites, PointLight *pointLight, glm::vec3 *lightColor, bool *rotateLightSource, ShaderProgram *postProcessingProgram, float *intensity);
 
     Window *gameWindow;
     EventHandler *gameEventHandler;
@@ -40,5 +41,7 @@ private:
     double deltaTime;
 
     bool wireFrameMode = 0;
+
+    float exposure = 1.0f;
 
 };

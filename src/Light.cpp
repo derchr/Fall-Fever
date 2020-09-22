@@ -18,8 +18,6 @@ void PointLight::update() {
     shaderProgram->setUniform((_getStructMemberName() + "ambient").c_str(), ambientColor);
     shaderProgram->setUniform((_getStructMemberName() + "diffuse").c_str(), diffuseColor);
     shaderProgram->setUniform((_getStructMemberName() + "specular").c_str(), specularColor);
-    shaderProgram->setUniform((_getStructMemberName() + "K_c").c_str(), K_c);
-    shaderProgram->setUniform((_getStructMemberName() + "K_l").c_str(), K_l);
     shaderProgram->setUniform((_getStructMemberName() + "K_q").c_str(), K_q);
 
     shaderProgram->unbind();

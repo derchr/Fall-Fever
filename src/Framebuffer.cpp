@@ -41,17 +41,56 @@ void Framebuffer::unbind() {
 }
 
 void Framebuffer::render() {
-        shaderProgram->bind();
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, getTextureId());
-        GLint location = glGetUniformLocation(shaderProgram->getShaderProgramId(), "u_texture");
-        glUniform1i(location, 0);
 
-        // A VAO is necessary although no data is stored in it
-        GLuint temp_vao;
-        glGenVertexArrays(1, &temp_vao);
-        glBindVertexArray(temp_vao);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-        glBindVertexArray(0);
-        shaderProgram->unbind();
+    // Disable wireframe mode
+    GLint wireframe;
+    glGetIntegerv(GL_POLYGON_MODE, &wireframe);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+    shaderProgram->bind();
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, getTextureId());
+    GLint location = glGetUniformLocation(shaderProgram->getShaderProgramId(), "u_texture");
+    glUniform1i(location, 0);
+
+    // A VAO is necessary although no data is stored in it
+    GLuint temp_vao;
+    glGenVertexArrays(1, &temp_vao);
+    glBindVertexArray(temp_vao);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glBindVertexArray(0);
+
+    glPolygonMode(GL_FRONT_AND_BACK, wireframe);
+    shaderProgram->unbind();
+}
+
+
+
+DepthMap::DepthMap(int resolution) {
+
+    glGenFramebuffers(1, &depthMapFBO);
+
+    unsigned int depthMap;
+    glGenTextures(1, &depthMap);
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, resolution, resolution, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+}
+
+void DepthMap::bind() {
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+}
+
+void DepthMap::unbind() {
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

@@ -60,7 +60,7 @@ public:
         update();
     }
 
-    void setParameters(float K_c, float K_l, float K_q) { this->K_c = K_c; this->K_l = K_l; this->K_q = K_q; }
+    void setParameters(float K_q) { this->K_q = K_q; }
 
     void setId(unsigned int id) { lightId = id; }
 
@@ -72,8 +72,7 @@ private:
     unsigned int lightId;
 
     glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
-    float K_c = 1.0f;
-    float K_l = 0.09f;
+    
     float K_q = 0.032f;
 
 };

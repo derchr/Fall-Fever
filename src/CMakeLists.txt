@@ -13,6 +13,7 @@ add_executable(Fall-Fever
     Light.cpp
     World.cpp
     Framebuffer.cpp
+    Shadows.cpp
 )
 
 target_link_libraries(
