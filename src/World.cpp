@@ -79,16 +79,21 @@ void World::calculateShadows(ShaderProgram *p_shaderProgram) {
 
     glClear(GL_DEPTH_BUFFER_BIT);
     // ConfigureShaderAndMatrices();
-    float near_plane = 0.1f, far_plane = 7.5f;
+    float near_plane = 1.0f, far_plane = 15.0f;
     glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-    glm::mat4 lightView = glm::lookAt(-glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3( 0.0f, 0.0f,  0.0f), glm::vec3( 0.0f, 1.0f,  0.0f));
+    glm::mat4 lightView = glm::lookAt(-5.0f * glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3( 0.0f, 0.0f,  0.0f), glm::vec3( 0.0f, 1.0f,  0.0f));
     glm::mat4 lightViewProjectionMatrix = lightProjection * lightView;
+
+    // Switch face culling (Peter panning)
+    glCullFace(GL_BACK);
 
     // Draw scene from light perspective
     // Draw all entities
     for(auto it = entities.begin(); it != entities.end(); it++) {
         it->drawShadows(lightViewProjectionMatrix, p_shaderProgram);
     }
+
+    glCullFace(GL_FRONT);
 
     depthMapFBO.unbind();
 

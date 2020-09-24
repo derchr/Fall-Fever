@@ -40,7 +40,7 @@ private:
     //SpotLight spotLight;
 
     // Shadows
-    const int SHADOW_RES = 1024;
+    const int SHADOW_RES = 4096;
     DepthMap depthMapFBO;
 
 };
