@@ -80,6 +80,7 @@ void Controller::run() {
     ShaderProgram lightProgram("res/shaders/light.vert", "res/shaders/light.frag");
     ShaderProgram skyboxProgram("res/shaders/skybox.vert", "res/shaders/skybox.frag");
     ShaderProgram postProcessingProgram("res/shaders/postprocessing.vert", "res/shaders/postprocessing.frag");
+    ShaderProgram shadowDepthProgram("res/shaders/shadowDepth.vert", "res/shaders/shadowDepth.frag");
 
     updateExposure(&postProcessingProgram);
 
@@ -126,13 +127,14 @@ void Controller::run() {
 
         // Update game
         // ...
-        static bool rotateLightSource = 0;
+        static bool rotateLightSource = false;
         if(rotateLightSource) {
             float radius = 4.0;
             glm::vec3 newPos = glm::vec3(-cos(glfwGetTime()*0.5), 0.5f, sin(glfwGetTime()*0.5)) * radius;
             world.getEntities()->operator[](1).setPosition(newPos);
         }
-        static glm::vec3 lightColor = glm::vec3(1.f); static float intensity = 1.0f;
+        static glm::vec3 lightColor = glm::vec3(1.f);
+        static float intensity = 20.0f;
         world.updatePointLight(0, true, world.getEntities()->operator[](1).getPosition(), lightColor * intensity);
         world.updateDirectionalLight(true, glm::vec3(-0.2f, -1.0f, -0.3f), lightColor * 0.1f);
         lightProgram.bind();
@@ -154,12 +156,16 @@ void Controller::run() {
         glViewport(0, 0, gameWindow->getWindowWidth(), gameWindow->getWindowHeight());
         skybox.draw(camera->getView(), camera->getProj());
         world.draw(camera->getViewProj(), camera->getPosition());
-        pp_framebuffer->unbind();
 
+        static bool drawShadows = false;
+        if(drawShadows)
+            world.calculateShadows(&shadowDepthProgram);
+
+        pp_framebuffer->unbind();
         pp_framebuffer->render();
 
         #ifdef _DEBUG
-        renderImGui(world.getEntities(), &world.getPointLights()[0], &lightColor, &rotateLightSource, &postProcessingProgram, &intensity);
+        renderImGui(world.getEntities(), &world.getPointLights()[0], &lightColor, &rotateLightSource, &postProcessingProgram, &intensity, &drawShadows);
         #endif
 
         glfwSwapBuffers(gameWindow->getGLFWwindow());
@@ -222,7 +228,7 @@ void Controller::updateExposure(ShaderProgram *shaderProgram) {
 }
 
 #ifdef _DEBUG
-void Controller::renderImGui(std::vector<Entity> *entites, PointLight *pointLight, glm::vec3 *lightColor, bool *rotateLightSource, ShaderProgram *postProcessingProgram, float *intensity) {
+void Controller::renderImGui(std::vector<Entity> *entites, PointLight *pointLight, glm::vec3 *lightColor, bool *rotateLightSource, ShaderProgram *postProcessingProgram, float *intensity, bool *drawShadows) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
@@ -244,7 +250,7 @@ void Controller::renderImGui(std::vector<Entity> *entites, PointLight *pointLigh
 
     // color picker
     ImGui::Text("\nLight Source");
-    static float K_q = 0.062f;
+    static float K_q = 1.0f;
     ImGui::SliderFloat("Attenuation Parameter", &K_q, 0, 1.5f);
 
     updateExposure(postProcessingProgram);
@@ -262,6 +268,7 @@ void Controller::renderImGui(std::vector<Entity> *entites, PointLight *pointLigh
     ImGui::Text("\nMiscellaneous");
     ImGui::SliderFloat("Exposure", &exposure, 0, 5.0f);
 
+    ImGui::Checkbox("Draw Shadows", drawShadows);
     ImGui::Checkbox("Rotate Lightsource", rotateLightSource);
 
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",

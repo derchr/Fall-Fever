@@ -15,6 +15,7 @@ public:
     ~Entity() = default;
 
     void draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition);
+    void drawShadows(glm::mat4 viewProjMatrix, ShaderProgram *p_shaderProgram);
 
     void translate(glm::vec3 vector);
     void rotate(glm::vec3 axis, float radians);

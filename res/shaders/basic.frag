@@ -5,6 +5,7 @@ layout(location = 0) out vec4 f_color;
 in vec3 v_normal;
 in vec2 v_texCoord;
 in vec3 v_fragmentPosition;
+in vec4 v_fragmentPositionLightSpace;
 
 struct Material {
     sampler2D texture_diffuse0;
@@ -63,6 +64,8 @@ uniform SpotLight u_spotLight;
 uniform mat3 u_normalMatrix;
 uniform vec3 u_viewPosition;
 
+uniform sampler2D u_texture_shadowMap;
+
 vec3 directionalLightContribution(DirectionalLight light, vec3 normal, vec3 viewDir);
 vec3 pointLightContribution(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 vec3 spotLightContribution(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
@@ -74,6 +77,8 @@ void computeShading(
 );
 
 float computeAttenuation(vec3 lightPos, vec3 fragPos, float K_q);
+
+float computeShadows(vec4 fragPosLightSpace);
 
 void main() {
 
@@ -87,6 +92,10 @@ void main() {
     for(int i = 0; i < NUM_POINT_LIGHTS; i++) {
         fragmentColor += pointLightContribution(u_pointLight[i], normal, v_fragmentPosition, viewDir);
     }
+
+    // This is not final: ambient lighting should not be affected of shadows.
+    float shadows = computeShadows(v_fragmentPositionLightSpace);
+    fragmentColor *= (1.0f - shadows);
 
     //fragmentColor += spotLightContribution(u_spotLight, normal, v_fragmentPosition, viewDir);
 
@@ -180,4 +189,21 @@ float computeAttenuation(vec3 lightPos, vec3 fragPos, float K_q) {
 
     return 1.0f / (K_q * distanceLightFragment * distanceLightFragment);
 
+}
+
+float computeShadows(vec4 fragPosLightSpace) {
+
+    // Perspective divide
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+
+    // Transform from [-1,1] to [0,1]
+    projCoords *= 0.5f;
+    projCoords += 0.5f;
+
+    float closestDepth = texture(u_texture_shadowMap, projCoords.xy).r;
+    float currentDepth = projCoords.z;
+
+    float shadow = currentDepth > closestDepth  ? 1.0 : 0.0;
+
+    return shadow;
 }

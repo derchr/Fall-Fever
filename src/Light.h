@@ -39,6 +39,7 @@ protected:
     ShaderProgram *shaderProgram;
 
     bool isActive = false;
+    bool shouldCastShadow = true;
 
     // Color
     glm::vec3 lightColor;

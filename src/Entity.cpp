@@ -32,6 +32,20 @@ void Entity::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition) {
 
 }
 
+void Entity::drawShadows(glm::mat4 viewProjMatrix, ShaderProgram *p_shaderProgram) {
+
+    p_shaderProgram->bind();
+
+    glm::mat4 modelViewProj = viewProjMatrix * modelMatrix;
+    shaderProgram->setUniform("u_modelViewProjMatrix", modelViewProj);
+
+    // Draw the model
+    model->drawWithoutTextures();
+
+    p_shaderProgram->unbind();
+
+}
+
 void Entity::translate(glm::vec3 vector) {
     position += vector;
     updateModelMatrix();

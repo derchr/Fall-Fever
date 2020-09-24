@@ -5,6 +5,8 @@
 #include "Light.h"
 #include "Camera.h"
 #include "Entity.h"
+#include "ShaderProgram.h"
+#include "Framebuffer.h"
 
 class World {
 
@@ -24,6 +26,7 @@ public:
     PointLight * getPointLights() { return pointLights; }
 
     void draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition);
+    void calculateShadows(ShaderProgram *shaderProgram);
 
 private:
 
@@ -31,8 +34,13 @@ private:
 
     std::vector<Entity> entities;
 
+    // Lights
     DirectionalLight directionalLight;
     PointLight pointLights[NUM_POINT_LIGHTS];
     //SpotLight spotLight;
+
+    // Shadows
+    const int SHADOW_RES = 1024;
+    DepthMap depthMapFBO;
 
 };

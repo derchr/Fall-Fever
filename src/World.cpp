@@ -7,7 +7,7 @@
 // constructors for Light and PointLight have only this reason to exist.
 
 World::World(ShaderProgram *shaderProgram)
-    : shaderProgram(shaderProgram) {
+    : shaderProgram(shaderProgram), depthMapFBO(SHADOW_RES) {
 
     // PointLights
     for(unsigned int i = 0; i < NUM_POINT_LIGHTS; i++) {
@@ -57,8 +57,55 @@ void World::updateDirectionalLight(bool active, glm::vec3 direction, glm::vec3 c
 
 void World::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition) {
 
+    // Draw all entities
     for(auto it = entities.begin(); it != entities.end(); it++) {
         it->draw(viewProjMatrix, viewPosition);
     }
+
+    // Calculate shadows
+    // calculateShadows();
+
+}
+
+void World::calculateShadows(ShaderProgram *p_shaderProgram) {
+
+    // Get old viewport dimensions to reset them later...
+    GLint VIEWPORT[4];
+    glGetIntegerv(GL_VIEWPORT, VIEWPORT);
+
+    glViewport(0, 0, SHADOW_RES, SHADOW_RES);
+
+    depthMapFBO.bind();
+
+    glClear(GL_DEPTH_BUFFER_BIT);
+    // ConfigureShaderAndMatrices();
+    float near_plane = 0.1f, far_plane = 7.5f;
+    glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+    glm::mat4 lightView = glm::lookAt(-glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3( 0.0f, 0.0f,  0.0f), glm::vec3( 0.0f, 1.0f,  0.0f));
+    glm::mat4 lightViewProjectionMatrix = lightProjection * lightView;
+
+    // Draw scene from light perspective
+    // Draw all entities
+    for(auto it = entities.begin(); it != entities.end(); it++) {
+        it->drawShadows(lightViewProjectionMatrix, p_shaderProgram);
+    }
+
+    depthMapFBO.unbind();
+
+    // Reset viewport size
+    glViewport(VIEWPORT[0], VIEWPORT[1], VIEWPORT[2], VIEWPORT[3]);
+
+    shaderProgram->bind();
+
+    // Send lightViewProjMatrix to basic shader
+    shaderProgram->setUniform("u_lightViewProjMatrix", lightViewProjectionMatrix);
+
+    // Send shadowMap to basic shader
+    const int textureUnit = TEXTURE_TYPE_NUM_ITEMS * 2;
+    shaderProgram->setUniform("u_texture_shadowMap", (int)textureUnit);
+    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glBindTexture(GL_TEXTURE_2D, depthMapFBO.getDepthMap());
+
+    shaderProgram->unbind();
 
 }

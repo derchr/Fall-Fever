@@ -33,13 +33,16 @@ class DepthMap {
 
 public:
 
-    DepthMap(int resolution);
+    DepthMap(int RESOLUTION);
 
     void bind();
     void unbind();
 
+    GLuint getDepthMap() { return depthMap; }
+
 private:
 
     GLuint depthMapFBO;
+    GLuint depthMap;
 
 };
