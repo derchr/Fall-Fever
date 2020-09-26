@@ -29,7 +29,7 @@ private:
     void updateWindowSize(ShaderProgram *pp_program);
     void updateExposure(ShaderProgram *shaderProgram);
 
-    void renderImGui(std::vector<Entity> *entites, PointLight *pointLight, glm::vec3 *lightColor, bool *rotateLightSource, ShaderProgram *postProcessingProgram, float *intensity, bool *drawShadows);
+    void renderImGui(std::vector<Entity> *entites, PointLight *pointLight, glm::vec3 *lightColor, bool *rotateEntity, bool *rotateLightSource, ShaderProgram *postProcessingProgram, float *intensity, bool *drawShadows);
 
     Window *gameWindow;
     EventHandler *gameEventHandler;

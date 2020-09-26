@@ -8,7 +8,8 @@ class ShaderProgram {
 
 public:
 
-    ShaderProgram(const char* vertexShaderPath, const char* framentShaderPath);
+    ShaderProgram(const char* vertexShaderPath, const char* fragmentShaderPath);
+    ShaderProgram(const char* vertexShaderPath, const char* geometryShaderPath, const char* fragmentShaderPath);
     ~ShaderProgram();
 
     void bind();
@@ -28,7 +29,6 @@ private:
 
     std::string parse(const char* filename);
     GLuint compile(std::string shaderSource, GLenum type);
-    GLuint createShader(const char* vertexShaderPath, const char* framentShaderPath);
 
     GLuint shaderProgramId;
 

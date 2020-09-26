@@ -33,7 +33,6 @@ public:
 
 protected:
 
-    Light() = default;
     Light(ShaderProgram *shaderProgram) : shaderProgram(shaderProgram) {}
 
     ShaderProgram *shaderProgram;
@@ -53,7 +52,6 @@ class PointLight : public Light {
 
 public:
 
-    PointLight() = default;
     PointLight(ShaderProgram *shaderProgram);
 
     void setPosition(glm::vec3 position) { 
@@ -64,6 +62,8 @@ public:
     void setParameters(float K_q) { this->K_q = K_q; }
 
     void setId(unsigned int id) { lightId = id; }
+
+    glm::vec3 getPosition() { return position; }
 
 
 private:
@@ -82,7 +82,6 @@ class DirectionalLight : public Light {
 
 public:
 
-    DirectionalLight() = default;
     DirectionalLight(ShaderProgram *shaderProgram);
 
     void setDirection(glm::vec3 direction) { 

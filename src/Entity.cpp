@@ -32,12 +32,25 @@ void Entity::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition) {
 
 }
 
-void Entity::drawShadows(glm::mat4 viewProjMatrix, ShaderProgram *p_shaderProgram) {
+void Entity::drawDirectionalShadows(glm::mat4 viewProjMatrix, ShaderProgram *p_shaderProgram) {
 
     p_shaderProgram->bind();
 
     glm::mat4 modelViewProj = viewProjMatrix * modelMatrix;
     shaderProgram->setUniform("u_modelViewProjMatrix", modelViewProj);
+
+    // Draw the model
+    model->drawWithoutTextures();
+
+    p_shaderProgram->unbind();
+
+}
+
+void Entity::drawPointShadows(ShaderProgram *p_shaderProgram) {
+
+    p_shaderProgram->bind();
+
+    p_shaderProgram->setUniform("u_modelMatrix", modelMatrix);
 
     // Draw the model
     model->drawWithoutTextures();

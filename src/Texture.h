@@ -44,10 +44,14 @@ class CubeMap {
 public:
 
     CubeMap(const char* texturePseudoPath);
+    CubeMap(int RESOLUTION);
+
     ~CubeMap();
 
     void bind(ShaderProgram *shaderProgram);
     void unbind();
+
+    GLuint getTextureId() { return textureId; }
 
 private:
 

@@ -8,9 +8,8 @@ uniform samplerCube u_skybox;
 
 void main() {
 
-
     vec3 fragmentColor = vec3(texture(u_skybox, v_texCoord));
 
     f_color = vec4(fragmentColor, 1.0f);
 
-}  
+}
