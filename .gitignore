@@ -3,3 +3,5 @@ build
 lib/assimp/libassimp.so.5.0.0
 res/models
 res/textures
+.kdev4/Fall-Fever.kdev4
+Fall-Fever.kdev4

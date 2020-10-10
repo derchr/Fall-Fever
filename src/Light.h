@@ -19,7 +19,7 @@ public:
     void setColor(glm::vec3 color) {
         lightColor = color;
         diffuseColor = lightColor * glm::vec3(1.0f);
-        ambientColor = diffuseColor * glm::vec3(0.1f);
+        ambientColor = diffuseColor * glm::vec3(0.002f);
         specularColor = lightColor * glm::vec3(1.0f);
         update();
     }
@@ -29,14 +29,16 @@ public:
         update();
     }
 
+    glm::vec3 getColor() { return lightColor; }
+
 protected:
 
-    Light() = default;
     Light(ShaderProgram *shaderProgram) : shaderProgram(shaderProgram) {}
 
     ShaderProgram *shaderProgram;
 
     bool isActive = false;
+    bool shouldCastShadow = true;
 
     // Color
     glm::vec3 lightColor;
@@ -50,7 +52,6 @@ class PointLight : public Light {
 
 public:
 
-    PointLight() = default;
     PointLight(ShaderProgram *shaderProgram);
 
     void setPosition(glm::vec3 position) { 
@@ -58,7 +59,11 @@ public:
         update();
     }
 
+    void setParameters(float K_q) { this->K_q = K_q; }
+
     void setId(unsigned int id) { lightId = id; }
+
+    glm::vec3 getPosition() { return position; }
 
 
 private:
@@ -68,8 +73,7 @@ private:
     unsigned int lightId;
 
     glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
-    float K_c = 1.0f;
-    float K_l = 0.09f;
+    
     float K_q = 0.032f;
 
 };
@@ -78,7 +82,6 @@ class DirectionalLight : public Light {
 
 public:
 
-    DirectionalLight() = default;
     DirectionalLight(ShaderProgram *shaderProgram);
 
     void setDirection(glm::vec3 direction) { 
@@ -90,8 +93,6 @@ private:
 
     void update() override;
 
-    bool isActive = true;
-
-    glm::vec3 direction = glm::vec3(-0.2f, -1.0f, -0.3f);
+    glm::vec3 direction;
 
 };

@@ -6,13 +6,64 @@
 #include "ShaderProgram.h"
 
 ShaderProgram::ShaderProgram(const char* vertexShaderPath, const char* fragmentShaderPath) {
-    shaderProgramId = createShader(vertexShaderPath, fragmentShaderPath);
 
-    // Set transformation matrix as default to identity matrix
-    bind();
-    glm::mat4 identity_matrix = glm::mat4(1.0f);
-    setUniform("transform", identity_matrix);
-    unbind();
+    std::string vertexShaderSource = parse(vertexShaderPath);
+    std::string fragmentShaderSource = parse(fragmentShaderPath);
+
+    shaderProgramId = glCreateProgram();
+    GLuint vs = compile(vertexShaderSource, GL_VERTEX_SHADER);
+    GLuint fs = compile(fragmentShaderSource, GL_FRAGMENT_SHADER);
+
+    glAttachShader(shaderProgramId, vs);
+    glAttachShader(shaderProgramId, fs);
+
+    glLinkProgram(shaderProgramId);
+
+    GLint isLinked = 0;
+    glGetProgramiv(shaderProgramId, GL_LINK_STATUS, &isLinked);
+    if(!isLinked) std::cout << "Failed to link shaderProgram: " << vertexShaderPath << ", " << fragmentShaderPath << std::endl;
+
+    #ifdef _RELEASE
+    glDetachShader(program, vs);
+    glDetachShader(program, fs);
+
+    glDeleteShader(vs);
+    glDeleteShader(fs);
+    #endif
+
+}
+
+ShaderProgram::ShaderProgram(const char* vertexShaderPath, const char* geometryShaderPath, const char* fragmentShaderPath) {
+
+    std::string vertexShaderSource = parse(vertexShaderPath);
+    std::string geometryShaderSource = parse(geometryShaderPath);
+    std::string fragmentShaderSource = parse(fragmentShaderPath);
+
+    shaderProgramId = glCreateProgram();
+    GLuint vs = compile(vertexShaderSource, GL_VERTEX_SHADER);
+    GLuint gs = compile(geometryShaderSource, GL_GEOMETRY_SHADER);
+    GLuint fs = compile(fragmentShaderSource, GL_FRAGMENT_SHADER);
+
+    glAttachShader(shaderProgramId, vs);
+    glAttachShader(shaderProgramId, gs);
+    glAttachShader(shaderProgramId, fs);
+
+    glLinkProgram(shaderProgramId);
+
+    GLint isLinked = 0;
+    glGetProgramiv(shaderProgramId, GL_LINK_STATUS, &isLinked);
+    if(!isLinked) std::cout << "Failed to link shaderProgram: " << vertexShaderPath << ", " << geometryShaderPath << ", " << fragmentShaderPath << std::endl;
+
+    #ifdef _RELEASE
+    glDetachShader(program, vs);
+    glDetachShader(program, gs);
+    glDetachShader(program, fs);
+
+    glDeleteShader(vs);
+    glDeleteShader(gs);
+    glDeleteShader(fs);
+    #endif
+
 }
 
 ShaderProgram::~ShaderProgram() {
@@ -27,35 +78,11 @@ void ShaderProgram::unbind() {
     glUseProgram(0);
 }
 
-GLuint ShaderProgram::createShader(const char* vertexShaderPath, const char* framentShaderPath) {
-    std::string vertexShaderSource = parse(vertexShaderPath);
-    std::string fragmentShaderSource = parse(framentShaderPath);
-
-    GLuint program = glCreateProgram();
-    GLuint vs = compile(vertexShaderSource, GL_VERTEX_SHADER);
-    GLuint fs = compile(fragmentShaderSource, GL_FRAGMENT_SHADER);
-
-    glAttachShader(program, vs);
-    glAttachShader(program, fs);
-
-    glLinkProgram(program);
-
-    #ifdef _RELEASE
-    glDetachShader(program, vs);
-    glDetachShader(program, fs);
-
-    glDeleteShader(vs);
-    glDeleteShader(fs);
-    #endif
-
-    return program;
-}
-
 std::string ShaderProgram::parse(const char* filename) {
     FILE* file;
     file = fopen(filename, "rb");
     if(!file) {
-        std::cout << "File " << filename << " not found!" << std::endl;
+        std::cout << "Shader " << filename << " not found!" << std::endl;
         exit(-1);
     }
 

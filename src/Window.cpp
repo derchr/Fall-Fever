@@ -42,6 +42,9 @@ Window::Window() {
     #endif
     setCatchedCursor(mouseCatched);
 
+    // Enable primitive gamma correction
+    // glEnable(GL_FRAMEBUFFER_SRGB);
+
     // Maximize in release build
     #ifndef _DEBUG
     glfwMaximizeWindow(window);

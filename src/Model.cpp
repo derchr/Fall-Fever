@@ -28,6 +28,15 @@ void Model::draw(ShaderProgram *shaderProgram) {
 
 }
 
+void Model::drawWithoutTextures() {
+
+    // Iterate through every mesh and call the draw function
+    for(auto it = meshes.begin(); it != meshes.end(); it++) {
+        (*it)->drawWithoutTextures();
+    }
+
+}
+
 void Model::loadModel(std::string pathToModel) {
     
     std::ifstream input(pathToModel, std::ios::in | std::ios::binary);

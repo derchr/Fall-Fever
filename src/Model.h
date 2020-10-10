@@ -13,6 +13,7 @@ public:
     ~Model();
 
     void draw(ShaderProgram *shaderProgram);
+    void drawWithoutTextures();
 
     Mesh * getMesh(unsigned int index) { return meshes[index]; }
 

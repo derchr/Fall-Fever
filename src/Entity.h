@@ -15,6 +15,8 @@ public:
     ~Entity() = default;
 
     void draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition);
+    void drawDirectionalShadows(glm::mat4 viewProjMatrix, ShaderProgram *p_shaderProgram);
+    void drawPointShadows(ShaderProgram *p_shaderProgram);
 
     void translate(glm::vec3 vector);
     void rotate(glm::vec3 axis, float radians);
@@ -24,17 +26,21 @@ public:
     void setRotation(glm::vec3 axis, float radians);
     void setScale(float scaleFactor);
 
+    void setIsLightSource(bool temp) { isLightSource = temp;}
+
     void setId(uint32_t id) { this->id = id; }
     uint32_t getId() { return id; }
 
     glm::vec3 getPosition() { return position; }
     glm::mat4 getModelMatrix() { return modelMatrix; }
+    bool getIsLightSource() { return isLightSource; }
 
 private:
 
     void updateModelMatrix();
 
     uint32_t id;
+    bool isLightSource = false;
 
     glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::quat quaternion;

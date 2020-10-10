@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include "ShaderProgram.h"
 
 class Camera {
 
@@ -17,6 +18,11 @@ public:
     void translate(glm::vec3 translateVector);
 
     void setPosition(glm::vec3 position) { this->position = position; }
+    void setExposure(ShaderProgram *shaderProgram) {
+        shaderProgram->setUniform("exposure", exposure);
+        this->exposure = exposure;
+    }
+
     void lookAtTarget(glm::vec3 target);
     void lookForward();
     
@@ -43,5 +49,6 @@ private:
     float speed = 2.0f;
 
     float fov;
+    float exposure = 1.0f;
 
 };
