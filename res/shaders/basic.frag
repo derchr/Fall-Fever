@@ -70,6 +70,14 @@ uniform samplerCube u_texture_pointShadowMap0;
 //uniform samplerCube u_texture_pointShadowMap2;
 //uniform samplerCube u_texture_pointShadowMap3;
 
+vec3 sampleOffsetDirections[20] = vec3[] (
+    vec3( 1,  1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1,  1,  1), 
+    vec3( 1,  1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1,  1, -1),
+    vec3( 1,  1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1,  1,  0),
+    vec3( 1,  0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1,  0, -1),
+    vec3( 0,  1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0,  1, -1)
+);
+
 uniform bool b_drawShadows;
 
 uniform float pointShadowDepthMapFarPlane;
@@ -120,8 +128,7 @@ vec3 directionalLightContribution(DirectionalLight light, vec3 normal, vec3 view
     computeShading(light.ambient, light.diffuse, light.specular, lightDir, viewDir, normal, ambient, diffuse, specular);
 
     float shadows = 0.0f;
-    //if(b_drawShadows)
-    if(false)
+    if(b_drawShadows)
         shadows = computeDirectionalShadows(v_fragmentPositionDirectionalLightSpace, normal, lightDir);
 
     return (ambient + (1.0f - shadows) * (diffuse + specular));
@@ -245,18 +252,22 @@ float computePointShadows(vec3 fragPos, vec3 lightPos) {
     // get vector between fragment position and light position
     vec3 fragToLight = fragPos - lightPos;
 
-    // use the light to fragment vector to sample from the depth map    
-    float closestDepth = texture(u_texture_pointShadowMap0, fragToLight).r;
-
-    // it is currently in linear range between [0,1]. Re-transform back to original value
-    closestDepth *= pointShadowDepthMapFarPlane;
-
     // now get current linear depth as the length between the fragment and light position
     float currentDepth = length(fragToLight);
 
-    // now test for shadows
-    float bias = 0.05; 
-    float shadow = currentDepth -  bias > closestDepth ? 1.0 : 0.0;
+    float shadow = 0.0;
+    float bias   = 0.05;
+    int samples  = 20;
+    float viewDistance = length(u_viewPosition - fragPos);
+    float diskRadius = 0.05;
 
+    for(int i = 0; i < samples; ++i) {
+        float closestDepth = texture(u_texture_pointShadowMap0, fragToLight + sampleOffsetDirections[i] * diskRadius).r;
+        closestDepth *= pointShadowDepthMapFarPlane;
+        if(currentDepth - bias > closestDepth)
+            shadow += 1.0;
+    }
+
+    shadow /= float(samples);
     return shadow;
 }
