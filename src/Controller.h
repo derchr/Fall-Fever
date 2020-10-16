@@ -12,18 +12,17 @@
 #include "Framebuffer.h"
 
 
-class Controller {
-
+class Controller
+{
 public:
     Controller();
     ~Controller();
 
     void run();
 
-    static void error_callback(int error, const char* description);
+    static void error_callback(int error, const char *description);
 
 private:
-
     void limit_framerate();
 
     void updateWindowSize(ShaderProgram *pp_program);
@@ -43,5 +42,4 @@ private:
     bool wireFrameMode = 0;
 
     float exposure = 1.0f;
-
 };

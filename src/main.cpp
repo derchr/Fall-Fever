@@ -4,13 +4,15 @@
 
 #include "Controller.h"
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv)
+{
     // Suppress warning about unused variable
-    (void)argc; (void)argv;
+    (void)argc;
+    (void)argv;
 
-    #ifdef _DEBUG
+#ifdef _DEBUG
     std::cout << "[Debug Mode]" << std::endl;
-    #endif
+#endif
 
     // Create window
     Controller *mainController = new Controller();

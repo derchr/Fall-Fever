@@ -4,69 +4,86 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/ext/matrix_transform.hpp>
 
-Camera::Camera(float fov, float aspectRatio) {
+Camera::Camera(float fov, float aspectRatio)
+{
     this->fov = fov;
     viewMatrix = glm::mat4(1.0f);
     updateAspectRatio(aspectRatio);
     updateVPM();
 }
 
-void Camera::updateVPM() {
+void Camera::updateVPM()
+{
     viewProjectionMatrix = projectionMatrix * viewMatrix;
 }
 
-void Camera::updateAspectRatio(float aspectRatio) {
+void Camera::updateAspectRatio(float aspectRatio)
+{
     //projectionMatrix = glm::ortho(-2.0f, 2.0f, -2.0f, 2.0f, -10.f, 100.0f);
-    projectionMatrix = glm::perspective(fov/2.0f, aspectRatio, 0.1f, 1000.0f);
+    projectionMatrix = glm::perspective(fov / 2.0f, aspectRatio, 0.1f, 1000.0f);
     updateVPM();
 }
 
-void Camera::translate(glm::vec3 translateVector) {
+void Camera::translate(glm::vec3 translateVector)
+{
     position += translateVector;
     viewMatrix = glm::translate(viewMatrix, translateVector * -1.0f);
 }
 
-void Camera::lookAtTarget(glm::vec3 target) {
+void Camera::lookAtTarget(glm::vec3 target)
+{
     viewMatrix = glm::lookAt(position, target, upVec);
 }
 
-void Camera::lookForward() {
+void Camera::lookForward()
+{
     viewMatrix = glm::lookAt(position, position + frontVec, upVec);
 }
 
-void Camera::updatePositionFromKeyboardInput(bool *cameraActionRegister, float deltaTime) {
+void Camera::updatePositionFromKeyboardInput(bool *cameraActionRegister, float deltaTime)
+{
     glm::vec3 frontVecWithoutY = glm::vec3(frontVec.x, 0.0f, frontVec.z);
 
     glm::vec3 deltaPos = glm::vec3(0.0f, 0.0f, 0.0f);
 
-    if(cameraActionRegister[cameraForward])
+    if (cameraActionRegister[cameraForward]) {
         deltaPos += speed * deltaTime * glm::normalize(frontVecWithoutY);
-    if(cameraActionRegister[cameraBackward])
+    }
+    if (cameraActionRegister[cameraBackward]) {
         deltaPos -= speed * deltaTime * glm::normalize(frontVecWithoutY);
-    if(cameraActionRegister[cameraLeft])
+    }
+    if (cameraActionRegister[cameraLeft]) {
         deltaPos -= speed * deltaTime * glm::normalize(glm::cross(frontVec, upVec));
-    if(cameraActionRegister[cameraRight])
+    }
+    if (cameraActionRegister[cameraRight]) {
         deltaPos += speed * deltaTime * glm::normalize(glm::cross(frontVec, upVec));
-    if(cameraActionRegister[cameraUp])
+    }
+    if (cameraActionRegister[cameraUp]) {
         deltaPos += speed * deltaTime * upVec;
-    if(cameraActionRegister[cameraDown])
+    }
+    if (cameraActionRegister[cameraDown]) {
         deltaPos -= speed * deltaTime * upVec;
+    }
 
     position += deltaPos;
 }
 
-void Camera::updateDirectionFromMouseInput(double *cameraMouseActionRegister) {
+void Camera::updateDirectionFromMouseInput(double *cameraMouseActionRegister)
+{
 
-    if(cameraMouseActionRegister[cameraMouseDeltaX]==0 && cameraMouseActionRegister[cameraMouseDeltaY]==0)
+    if (cameraMouseActionRegister[cameraMouseDeltaX] == 0 && cameraMouseActionRegister[cameraMouseDeltaY] == 0) {
         return;
+    }
 
     yaw += cameraMouseActionRegister[cameraMouseDeltaX];
     pitch += cameraMouseActionRegister[cameraMouseDeltaY];
-    
-    if(pitch > 89.0f)
+
+    if (pitch > 89.0f) {
         pitch =  89.0f;
-    if(pitch < -89.0f)
+    }
+    if (pitch < -89.0f) {
         pitch = -89.0f;
+    }
 
     glm::vec3 direction;
     direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));

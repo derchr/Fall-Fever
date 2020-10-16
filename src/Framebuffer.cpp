@@ -3,8 +3,8 @@
 #include <cstddef>
 #include <iostream>
 
-Framebuffer::Framebuffer(uint32_t width, uint32_t height, ShaderProgram *shaderProgram) {
-
+Framebuffer::Framebuffer(uint32_t width, uint32_t height, ShaderProgram *shaderProgram)
+{
     this->shaderProgram = shaderProgram;
 
     glGenFramebuffers(1, &FBO);
@@ -29,21 +29,24 @@ Framebuffer::Framebuffer(uint32_t width, uint32_t height, ShaderProgram *shaderP
     unbind();
 }
 
-Framebuffer::~Framebuffer() {
+Framebuffer::~Framebuffer()
+{
     glDeleteFramebuffers(1, &FBO);
     glDeleteTextures(2, textures);
 }
 
-void Framebuffer::bind() {
+void Framebuffer::bind()
+{
     glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 }
 
-void Framebuffer::unbind() {
+void Framebuffer::unbind()
+{
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Framebuffer::render() {
-
+void Framebuffer::render()
+{
     // Disable wireframe mode
     GLint wireframe;
     glGetIntegerv(GL_POLYGON_MODE, &wireframe);
@@ -66,13 +69,10 @@ void Framebuffer::render() {
     shaderProgram->unbind();
 }
 
-
-
-DepthMap::DepthMap(int TYPE, int RESOLUTION)
-    : cubeMap(RESOLUTION) {
-
-    if(TYPE == DEPTHMAP_NORMAL) {
-
+DepthMap::DepthMap(int TYPE, int RESOLUTION) :
+    cubeMap(RESOLUTION)
+{
+    if (TYPE == DEPTHMAP_NORMAL) {
         glGenFramebuffers(1, &depthMapFBO);
 
         glGenTextures(1, &depthMap);
@@ -90,9 +90,7 @@ DepthMap::DepthMap(int TYPE, int RESOLUTION)
         glDrawBuffer(GL_NONE);
         glReadBuffer(GL_NONE);
         unbind();
-
-    } else if(TYPE == DEPTHMAP_CUBEMAP) {
-
+    } else if (TYPE == DEPTHMAP_CUBEMAP) {
         glGenFramebuffers(1, &depthMapFBO);
 
         // CubeMap is already created
@@ -102,15 +100,15 @@ DepthMap::DepthMap(int TYPE, int RESOLUTION)
         glDrawBuffer(GL_NONE);
         glReadBuffer(GL_NONE);
         unbind();
-
     }
-
 }
 
-void DepthMap::bind() {
+void DepthMap::bind()
+{
     glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 }
 
-void DepthMap::unbind() {
+void DepthMap::unbind()
+{
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

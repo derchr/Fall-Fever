@@ -5,8 +5,8 @@
 
 #include "ShaderProgram.h"
 
-ShaderProgram::ShaderProgram(const char* vertexShaderPath, const char* fragmentShaderPath) {
-
+ShaderProgram::ShaderProgram(const char *vertexShaderPath, const char *fragmentShaderPath)
+{
     std::string vertexShaderSource = parse(vertexShaderPath);
     std::string fragmentShaderSource = parse(fragmentShaderPath);
 
@@ -21,20 +21,21 @@ ShaderProgram::ShaderProgram(const char* vertexShaderPath, const char* fragmentS
 
     GLint isLinked = 0;
     glGetProgramiv(shaderProgramId, GL_LINK_STATUS, &isLinked);
-    if(!isLinked) std::cout << "Failed to link shaderProgram: " << vertexShaderPath << ", " << fragmentShaderPath << std::endl;
+    if (!isLinked) {
+        std::cout << "Failed to link shaderProgram: " << vertexShaderPath << ", " << fragmentShaderPath << std::endl;
+    }
 
-    #ifdef _RELEASE
+#ifdef _RELEASE
     glDetachShader(program, vs);
     glDetachShader(program, fs);
 
     glDeleteShader(vs);
     glDeleteShader(fs);
-    #endif
-
+#endif
 }
 
-ShaderProgram::ShaderProgram(const char* vertexShaderPath, const char* geometryShaderPath, const char* fragmentShaderPath) {
-
+ShaderProgram::ShaderProgram(const char *vertexShaderPath, const char *geometryShaderPath, const char *fragmentShaderPath)
+{
     std::string vertexShaderSource = parse(vertexShaderPath);
     std::string geometryShaderSource = parse(geometryShaderPath);
     std::string fragmentShaderSource = parse(fragmentShaderPath);
@@ -52,9 +53,11 @@ ShaderProgram::ShaderProgram(const char* vertexShaderPath, const char* geometryS
 
     GLint isLinked = 0;
     glGetProgramiv(shaderProgramId, GL_LINK_STATUS, &isLinked);
-    if(!isLinked) std::cout << "Failed to link shaderProgram: " << vertexShaderPath << ", " << geometryShaderPath << ", " << fragmentShaderPath << std::endl;
+    if (!isLinked) {
+        std::cout << "Failed to link shaderProgram: " << vertexShaderPath << ", " << geometryShaderPath << ", " << fragmentShaderPath << std::endl;
+    }
 
-    #ifdef _RELEASE
+#ifdef _RELEASE
     glDetachShader(program, vs);
     glDetachShader(program, gs);
     glDetachShader(program, fs);
@@ -62,26 +65,29 @@ ShaderProgram::ShaderProgram(const char* vertexShaderPath, const char* geometryS
     glDeleteShader(vs);
     glDeleteShader(gs);
     glDeleteShader(fs);
-    #endif
-
+#endif
 }
 
-ShaderProgram::~ShaderProgram() {
+ShaderProgram::~ShaderProgram()
+{
     glDeleteProgram(shaderProgramId);
 }
 
-void ShaderProgram::bind() {
+void ShaderProgram::bind()
+{
     glUseProgram(shaderProgramId);
 }
 
-void ShaderProgram::unbind() {
+void ShaderProgram::unbind()
+{
     glUseProgram(0);
 }
 
-std::string ShaderProgram::parse(const char* filename) {
-    FILE* file;
+std::string ShaderProgram::parse(const char *filename)
+{
+    FILE *file;
     file = fopen(filename, "rb");
-    if(!file) {
+    if (!file) {
         std::cout << "Shader " << filename << " not found!" << std::endl;
         exit(-1);
     }
@@ -98,18 +104,19 @@ std::string ShaderProgram::parse(const char* filename) {
     return contents;
 }
 
-GLuint ShaderProgram::compile(std::string shaderSource, GLenum type) {
+GLuint ShaderProgram::compile(std::string shaderSource, GLenum type)
+{
     GLuint shaderId = glCreateShader(type);
-    const char* src = shaderSource.c_str();
+    const char *src = shaderSource.c_str();
     glShaderSource(shaderId, 1, &src, 0);
     glCompileShader(shaderId);
 
     int result;
     glGetShaderiv(shaderId, GL_COMPILE_STATUS, &result);
-    if(result != GL_TRUE) {
+    if (result != GL_TRUE) {
         int length;
         glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &length);
-        char* message = new char[length];
+        char *message = new char[length];
         glGetShaderInfoLog(shaderId, length, &length, message);
         std::cout << "Shader compile error: " << message << std::endl;
         delete[] message;
@@ -118,32 +125,38 @@ GLuint ShaderProgram::compile(std::string shaderSource, GLenum type) {
     return shaderId;
 }
 
-void ShaderProgram::setUniform(const char *name, bool value) const {
+void ShaderProgram::setUniform(const char *name, bool value) const
+{
     GLint location = glGetUniformLocation(shaderProgramId, name);
     glUniform1i(location, (int)value);
 }
 
-void ShaderProgram::setUniform(const char *name, int value) const {
+void ShaderProgram::setUniform(const char *name, int value) const
+{
     GLint location = glGetUniformLocation(shaderProgramId, name);
     glUniform1i(location, value);
 }
 
-void ShaderProgram::setUniform(const char *name, float value) const {
+void ShaderProgram::setUniform(const char *name, float value) const
+{
     GLint location = glGetUniformLocation(shaderProgramId, name);
     glUniform1f(location, value);
 }
 
-void ShaderProgram::setUniform(const char *name, glm::vec3 vector) const {
+void ShaderProgram::setUniform(const char *name, glm::vec3 vector) const
+{
     GLint location = glGetUniformLocation(shaderProgramId, name);
     glUniform3f(location, vector.x, vector.y, vector.z);
 }
 
-void ShaderProgram::setUniform(const char *name, glm::mat3 matrix) const {
+void ShaderProgram::setUniform(const char *name, glm::mat3 matrix) const
+{
     GLint location = glGetUniformLocation(shaderProgramId, name);
     glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
 }
 
-void ShaderProgram::setUniform(const char *name, glm::mat4 matrix) const {
+void ShaderProgram::setUniform(const char *name, glm::mat4 matrix) const
+{
     GLint location = glGetUniformLocation(shaderProgramId, name);
     glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
 }

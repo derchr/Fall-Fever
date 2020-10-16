@@ -3,10 +3,9 @@
 #include <glm/glm.hpp>
 #include "ShaderProgram.h"
 
-class Camera {
-
+class Camera
+{
 public:
-
     Camera(float fov, float aspectRatio);
     ~Camera() = default;
 
@@ -17,23 +16,36 @@ public:
 
     void translate(glm::vec3 translateVector);
 
-    void setPosition(glm::vec3 position) { this->position = position; }
-    void setExposure(ShaderProgram *shaderProgram) {
-        shaderProgram->setUniform("exposure", exposure);
-        this->exposure = exposure;
+    void setPosition(glm::vec3 position)
+    {
+        this->position = position;
     }
 
     void lookAtTarget(glm::vec3 target);
     void lookForward();
-    
-    glm::mat4 getView() { return viewMatrix; }
-    glm::mat4 getProj() { return projectionMatrix; }
-    glm::mat4 getViewProj() { return viewProjectionMatrix; }
-    glm::vec3 getPosition() { return position; }
-    glm::vec3 getDirection() { return frontVec; }
+
+    glm::mat4 getView()
+    {
+        return viewMatrix;
+    }
+    glm::mat4 getProj()
+    {
+        return projectionMatrix;
+    }
+    glm::mat4 getViewProj()
+    {
+        return viewProjectionMatrix;
+    }
+    glm::vec3 getPosition()
+    {
+        return position;
+    }
+    glm::vec3 getDirection()
+    {
+        return frontVec;
+    }
 
 private:
-
     glm::mat4 viewMatrix;
     glm::mat4 projectionMatrix;
 
@@ -50,5 +62,6 @@ private:
 
     float fov;
     float exposure = 1.0f;
-
 };
+
+

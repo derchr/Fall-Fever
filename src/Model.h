@@ -5,27 +5,26 @@
 
 #include "Mesh.h"
 
-class Model {
-
+class Model
+{
 public:
-
-    Model(const char* pathToModel);
+    Model(const char *pathToModel);
     ~Model();
 
     void draw(ShaderProgram *shaderProgram);
     void drawWithoutTextures();
 
-    Mesh * getMesh(unsigned int index) { return meshes[index]; }
-
+    Mesh *getMesh(unsigned int index)
+    {
+        return meshes[index];
+    }
 
 private:
-
     void loadModel(std::string pathToModel);
 
-    std::vector<Mesh*> meshes;
+    std::vector<Mesh *> meshes;
 
-    std::vector<Texture*> loadedTextures;
+    std::vector<Texture *> loadedTextures;
 
     std::string directory;
-
 };

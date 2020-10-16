@@ -25,55 +25,59 @@
 #include "Entity.h"
 #include "World.h"
 
-Controller::Controller() {
-    if(!glfwInit()) exit(-1);
+Controller::Controller()
+{
+    if (!glfwInit()) {
+        exit(-1);
+    }
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    #ifndef _DEBUG
+#ifndef _DEBUG
     glfwWindowHint(GLFW_MAXIMIZED, GL_TRUE);
-    #endif
+#endif
 
     gameWindow = new Window();
     gameEventHandler = new EventHandler(gameWindow->getGLFWwindow());
 
     camera = new Camera(90.0f, gameWindow->getWindowAspectRatio());
 
-    #ifdef _DEBUG
+#ifdef _DEBUG
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
     glfwSetErrorCallback(error_callback);
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO &io = ImGui::GetIO(); (void)io;
+    ImGuiIO &io = ImGui::GetIO();
+    (void)io;
     // Setup Platform/Renderer bindings
     ImGui_ImplGlfw_InitForOpenGL(gameWindow->getGLFWwindow(), true);
     ImGui_ImplOpenGL3_Init("#version 150");
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
-    #endif
+#endif
 }
 
-Controller::~Controller() {
-
-    #ifdef _DEBUG
+Controller::~Controller()
+{
+#ifdef _DEBUG
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
-    #endif
+#endif
 
     delete gameWindow;
     delete gameEventHandler;
     delete camera;
     delete pp_framebuffer;
     glfwTerminate();
-
 }
 
-void Controller::run() {
+void Controller::run()
+{
     glClearColor(0.0015f, 0.0015f, 0.0015f, 1.0f);
 
     ShaderProgram shaderProgram("res/shaders/basic.vert", "res/shaders/basic.frag");
@@ -86,21 +90,10 @@ void Controller::run() {
     updateExposure(&postProcessingProgram);
 
     //Model model_backpack("res/models/backpack.ffo");
-    //Model model_plant("res/models/plant.ffo");
-    //Model model_container("res/models/container.ffo");
     Model model_cube("res/models/cube.ffo");
     Model model_dragon("res/models/dragon.ffo");
     Model model_ground("res/models/wood_floor.ffo");
-    //Model model_moon("res/models/moon.ffo");
-    //Model model_hut("res/models/hut.ffo");
-    //Model model_sphere("res/models/sphere.ffo");
 
-    //Entity backpack(&model_backpack, &shaderProgram);
-    //Entity sphere(&model_sphere, &shaderProgram);
-    //Entity container(&model_container, &shaderProgram);
-    //Entity hut(&model_hut, &shaderProgram);
-    //Entity moon(&model_moon, &shaderProgram);
-    //Entity plant(&model_plant, &shaderProgram);
     Entity dragon(&model_dragon, &shaderProgram);
     Entity ground(&model_ground, &shaderProgram);
     Entity lightSource(&model_cube, &lightProgram);
@@ -118,25 +111,25 @@ void Controller::run() {
     world.addEntity(dragon);
     world.addEntity(lightSource);
     world.addEntity(ground);
-    
+
     camera->translate(glm::vec3(0.0f, 1.5f, 5.0f));
 
     pp_framebuffer = new Framebuffer(INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT, &postProcessingProgram);
 
     // This is the game loop
-    while(!glfwWindowShouldClose(gameWindow->getGLFWwindow())) {
-        // Timing
+    while (!glfwWindowShouldClose(gameWindow->getGLFWwindow())) {
+        // --- Timing ---
         limit_framerate();
 
-        // Update game
-        // ...
+        // --- Update game ---
+
         static bool rotateLightSource = false, rotateEntity = false;
-        if(rotateLightSource) {
+        if (rotateLightSource) {
             float radius = 4.0;
-            glm::vec3 newPos = glm::vec3(-cos(glfwGetTime()*0.5), 0.5f, sin(glfwGetTime()*0.5)) * radius;
+            glm::vec3 newPos = glm::vec3(-cos(glfwGetTime() * 0.5), 0.5f, sin(glfwGetTime() * 0.5)) * radius;
             world.getEntities()->operator[](1).setPosition(newPos);
         }
-        if(rotateEntity) {
+        if (rotateEntity) {
             world.getEntities()->operator[](0).rotate(glm::vec3(0.0f, 1.0f, 0.0f), 0.2f * deltaTime);
         }
         static glm::vec3 lightColor = glm::vec3(1.f);
@@ -147,7 +140,7 @@ void Controller::run() {
         lightProgram.setUniform("v_lightColor", lightColor * 100.0f);
         lightProgram.unbind();
 
-        // Render and buffer swap
+        // --- Render and buffer swap ---
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Calc shadows
@@ -155,8 +148,9 @@ void Controller::run() {
         shaderProgram.bind();
         shaderProgram.setUniform("b_drawShadows", (int)drawShadows);
         shaderProgram.unbind();
-        if(drawShadows)
+        if (drawShadows) {
             world.calculateShadows(&directionalShadowDepthProgram, &pointShadowDepthProgram);
+        }
 
         pp_framebuffer->bind();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -172,42 +166,44 @@ void Controller::run() {
         pp_framebuffer->unbind();
         pp_framebuffer->render();
 
-        #ifdef _DEBUG
+#ifdef _DEBUG
         renderImGui(world.getEntities(), &world.getPointLights()[0], &lightColor, &rotateEntity, &rotateLightSource, &postProcessingProgram, &intensity, &drawShadows);
-        #endif
+#endif
 
         glfwSwapBuffers(gameWindow->getGLFWwindow());
-            
-        // Update window size
-        if(gameWindow->checkWindowWasResized())
-            updateWindowSize(&postProcessingProgram);
 
-        // Check events, handle input
+        // Update window size
+        if (gameWindow->checkWindowWasResized()) {
+            updateWindowSize(&postProcessingProgram);
+        }
+
+        // --- Check events, handle input ---
         gameEventHandler->handleEvents();
 
         camera->updatePositionFromKeyboardInput(gameEventHandler->getCameraActionRegister(), deltaTime);
-        if(gameWindow->getMouseIsCatched())
+        if (gameWindow->getMouseIsCatched()) {
             camera->updateDirectionFromMouseInput(gameEventHandler->getCursorDelta());
-
+        }
+        
         gameWindow->handleActionRegister(gameEventHandler->getWindowActionRegister());
     }
-
 }
 
-void Controller::limit_framerate() {
+void Controller::limit_framerate()
+{
     static double startingTime = 0.0;
     static double lastTime = 0.0;
 
     lastTime = glfwGetTime() - startingTime;
 
-    double frameTime = 1/(double)MAX_FPS;
-    if(frameTime > lastTime) {
-        #ifdef __linux__
+    double frameTime = 1 / (double)MAX_FPS;
+    if (frameTime > lastTime) {
+#ifdef __linux__
         usleep((frameTime - lastTime) * 1000000);
-        #endif
-        #ifdef _WIN32
+#endif
+#ifdef _WIN32
         Sleep((frameTime - lastTime) * 1000);
-        #endif
+#endif
     }
 
     deltaTime = glfwGetTime() - startingTime;
@@ -216,12 +212,14 @@ void Controller::limit_framerate() {
 }
 
 // GLFW error function
-void Controller::error_callback(int error, const char* description) {
+void Controller::error_callback(int error, const char *description)
+{
     (void)error;
     fprintf(stderr, "Error: %s\n", description);
 }
 
-void Controller::updateWindowSize(ShaderProgram *pp_program) {
+void Controller::updateWindowSize(ShaderProgram *pp_program)
+{
     camera->updateAspectRatio(gameWindow->getWindowAspectRatio());
     gameEventHandler->setFirstMouseInput(1);
 
@@ -229,14 +227,16 @@ void Controller::updateWindowSize(ShaderProgram *pp_program) {
     pp_framebuffer = new Framebuffer(gameWindow->getWindowWidth(), gameWindow->getWindowHeight(), pp_program);
 }
 
-void Controller::updateExposure(ShaderProgram *shaderProgram) {
+void Controller::updateExposure(ShaderProgram *shaderProgram)
+{
     shaderProgram->bind();
     shaderProgram->setUniform("u_exposure", exposure);
     shaderProgram->unbind();
 }
 
 #ifdef _DEBUG
-void Controller::renderImGui(std::vector<Entity> *entites, PointLight *pointLight, glm::vec3 *lightColor, bool *rotateEntity, bool *rotateLightSource, ShaderProgram *postProcessingProgram, float *intensity, bool *drawShadows) {
+void Controller::renderImGui(std::vector<Entity> *entites, PointLight *pointLight, glm::vec3 *lightColor, bool *rotateEntity, bool *rotateLightSource, ShaderProgram *postProcessingProgram, float *intensity, bool *drawShadows)
+{
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
@@ -254,7 +254,9 @@ void Controller::renderImGui(std::vector<Entity> *entites, PointLight *pointLigh
     ImGui::Checkbox("Rotate Object", rotateEntity);
 
     entites->operator[](0).setPosition(glm::vec3(translation[0], translation[1], translation[2]));
-    if(!*rotateEntity) entites->operator[](0).setRotation(glm::vec3(0.f,1.0f,0.f), rotation);
+    if (!*rotateEntity) {
+        entites->operator[](0).setRotation(glm::vec3(0.f, 1.0f, 0.f), rotation);
+    }
     entites->operator[](0).setScale(scale);
 
     // color picker
@@ -281,12 +283,11 @@ void Controller::renderImGui(std::vector<Entity> *entites, PointLight *pointLigh
     ImGui::Checkbox("Rotate Lightsource", rotateLightSource);
 
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
-        1000.0/ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+                1000.0 / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
     ImGui::End();
 
-
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-} 
+}
 #endif

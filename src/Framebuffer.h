@@ -4,10 +4,9 @@
 #include "ShaderProgram.h"
 #include "Texture.h"
 
-class Framebuffer {
-
+class Framebuffer
+{
 public:
-
     Framebuffer(uint32_t width, uint32_t height, ShaderProgram *ShaderProgram);
     ~Framebuffer();
 
@@ -16,44 +15,48 @@ public:
 
     void render();
 
-    GLuint getTextureId() {
+    GLuint getTextureId()
+    {
         return textures[0];
     }
 
 private:
-
     GLuint FBO;
     GLuint textures[2];
 
     ShaderProgram *shaderProgram;
-
 };
 
 enum depthMapType {DEPTHMAP_NORMAL, DEPTHMAP_CUBEMAP};
 
 // Framebuffer without color buffer. (Shadows)
-class DepthMap {
-
+class DepthMap
+{
 public:
-
     // Normal depthMap with texture and point depthMap with cubeMap
     DepthMap(int TYPE, int RESOLUTION);
 
     void bind();
     void unbind();
 
-    GLuint getFBO() { return depthMapFBO; }
-    GLuint getDepthMap() { return depthMap; }
-    GLuint getCubeMapId() { return cubeMap.getTextureId(); }
+    GLuint getFBO()
+    {
+        return depthMapFBO;
+    }
+    GLuint getDepthMap()
+    {
+        return depthMap;
+    }
+    GLuint getCubeMapId()
+    {
+        return cubeMap.getTextureId();
+    }
 
 private:
-
     GLuint depthMapFBO;
 
     // Either a normal depthMap is used (Directional shadows)
-    // or a cubeMap is used (Point shadows)    
+    // or a cubeMap is used (Point shadows)
     GLuint depthMap;
     CubeMap cubeMap;
-    
-
 };

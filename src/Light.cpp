@@ -4,13 +4,14 @@
 
 // PointLight
 
-PointLight::PointLight(ShaderProgram *shaderProgram)
-    : Light(shaderProgram) {
-
+PointLight::PointLight(ShaderProgram *shaderProgram) :
+    Light(shaderProgram)
+{
+    // Empty
 }
 
-void PointLight::update() {
-
+void PointLight::update()
+{
     shaderProgram->bind();
 
     shaderProgram->setUniform((_getStructMemberName() + "isActive").c_str(), isActive);
@@ -23,7 +24,8 @@ void PointLight::update() {
     shaderProgram->unbind();
 }
 
-std::string PointLight::_getStructMemberName() {
+std::string PointLight::_getStructMemberName()
+{
     std::string temp = "u_pointLight[" + std::to_string(lightId) + "].";
     return temp;
 }
@@ -31,14 +33,14 @@ std::string PointLight::_getStructMemberName() {
 
 // DirectionalLight
 
-DirectionalLight::DirectionalLight(ShaderProgram *shaderProgram)
-    : Light(shaderProgram) {
-
-
+DirectionalLight::DirectionalLight(ShaderProgram *shaderProgram) :
+    Light(shaderProgram)
+{
+    // Empty
 }
 
-void DirectionalLight::update() {
-
+void DirectionalLight::update()
+{
     shaderProgram->bind();
 
     shaderProgram->setUniform("u_directionalLight.isActive", isActive);
@@ -48,5 +50,4 @@ void DirectionalLight::update() {
     shaderProgram->setUniform("u_directionalLight.specular", specularColor);
 
     shaderProgram->unbind();
-
 }

@@ -4,15 +4,17 @@
 #include <glm/ext/matrix_transform.hpp>
 
 
-Entity::Entity(Model *model, ShaderProgram *shaderProgram)
-    : model(model), shaderProgram(shaderProgram) {
-    
-        // Empty...
+Entity::Entity(Model *model, ShaderProgram *shaderProgram) :
+    model(model),
+    shaderProgram(shaderProgram)
+{
+
+    // Empty...
 
 }
 
-void Entity::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition) {
-
+void Entity::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition)
+{
     shaderProgram->bind();
 
     glm::mat4 modelViewProj = viewProjMatrix * modelMatrix;
@@ -29,11 +31,10 @@ void Entity::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition) {
     model->draw(shaderProgram);
 
     shaderProgram->unbind();
-
 }
 
-void Entity::drawDirectionalShadows(glm::mat4 viewProjMatrix, ShaderProgram *p_shaderProgram) {
-
+void Entity::drawDirectionalShadows(glm::mat4 viewProjMatrix, ShaderProgram *p_shaderProgram)
+{
     p_shaderProgram->bind();
 
     glm::mat4 modelViewProj = viewProjMatrix * modelMatrix;
@@ -43,11 +44,10 @@ void Entity::drawDirectionalShadows(glm::mat4 viewProjMatrix, ShaderProgram *p_s
     model->drawWithoutTextures();
 
     p_shaderProgram->unbind();
-
 }
 
-void Entity::drawPointShadows(ShaderProgram *p_shaderProgram) {
-
+void Entity::drawPointShadows(ShaderProgram *p_shaderProgram)
+{
     p_shaderProgram->bind();
 
     p_shaderProgram->setUniform("u_modelMatrix", modelMatrix);
@@ -56,42 +56,47 @@ void Entity::drawPointShadows(ShaderProgram *p_shaderProgram) {
     model->drawWithoutTextures();
 
     p_shaderProgram->unbind();
-
 }
 
-void Entity::translate(glm::vec3 vector) {
+void Entity::translate(glm::vec3 vector)
+{
     position += vector;
     updateModelMatrix();
 }
 
-void Entity::rotate(glm::vec3 axis, float radians) {
+void Entity::rotate(glm::vec3 axis, float radians)
+{
     glm::quat rotation = glm::angleAxis(radians, axis);
     quaternion = rotation * quaternion;
     updateModelMatrix();
 }
 
-void Entity::setPosition(glm::vec3 position) {
+void Entity::setPosition(glm::vec3 position)
+{
     this->position = position;
     updateModelMatrix();
 }
 
-void Entity::setRotation(glm::vec3 eulerAngles) {
+void Entity::setRotation(glm::vec3 eulerAngles)
+{
     quaternion = glm::quat(eulerAngles);
     updateModelMatrix();
 }
 
-void Entity::setRotation(glm::vec3 axis, float radians) {
+void Entity::setRotation(glm::vec3 axis, float radians)
+{
     quaternion = glm::angleAxis(radians, axis);
     updateModelMatrix();
 }
 
-void Entity::setScale(float scaleFactor) {
+void Entity::setScale(float scaleFactor)
+{
     modelScale = scaleFactor;
     updateModelMatrix();
 }
 
-void Entity::updateModelMatrix() {
-    
+void Entity::updateModelMatrix()
+{
     // Translate * Rotate * Scale * vertex_vec;
     // First scaling, then rotation, then translation
 
@@ -105,23 +110,21 @@ void Entity::updateModelMatrix() {
     glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(modelScale, modelScale, modelScale));
 
     modelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
-
 }
 
 
 
-Skybox::Skybox(Model *cubeModel, ShaderProgram *shaderProgram, const char *texturePseudoPath) 
-    :   cubeModel(cubeModel),
-        shaderProgram(shaderProgram),
-        cubeMap(texturePseudoPath),
-        vertexArray(cubeModel->getMesh(0)->getVertexArray()) {
-
+Skybox::Skybox(Model *cubeModel, ShaderProgram *shaderProgram, const char *texturePseudoPath) :
+    cubeModel(cubeModel),
+    shaderProgram(shaderProgram),
+    cubeMap(texturePseudoPath),
+    vertexArray(cubeModel->getMesh(0)->getVertexArray())
+{
     // Empty
-
 }
 
-void Skybox::draw(glm::mat4 viewMatrix, glm::mat4 projectionMatrix) {
-
+void Skybox::draw(glm::mat4 viewMatrix, glm::mat4 projectionMatrix)
+{
     // To disable face culling first get current state
     GLboolean active;
     glGetBooleanv(GL_CULL_FACE_MODE, &active);
@@ -143,9 +146,9 @@ void Skybox::draw(glm::mat4 viewMatrix, glm::mat4 projectionMatrix) {
     glDepthMask(GL_TRUE);
 
     // Restore face culling
-    if(active)
+    if (active) {
         glEnable(GL_CULL_FACE);
-    else
+    } else {
         glDisable(GL_CULL_FACE);
-
+    }
 }

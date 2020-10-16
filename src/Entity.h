@@ -7,10 +7,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 
-class Entity {
-
+class Entity
+{
 public:
-
     Entity(Model *model, ShaderProgram *shaderProgram);
     ~Entity() = default;
 
@@ -26,17 +25,34 @@ public:
     void setRotation(glm::vec3 axis, float radians);
     void setScale(float scaleFactor);
 
-    void setIsLightSource(bool temp) { isLightSource = temp;}
+    void setIsLightSource(bool temp)
+    {
+        isLightSource = temp;
+    }
 
-    void setId(uint32_t id) { this->id = id; }
-    uint32_t getId() { return id; }
+    void setId(uint32_t id)
+    {
+        this->id = id;
+    }
+    uint32_t getId()
+    {
+        return id;
+    }
 
-    glm::vec3 getPosition() { return position; }
-    glm::mat4 getModelMatrix() { return modelMatrix; }
-    bool getIsLightSource() { return isLightSource; }
+    glm::vec3 getPosition()
+    {
+        return position;
+    }
+    glm::mat4 getModelMatrix()
+    {
+        return modelMatrix;
+    }
+    bool getIsLightSource()
+    {
+        return isLightSource;
+    }
 
 private:
-
     void updateModelMatrix();
 
     uint32_t id;
@@ -54,25 +70,21 @@ private:
     glm::mat4 modelMatrix = glm::mat4(1.0f);
 
     ShaderProgram *shaderProgram;
-
 };
 
-class Skybox {
-
+class Skybox
+{
 public:
-
     Skybox(Model *cubeModel, ShaderProgram *shaderProgram, const char *texturePseudoPath);
     ~Skybox() = default;
 
     void draw(glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
 
 private:
-
     Model *cubeModel;
     ShaderProgram *shaderProgram;
 
     CubeMap cubeMap;
 
     VertexArray *vertexArray;
-
 };
