@@ -73,6 +73,13 @@ void Framebuffer::render(GLuint customTextureId)
     shaderProgram->unbind();
 }
 
+void Framebuffer::setExposureCorrection(bool exposureCorrection)
+{
+    shaderProgram->bind();
+    shaderProgram->setUniform("u_exposureCorrection", exposureCorrection);
+    shaderProgram->unbind();
+}
+
 DepthMap::DepthMap(int TYPE, int RESOLUTION) :
     cubeMap(RESOLUTION)
 {

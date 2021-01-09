@@ -42,21 +42,4 @@ private:
     bool wireFrameMode = 0;
 
     float exposure = 1.0f;
-    
-    float loadingScreenVerticesData[12] = {
-        1.0f, -1.0f, 0.0f,
-        -1.0f, 1.0f, 0.0f,
-        -1.0f, -1.0f, 0.0f,
-        1.0f, 1.0f, 0.0f
-    };
-    unsigned int loadingScreenIndicesData[6] = {
-        0, 1, 2,
-        0, 3, 1
-    };
-    float loadingScreenTextureCoordinates[8] = {
-        1.0f, 0.0f,
-        0.0f, 1.0f,
-        0.0f, 0.0f,
-        1.0f, 1.0f
-    };
 };

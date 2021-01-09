@@ -7,6 +7,7 @@ layout(location = 0) out vec4 f_color;
 in vec2 v_tex_coords;
 
 uniform float u_exposure;
+uniform bool u_exposureCorrection;
 
 uniform sampler2D u_texture;
 
@@ -15,7 +16,8 @@ void main() {
     vec3 fragmentColor = vec3(texture2D(u_texture, v_tex_coords));
 
     // Exposure tone mapping
-    fragmentColor = vec3(1.0) - exp(-fragmentColor * u_exposure);
+    if(u_exposureCorrection)
+        fragmentColor = vec3(1.0) - exp(-fragmentColor * u_exposure);
 
     // Gamma correction
     fragmentColor = pow(fragmentColor, vec3(1.0/GAMMA));

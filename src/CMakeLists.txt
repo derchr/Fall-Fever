@@ -13,6 +13,8 @@ add_executable(Fall-Fever
     Light.cpp
     World.cpp
     Framebuffer.cpp
+    Widget.cpp
+    Screen.cpp
 )
 
 target_link_libraries(
@@ -22,6 +24,7 @@ target_link_libraries(
     stb
     ${GLFW3_LIBRARY}
     ${OPENGL_LIBRARIES}
+    ${FREETYPE_LIBRARIES}
     imgui
 )
 

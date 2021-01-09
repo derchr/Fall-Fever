@@ -25,6 +25,8 @@
 #include "Model.h"
 #include "Entity.h"
 #include "World.h"
+#include "Widget.h"
+#include "Screen.h"
 
 Controller::Controller()
 {
@@ -95,32 +97,21 @@ void Controller::run()
     // Show loading screen...
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     Texture loadingScreenTex("res/textures/loading.png", textureType::texture_diffuse);
-    std::vector<Vertex> loadingScreenVertices = VertexArray::createVertices(loadingScreenVerticesData, 12, loadingScreenTextureCoordinates);
-    std::vector<uint32_t> loadingScreenIndices;
-    std::vector<Texture*> loadingScreenTextures;
-    loadingScreenTextures.push_back(&loadingScreenTex);
-    loadingScreenIndices.assign(loadingScreenIndicesData, loadingScreenIndicesData + 6);
-    Mesh loadingScreenMesh(loadingScreenVertices, loadingScreenIndices, loadingScreenTextures);
-    pp_framebuffer->bind();
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    menuProgram.bind();
-    loadingScreenMesh.draw(&menuProgram);
-    menuProgram.unbind();
-    pp_framebuffer->unbind();
-    pp_framebuffer->render();
+    Widget loadingScreenWidget(&loadingScreenTex, 0.f, 0.f, 1.f, 1.f);
+    Screen loadingScreen(pp_framebuffer, &menuProgram);
+    loadingScreen.addWidget(&loadingScreenWidget);
+    loadingScreen.draw();
     glfwSwapBuffers(gameWindow->getGLFWwindow());
 
-    //Model model_backpack("res/models/backpack.ffo");
+    Model model_backpack("res/models/backpack.ffo");
     Model model_cube("res/models/cube.ffo");
-    Model model_dragon("res/models/dragon.ffo");
+    //Model model_dragon("res/models/dragon.ffo");
     Model model_ground("res/models/wood_floor.ffo");
 
-    Entity dragon(&model_dragon, &shaderProgram);
+    Entity backpack(&model_backpack, &shaderProgram);
     Entity ground(&model_ground, &shaderProgram);
     Entity lightSource(&model_cube, &lightProgram);
 
-    dragon.setRotation(glm::vec3(0.0f));
-    dragon.setScale(0.2f);
     lightSource.setScale(0.1f);
     lightSource.setRotation(glm::vec3(0.f));
     lightSource.setPosition(glm::vec3(-2.f, 1.5f, 2.f));
@@ -129,7 +120,7 @@ void Controller::run()
     Skybox skybox(&model_cube, &skyboxProgram, "res/textures/skybox/");
 
     World world(&shaderProgram);
-    world.addEntity(dragon);
+    world.addEntity(backpack);
     world.addEntity(lightSource);
     world.addEntity(ground);
 
@@ -269,9 +260,9 @@ void Controller::renderImGui(std::vector<Entity> *entites, PointLight *pointLigh
     ImGui::Text("Object");
     static float rotation = 0.0;
     ImGui::SliderFloat("Rotation", &rotation, 0, 2 * M_PI);
-    static float translation[] = {0.0f, 0.0f, 0.0f};
+    static float translation[] = {0.0f, 1.0f, 0.0f};
     ImGui::SliderFloat3("Position", translation, -4.0, 4.0);
-    static float scale = 0.2f;
+    static float scale = 0.6f;
     ImGui::SliderFloat("Scale", &scale, 0.02, 2.0);
     ImGui::Checkbox("Rotate Object", rotateEntity);
 

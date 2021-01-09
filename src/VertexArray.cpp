@@ -48,7 +48,7 @@ void VertexArray::unbind()
     glBindVertexArray(0);
 }
 
-std::vector<Vertex> VertexArray::createVertices(float *vertices, uint32_t numVertices, float *textureCoordinates) {
+std::vector<Vertex> VertexArray::createVertices(double *vertices, uint32_t numVertices, float *textureCoordinates) {
     std::vector<Vertex> vertexVec;
     uint32_t i = 0;
     uint32_t k = 0;

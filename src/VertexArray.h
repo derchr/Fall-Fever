@@ -13,7 +13,7 @@ public:
     void bind();
     void unbind();
     
-    static std::vector<Vertex> createVertices(float *vertices, uint32_t numVertices, float *textureCoordinates);
+    static std::vector<Vertex> createVertices(double *vertices, uint32_t numVertices, float *textureCoordinates);
 
 private:
     GLuint VAO;

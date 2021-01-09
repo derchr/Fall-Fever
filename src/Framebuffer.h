@@ -19,6 +19,7 @@ public:
     {
         return textures[0];
     }
+    void setExposureCorrection(bool exposureCorrection);
 
 private:
     GLuint FBO;
