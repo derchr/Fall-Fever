@@ -29,6 +29,10 @@ public:
     {
         return texturePath;
     }
+    GLuint getTextureId()
+    {
+        return textureId;
+    }
 
 private:
     std::string texturePath;

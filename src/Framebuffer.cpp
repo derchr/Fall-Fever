@@ -45,7 +45,7 @@ void Framebuffer::unbind()
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Framebuffer::render()
+void Framebuffer::render(GLuint customTextureId)
 {
     // Disable wireframe mode
     GLint wireframe;
@@ -54,7 +54,11 @@ void Framebuffer::render()
 
     shaderProgram->bind();
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, getTextureId());
+    if(customTextureId) {
+        glBindTexture(GL_TEXTURE_2D, customTextureId);
+    } else {
+        glBindTexture(GL_TEXTURE_2D, getTextureId());
+    }
     GLint location = glGetUniformLocation(shaderProgram->getShaderProgramId(), "u_texture");
     glUniform1i(location, 0);
 

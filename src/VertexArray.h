@@ -2,6 +2,8 @@
 
 #include <glad/glad.h>
 
+#include "defines.h"
+
 class VertexArray
 {
 public:
@@ -10,6 +12,8 @@ public:
 
     void bind();
     void unbind();
+    
+    static std::vector<Vertex> createVertices(float *vertices, uint32_t numVertices, float *textureCoordinates);
 
 private:
     GLuint VAO;

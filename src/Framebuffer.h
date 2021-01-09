@@ -13,7 +13,7 @@ public:
     void bind();
     void unbind();
 
-    void render();
+    void render(GLuint customTextureId = 0);
 
     GLuint getTextureId()
     {

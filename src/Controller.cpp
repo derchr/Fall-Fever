@@ -20,6 +20,7 @@
 #endif
 
 #include "Controller.h"
+#include "VertexArray.h"
 #include "Texture.h"
 #include "Model.h"
 #include "Entity.h"
@@ -84,10 +85,30 @@ void Controller::run()
     ShaderProgram lightProgram("res/shaders/light.vert", "res/shaders/light.frag");
     ShaderProgram skyboxProgram("res/shaders/skybox.vert", "res/shaders/skybox.frag");
     ShaderProgram postProcessingProgram("res/shaders/postprocessing.vert", "res/shaders/postprocessing.frag");
+    ShaderProgram menuProgram("res/shaders/menu.vert", "res/shaders/menu.frag");
     ShaderProgram directionalShadowDepthProgram("res/shaders/directionalShadowDepth.vert", "res/shaders/directionalShadowDepth.frag");
     ShaderProgram pointShadowDepthProgram("res/shaders/pointShadowDepth.vert", "res/shaders/pointShadowDepth.geom", "res/shaders/pointShadowDepth.frag");
 
     updateExposure(&postProcessingProgram);
+    pp_framebuffer = new Framebuffer(INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT, &postProcessingProgram);
+    
+    // Show loading screen...
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    Texture loadingScreenTex("res/textures/loading.png", textureType::texture_diffuse);
+    std::vector<Vertex> loadingScreenVertices = VertexArray::createVertices(loadingScreenVerticesData, 12, loadingScreenTextureCoordinates);
+    std::vector<uint32_t> loadingScreenIndices;
+    std::vector<Texture*> loadingScreenTextures;
+    loadingScreenTextures.push_back(&loadingScreenTex);
+    loadingScreenIndices.assign(loadingScreenIndicesData, loadingScreenIndicesData + 6);
+    Mesh loadingScreenMesh(loadingScreenVertices, loadingScreenIndices, loadingScreenTextures);
+    pp_framebuffer->bind();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    menuProgram.bind();
+    loadingScreenMesh.draw(&menuProgram);
+    menuProgram.unbind();
+    pp_framebuffer->unbind();
+    pp_framebuffer->render();
+    glfwSwapBuffers(gameWindow->getGLFWwindow());
 
     //Model model_backpack("res/models/backpack.ffo");
     Model model_cube("res/models/cube.ffo");
@@ -114,8 +135,6 @@ void Controller::run()
 
     camera->translate(glm::vec3(0.0f, 1.5f, 5.0f));
 
-    pp_framebuffer = new Framebuffer(INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT, &postProcessingProgram);
-
     // This is the game loop
     while (!glfwWindowShouldClose(gameWindow->getGLFWwindow())) {
         // --- Timing ---
@@ -141,16 +160,19 @@ void Controller::run()
         lightProgram.unbind();
 
         // --- Render and buffer swap ---
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+        
         // Calc shadows
-        static bool drawShadows = true;
+        static bool drawShadows = false;
+        static bool firstRun = true;
         shaderProgram.bind();
         shaderProgram.setUniform("b_drawShadows", (int)drawShadows);
         shaderProgram.unbind();
-        if (drawShadows) {
+        if (drawShadows || firstRun) {
+            firstRun = false;
             world.calculateShadows(&directionalShadowDepthProgram, &pointShadowDepthProgram);
         }
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         pp_framebuffer->bind();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
