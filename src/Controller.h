@@ -10,6 +10,7 @@
 #include "defines.h"
 #include "Light.h"
 #include "Framebuffer.h"
+#include "Menu.h"
 
 
 class Controller
@@ -34,7 +35,21 @@ private:
     EventHandler *gameEventHandler;
     Camera *camera;
 
+    /*struct shaderProgram {
+
+    }*/
+
+    ShaderProgram *shaderProgram;
+    ShaderProgram *lightProgram;
+    ShaderProgram *skyboxProgram;
+    ShaderProgram *postProcessingProgram;
+    ShaderProgram *menuProgram;
+    ShaderProgram *directionalShadowDepthProgram;
+    ShaderProgram *pointShadowDepthProgram;
+
     Framebuffer *pp_framebuffer;
+
+    Menu *menu;
 
     const uint16_t MAX_FPS = 60;
     double deltaTime;

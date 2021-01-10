@@ -15,6 +15,7 @@ add_executable(Fall-Fever
     Framebuffer.cpp
     Widget.cpp
     Screen.cpp
+    Menu.cpp
 )
 
 target_link_libraries(

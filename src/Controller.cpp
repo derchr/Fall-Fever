@@ -47,6 +47,17 @@ Controller::Controller()
 
     camera = new Camera(90.0f, gameWindow->getWindowAspectRatio());
 
+    shaderProgram = new ShaderProgram("res/shaders/basic.vert", "res/shaders/basic.frag");
+    lightProgram = new ShaderProgram("res/shaders/light.vert", "res/shaders/light.frag");
+    skyboxProgram = new ShaderProgram("res/shaders/skybox.vert", "res/shaders/skybox.frag");
+    postProcessingProgram = new ShaderProgram("res/shaders/postprocessing.vert", "res/shaders/postprocessing.frag");
+    menuProgram = new ShaderProgram("res/shaders/menu.vert", "res/shaders/menu.frag");
+    directionalShadowDepthProgram = new ShaderProgram("res/shaders/directionalShadowDepth.vert", "res/shaders/directionalShadowDepth.frag");
+    pointShadowDepthProgram = new ShaderProgram("res/shaders/pointShadowDepth.vert", "res/shaders/pointShadowDepth.geom", "res/shaders/pointShadowDepth.frag");
+
+    pp_framebuffer = new Framebuffer(INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT, postProcessingProgram);
+    menu = new Menu(pp_framebuffer, menuProgram);
+
 #ifdef _DEBUG
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
     glfwSetErrorCallback(error_callback);
@@ -75,7 +86,17 @@ Controller::~Controller()
     delete gameWindow;
     delete gameEventHandler;
     delete camera;
+
+    delete shaderProgram;
+    delete lightProgram;
+    delete skyboxProgram;
+    delete postProcessingProgram;
+    delete menuProgram;
+    delete directionalShadowDepthProgram;
+    delete pointShadowDepthProgram;
+
     delete pp_framebuffer;
+    delete menu;
     glfwTerminate();
 }
 
@@ -83,24 +104,11 @@ void Controller::run()
 {
     glClearColor(0.0015f, 0.0015f, 0.0015f, 1.0f);
 
-    ShaderProgram shaderProgram("res/shaders/basic.vert", "res/shaders/basic.frag");
-    ShaderProgram lightProgram("res/shaders/light.vert", "res/shaders/light.frag");
-    ShaderProgram skyboxProgram("res/shaders/skybox.vert", "res/shaders/skybox.frag");
-    ShaderProgram postProcessingProgram("res/shaders/postprocessing.vert", "res/shaders/postprocessing.frag");
-    ShaderProgram menuProgram("res/shaders/menu.vert", "res/shaders/menu.frag");
-    ShaderProgram directionalShadowDepthProgram("res/shaders/directionalShadowDepth.vert", "res/shaders/directionalShadowDepth.frag");
-    ShaderProgram pointShadowDepthProgram("res/shaders/pointShadowDepth.vert", "res/shaders/pointShadowDepth.geom", "res/shaders/pointShadowDepth.frag");
-
-    updateExposure(&postProcessingProgram);
-    pp_framebuffer = new Framebuffer(INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT, &postProcessingProgram);
+    updateExposure(postProcessingProgram);
     
     // Show loading screen...
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    Texture loadingScreenTex("res/textures/loading.png", textureType::texture_diffuse);
-    Widget loadingScreenWidget(&loadingScreenTex, 0.f, 0.f, 1.f, 1.f);
-    Screen loadingScreen(pp_framebuffer, &menuProgram);
-    loadingScreen.addWidget(&loadingScreenWidget);
-    loadingScreen.draw();
+    menu->showLoadingScreen();
     glfwSwapBuffers(gameWindow->getGLFWwindow());
 
     Model model_backpack("res/models/backpack.ffo");
@@ -108,18 +116,18 @@ void Controller::run()
     //Model model_dragon("res/models/dragon.ffo");
     Model model_ground("res/models/wood_floor.ffo");
 
-    Entity backpack(&model_backpack, &shaderProgram);
-    Entity ground(&model_ground, &shaderProgram);
-    Entity lightSource(&model_cube, &lightProgram);
+    Entity backpack(&model_backpack, shaderProgram);
+    Entity ground(&model_ground, shaderProgram);
+    Entity lightSource(&model_cube, lightProgram);
 
     lightSource.setScale(0.1f);
     lightSource.setRotation(glm::vec3(0.f));
     lightSource.setPosition(glm::vec3(-2.f, 1.5f, 2.f));
     lightSource.setIsLightSource(true);
 
-    Skybox skybox(&model_cube, &skyboxProgram, "res/textures/skybox/");
+    Skybox skybox(&model_cube, skyboxProgram, "res/textures/skybox/");
 
-    World world(&shaderProgram);
+    World world(shaderProgram);
     world.addEntity(backpack);
     world.addEntity(lightSource);
     world.addEntity(ground);
@@ -143,24 +151,24 @@ void Controller::run()
             world.getEntities()->operator[](0).rotate(glm::vec3(0.0f, 1.0f, 0.0f), 0.2f * deltaTime);
         }
         static glm::vec3 lightColor = glm::vec3(1.f);
-        static float intensity = 10.f;
+        static float intensity = 20.f;
         world.updatePointLight(0, true, world.getEntities()->operator[](1).getPosition(), lightColor * intensity);
         world.updateDirectionalLight(true, glm::vec3(-0.2f, -1.0f, -0.3f), lightColor * 0.25f);
-        lightProgram.bind();
-        lightProgram.setUniform("v_lightColor", lightColor * 100.0f);
-        lightProgram.unbind();
+        lightProgram->bind();
+        lightProgram->setUniform("v_lightColor", lightColor * 100.0f);
+        lightProgram->unbind();
 
         // --- Render and buffer swap ---
         
         // Calc shadows
         static bool drawShadows = false;
         static bool firstRun = true;
-        shaderProgram.bind();
-        shaderProgram.setUniform("b_drawShadows", (int)drawShadows);
-        shaderProgram.unbind();
+        shaderProgram->bind();
+        shaderProgram->setUniform("b_drawShadows", (int)drawShadows);
+        shaderProgram->unbind();
         if (drawShadows || firstRun) {
             firstRun = false;
-            world.calculateShadows(&directionalShadowDepthProgram, &pointShadowDepthProgram);
+            world.calculateShadows(directionalShadowDepthProgram, pointShadowDepthProgram);
         }
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -180,14 +188,14 @@ void Controller::run()
         pp_framebuffer->render();
 
 #ifdef _DEBUG
-        renderImGui(world.getEntities(), &world.getPointLights()[0], &lightColor, &rotateEntity, &rotateLightSource, &postProcessingProgram, &intensity, &drawShadows);
+        renderImGui(world.getEntities(), &world.getPointLights()[0], &lightColor, &rotateEntity, &rotateLightSource, postProcessingProgram, &intensity, &drawShadows);
 #endif
 
         glfwSwapBuffers(gameWindow->getGLFWwindow());
 
         // Update window size
         if (gameWindow->checkWindowWasResized()) {
-            updateWindowSize(&postProcessingProgram);
+            updateWindowSize(postProcessingProgram);
         }
 
         // --- Check events, handle input ---
