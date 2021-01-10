@@ -16,6 +16,7 @@ add_executable(Fall-Fever
     Widget.cpp
     Screen.cpp
     Menu.cpp
+    JsonParser.cpp
 )
 
 target_link_libraries(
@@ -23,6 +24,7 @@ target_link_libraries(
     glad
     glm
     stb
+    jsoncpp
     ${GLFW3_LIBRARY}
     ${OPENGL_LIBRARIES}
     ${FREETYPE_LIBRARIES}
