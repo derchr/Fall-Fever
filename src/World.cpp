@@ -30,6 +30,7 @@ World::World(std::vector<ShaderProgram*> shaderPrograms) :
     JsonParser worldParser("res/models.json");
     models = worldParser.getModels();
     entities = worldParser.getEntities(models, shaderPrograms);
+    skybox = worldParser.getSkybox(getModelByName("cube"), Controller::getShaderProgramByName(shaderPrograms, "skyboxProgram"));
 }
 
 World::~World()
@@ -45,6 +46,8 @@ World::~World()
     for (auto it = entities.begin(); it != entities.end(); it++) {
         delete (*it);
     }
+
+    delete skybox;
 }
 
 void World::addEntity(Entity *entity)
@@ -70,12 +73,6 @@ void World::clearEntities()
         entities.erase(it);
     }
 }
-
-void World::loadWorld ( unsigned int id )
-{
-    // Load World from File...
-}
-
 
 void World::updatePointLight(unsigned int lightId, bool active, glm::vec3 position, glm::vec3 color)
 {

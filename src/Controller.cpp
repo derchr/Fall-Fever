@@ -105,9 +105,6 @@ void Controller::run()
 
     World world(shaderPrograms);
 
-    Model *skyboxModel = world.getModelByName("cube");
-    Skybox skybox(skyboxModel, getShaderProgramByName("skyboxProgram"), "res/textures/skybox/");
-
     Entity *lightSource = world.getEntityByName("light");
     lightSource->setScale(0.1f);
     lightSource->setRotation(glm::vec3(0.f));
@@ -163,7 +160,7 @@ void Controller::run()
 
         glViewport(0, 0, gameWindow->getWindowWidth(), gameWindow->getWindowHeight());
 
-        skybox.draw(camera->getView(), camera->getProj());
+        world.getSkybox()->draw(camera->getView(), camera->getProj());
         world.draw(camera->getViewProj(), camera->getPosition());
 
         pp_framebuffer->unbind();

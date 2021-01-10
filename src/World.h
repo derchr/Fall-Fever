@@ -18,8 +18,6 @@ public:
     void removeEntityByName(std::string name);
     void clearEntities();
 
-    void loadWorld(unsigned int id);
-
     void updatePointLight(unsigned int lightId, bool active, glm::vec3 position, glm::vec3 color);
     void updateDirectionalLight(bool active, glm::vec3 direction, glm::vec3 color);
 
@@ -31,6 +29,10 @@ public:
     PointLight *getPointLights()
     {
         return pointLights.data();
+    }
+    Skybox *getSkybox()
+    {
+        return skybox;
     }
 
     Entity* getEntityByName(std::string name);
@@ -45,6 +47,7 @@ private:
 
     std::vector<Model*> models;
     std::vector<Entity*> entities;
+    Skybox *skybox;
 
     // Lights
     DirectionalLight directionalLight;

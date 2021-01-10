@@ -106,3 +106,15 @@ std::vector<ShaderProgram *> JsonParser::getShaderPrograms()
     return temp_shaderPrograms;
 }
 
+Skybox *JsonParser::getSkybox(Model *cubeModel, ShaderProgram *skyboxProgram)
+{
+    Skybox* temp_skybox;
+
+    const Json::Value shaderProgramsJson = root["skybox"];
+
+    std::string skybox_texturePath = shaderProgramsJson["texturePath"].asString();
+    temp_skybox = new Skybox(cubeModel, skyboxProgram, skybox_texturePath.c_str());
+    std::cout << "Loaded Skybox \"" << skybox_texturePath << "\"" << std::endl;
+
+    return temp_skybox;
+}

@@ -16,6 +16,7 @@ public:
 
     std::vector<Model*> getModels();
     std::vector<Entity*> getEntities(std::vector<Model*> &models, std::vector<ShaderProgram*> shaderPrograms);
+    Skybox *getSkybox(Model *cubeModel, ShaderProgram *skyboxProgram);
 
     std::vector<ShaderProgram*> getShaderPrograms();
 
