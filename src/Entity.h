@@ -10,7 +10,7 @@
 class Entity
 {
 public:
-    Entity(Model *model, ShaderProgram *shaderProgram);
+    Entity(std::string name, Model *model, ShaderProgram *shaderProgram);
     ~Entity() = default;
 
     void draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition);
@@ -38,6 +38,10 @@ public:
     {
         return id;
     }
+    std::string getUniqueName()
+    {
+        return unique_name;
+    }
 
     glm::vec3 getPosition()
     {
@@ -55,7 +59,10 @@ public:
 private:
     void updateModelMatrix();
 
+    static uint32_t id_counter;
     uint32_t id;
+    std::string unique_name;
+
     bool isLightSource = false;
 
     glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);

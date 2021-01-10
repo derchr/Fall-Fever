@@ -7,8 +7,8 @@
 class ShaderProgram
 {
 public:
-    ShaderProgram(const char *vertexShaderPath, const char *fragmentShaderPath);
-    ShaderProgram(const char *vertexShaderPath, const char *geometryShaderPath, const char *fragmentShaderPath);
+    ShaderProgram(std::string &name, std::string &vertexShaderPath, std::string &fragmentShaderPath);
+    ShaderProgram(std::string &name, std::string &vertexShaderPath, std::string &geometryShaderPath, std::string &fragmentShaderPath);
     ~ShaderProgram();
 
     void bind();
@@ -27,9 +27,15 @@ public:
         return shaderProgramId;
     }
 
+    std::string getUniqueName()
+    {
+        return unique_name;
+    }
+
 private:
     std::string parse(const char *filename);
     GLuint compile(std::string shaderSource, GLenum type);
 
     GLuint shaderProgramId;
+    std::string unique_name;
 };

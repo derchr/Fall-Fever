@@ -5,10 +5,11 @@
 
 #include "ShaderProgram.h"
 
-ShaderProgram::ShaderProgram(const char *vertexShaderPath, const char *fragmentShaderPath)
+ShaderProgram::ShaderProgram(std::string &name, std::string &vertexShaderPath, std::string &fragmentShaderPath) :
+    unique_name(name)
 {
-    std::string vertexShaderSource = parse(vertexShaderPath);
-    std::string fragmentShaderSource = parse(fragmentShaderPath);
+    std::string vertexShaderSource = parse(vertexShaderPath.c_str());
+    std::string fragmentShaderSource = parse(fragmentShaderPath.c_str());
 
     shaderProgramId = glCreateProgram();
     GLuint vs = compile(vertexShaderSource, GL_VERTEX_SHADER);
@@ -34,11 +35,12 @@ ShaderProgram::ShaderProgram(const char *vertexShaderPath, const char *fragmentS
 #endif
 }
 
-ShaderProgram::ShaderProgram(const char *vertexShaderPath, const char *geometryShaderPath, const char *fragmentShaderPath)
+ShaderProgram::ShaderProgram(std::string &name, std::string &vertexShaderPath, std::string &geometryShaderPath, std::string &fragmentShaderPath) :
+    unique_name(name)
 {
-    std::string vertexShaderSource = parse(vertexShaderPath);
-    std::string geometryShaderSource = parse(geometryShaderPath);
-    std::string fragmentShaderSource = parse(fragmentShaderPath);
+    std::string vertexShaderSource = parse(vertexShaderPath.c_str());
+    std::string geometryShaderSource = parse(geometryShaderPath.c_str());
+    std::string fragmentShaderSource = parse(fragmentShaderPath.c_str());
 
     shaderProgramId = glCreateProgram();
     GLuint vs = compile(vertexShaderSource, GL_VERTEX_SHADER);

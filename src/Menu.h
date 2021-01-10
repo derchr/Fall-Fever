@@ -2,6 +2,7 @@
 
 #include "Screen.h"
 #include "Framebuffer.h"
+#include "JsonParser.h"
 
 class Menu
 {

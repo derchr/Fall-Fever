@@ -3,12 +3,15 @@
 #include <iostream>
 #include <fstream>
 
-Model::Model(const char *pathToModel)
-{
-    std::string modelSource = pathToModel;
-    directory = modelSource.substr(0, modelSource.find_last_of('/'));
+uint32_t Model::id_counter = 0;
 
-    loadModel(pathToModel);
+Model::Model(std::string &modelName, std::string &modelPath) :
+    unique_name(modelName)
+{
+    directory = modelPath.substr(0, modelPath.find_last_of('/'));
+
+    loadModel(modelPath);
+    id = id_counter++;
 }
 
 Model::~Model()
@@ -35,7 +38,7 @@ void Model::drawWithoutTextures()
     }
 }
 
-void Model::loadModel(std::string pathToModel)
+void Model::loadModel(std::string &pathToModel)
 {
     std::ifstream input(pathToModel, std::ios::in | std::ios::binary);
 

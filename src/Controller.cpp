@@ -27,6 +27,7 @@
 #include "World.h"
 #include "Widget.h"
 #include "Screen.h"
+#include "JsonParser.h"
 
 Controller::Controller()
 {
@@ -47,16 +48,11 @@ Controller::Controller()
 
     camera = new Camera(90.0f, gameWindow->getWindowAspectRatio());
 
-    shaderProgram = new ShaderProgram("res/shaders/basic.vert", "res/shaders/basic.frag");
-    lightProgram = new ShaderProgram("res/shaders/light.vert", "res/shaders/light.frag");
-    skyboxProgram = new ShaderProgram("res/shaders/skybox.vert", "res/shaders/skybox.frag");
-    postProcessingProgram = new ShaderProgram("res/shaders/postprocessing.vert", "res/shaders/postprocessing.frag");
-    menuProgram = new ShaderProgram("res/shaders/menu.vert", "res/shaders/menu.frag");
-    directionalShadowDepthProgram = new ShaderProgram("res/shaders/directionalShadowDepth.vert", "res/shaders/directionalShadowDepth.frag");
-    pointShadowDepthProgram = new ShaderProgram("res/shaders/pointShadowDepth.vert", "res/shaders/pointShadowDepth.geom", "res/shaders/pointShadowDepth.frag");
+    JsonParser shaderParser("res/shaderPrograms.json");
+    shaderPrograms = shaderParser.getShaderPrograms();
 
-    pp_framebuffer = new Framebuffer(INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT, postProcessingProgram);
-    menu = new Menu(pp_framebuffer, menuProgram);
+    pp_framebuffer = new Framebuffer(INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT, getShaderProgramByName("postProcessingProgram"));
+    menu = new Menu(pp_framebuffer, getShaderProgramByName("menuProgram"));
 
 #ifdef _DEBUG
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
@@ -87,13 +83,9 @@ Controller::~Controller()
     delete gameEventHandler;
     delete camera;
 
-    delete shaderProgram;
-    delete lightProgram;
-    delete skyboxProgram;
-    delete postProcessingProgram;
-    delete menuProgram;
-    delete directionalShadowDepthProgram;
-    delete pointShadowDepthProgram;
+    for (auto it = shaderPrograms.begin(); it != shaderPrograms.end(); it++) {
+        delete *it;
+    }
 
     delete pp_framebuffer;
     delete menu;
@@ -104,33 +96,23 @@ void Controller::run()
 {
     glClearColor(0.0015f, 0.0015f, 0.0015f, 1.0f);
 
-    updateExposure(postProcessingProgram);
+    updateExposure(getShaderProgramByName("postProcessingProgram"));
     
     // Show loading screen...
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     menu->showLoadingScreen();
     glfwSwapBuffers(gameWindow->getGLFWwindow());
 
-    Model model_backpack("res/models/backpack.ffo");
-    Model model_cube("res/models/cube.ffo");
-    //Model model_dragon("res/models/dragon.ffo");
-    Model model_ground("res/models/wood_floor.ffo");
+    World world(shaderPrograms);
 
-    Entity backpack(&model_backpack, shaderProgram);
-    Entity ground(&model_ground, shaderProgram);
-    Entity lightSource(&model_cube, lightProgram);
+    Model *skyboxModel = world.getModelByName("cube");
+    Skybox skybox(skyboxModel, getShaderProgramByName("skyboxProgram"), "res/textures/skybox/");
 
-    lightSource.setScale(0.1f);
-    lightSource.setRotation(glm::vec3(0.f));
-    lightSource.setPosition(glm::vec3(-2.f, 1.5f, 2.f));
-    lightSource.setIsLightSource(true);
-
-    Skybox skybox(&model_cube, skyboxProgram, "res/textures/skybox/");
-
-    World world(shaderProgram);
-    world.addEntity(backpack);
-    world.addEntity(lightSource);
-    world.addEntity(ground);
+    Entity *lightSource = world.getEntityByName("light");
+    lightSource->setScale(0.1f);
+    lightSource->setRotation(glm::vec3(0.f));
+    lightSource->setPosition(glm::vec3(-2.f, 1.5f, 2.f));
+    lightSource->setIsLightSource(true);
 
     camera->translate(glm::vec3(0.0f, 1.5f, 5.0f));
 
@@ -145,30 +127,30 @@ void Controller::run()
         if (rotateLightSource) {
             float radius = 4.0;
             glm::vec3 newPos = glm::vec3(-cos(glfwGetTime() * 0.5), 0.5f, sin(glfwGetTime() * 0.5)) * radius;
-            world.getEntities()->operator[](1).setPosition(newPos);
+            world.getEntityByName("light")->setPosition(newPos);
         }
         if (rotateEntity) {
-            world.getEntities()->operator[](0).rotate(glm::vec3(0.0f, 1.0f, 0.0f), 0.2f * deltaTime);
+            world.getEntityById(0)->rotate(glm::vec3(0.0f, 1.0f, 0.0f), -0.2f * deltaTime);
         }
         static glm::vec3 lightColor = glm::vec3(1.f);
         static float intensity = 20.f;
-        world.updatePointLight(0, true, world.getEntities()->operator[](1).getPosition(), lightColor * intensity);
+        world.updatePointLight(0, true, world.getEntityByName("light")->getPosition(), lightColor * intensity);
         world.updateDirectionalLight(true, glm::vec3(-0.2f, -1.0f, -0.3f), lightColor * 0.25f);
-        lightProgram->bind();
-        lightProgram->setUniform("v_lightColor", lightColor * 100.0f);
-        lightProgram->unbind();
+        getShaderProgramByName("lightProgram")->bind();
+        getShaderProgramByName("lightProgram")->setUniform("v_lightColor", lightColor * 100.0f);
+        getShaderProgramByName("lightProgram")->unbind();
 
         // --- Render and buffer swap ---
         
         // Calc shadows
         static bool drawShadows = false;
         static bool firstRun = true;
-        shaderProgram->bind();
-        shaderProgram->setUniform("b_drawShadows", (int)drawShadows);
-        shaderProgram->unbind();
+        getShaderProgramByName("defaultProgram")->bind();
+        getShaderProgramByName("defaultProgram")->setUniform("b_drawShadows", (int)drawShadows);
+        getShaderProgramByName("defaultProgram")->unbind();
         if (drawShadows || firstRun) {
             firstRun = false;
-            world.calculateShadows(directionalShadowDepthProgram, pointShadowDepthProgram);
+            world.calculateShadows(getShaderProgramByName("directionalShadowDepthProgram"), getShaderProgramByName("pointShadowDepthProgram"));
         }
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -188,14 +170,14 @@ void Controller::run()
         pp_framebuffer->render();
 
 #ifdef _DEBUG
-        renderImGui(world.getEntities(), &world.getPointLights()[0], &lightColor, &rotateEntity, &rotateLightSource, postProcessingProgram, &intensity, &drawShadows);
+        renderImGui(world, &world.getPointLights()[0], &lightColor, &rotateEntity, &rotateLightSource, getShaderProgramByName("postProcessingProgram"), &intensity, &drawShadows);
 #endif
 
         glfwSwapBuffers(gameWindow->getGLFWwindow());
 
         // Update window size
         if (gameWindow->checkWindowWasResized()) {
-            updateWindowSize(postProcessingProgram);
+            updateWindowSize(getShaderProgramByName("postProcessingProgram"));
         }
 
         // --- Check events, handle input ---
@@ -255,8 +237,30 @@ void Controller::updateExposure(ShaderProgram *shaderProgram)
     shaderProgram->unbind();
 }
 
+ShaderProgram* Controller::getShaderProgramByName(const char *name)
+{
+    for (auto it = shaderPrograms.begin(); it != shaderPrograms.end(); it++) {
+        if((*it)->getUniqueName() == name) {
+            return *it;
+        }
+    }
+    std::cout << "[Warning] ShaderProgram could not be found by name \"" << name << "\"" << std::endl;
+    return nullptr;
+}
+
+ShaderProgram* Controller::getShaderProgramByName(std::vector<ShaderProgram*> shaderPrograms, const char *name)
+{
+    for (auto it = shaderPrograms.begin(); it != shaderPrograms.end(); it++) {
+        if((*it)->getUniqueName() == name) {
+            return *it;
+        }
+    }
+    std::cout << "[Warning] ShaderProgram could not be found by name \"" << name << "\"" << std::endl;
+    return nullptr;
+}
+
 #ifdef _DEBUG
-void Controller::renderImGui(std::vector<Entity> *entites, PointLight *pointLight, glm::vec3 *lightColor, bool *rotateEntity, bool *rotateLightSource, ShaderProgram *postProcessingProgram, float *intensity, bool *drawShadows)
+void Controller::renderImGui(World &world, PointLight *pointLight, glm::vec3 *lightColor, bool *rotateEntity, bool *rotateLightSource, ShaderProgram *postProcessingProgram, float *intensity, bool *drawShadows)
 {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -274,11 +278,12 @@ void Controller::renderImGui(std::vector<Entity> *entites, PointLight *pointLigh
     ImGui::SliderFloat("Scale", &scale, 0.02, 2.0);
     ImGui::Checkbox("Rotate Object", rotateEntity);
 
-    entites->operator[](0).setPosition(glm::vec3(translation[0], translation[1], translation[2]));
+    Entity *mainObject = world.getEntityById(0);
+    mainObject->setPosition(glm::vec3(translation[0], translation[1], translation[2]));
     if (!*rotateEntity) {
-        entites->operator[](0).setRotation(glm::vec3(0.f, 1.0f, 0.f), rotation);
+        mainObject->setRotation(glm::vec3(0.f, 1.0f, 0.f), rotation);
     }
-    entites->operator[](0).setScale(scale);
+    mainObject->setScale(scale);
 
     // color picker
     ImGui::Text("\nLight Source");

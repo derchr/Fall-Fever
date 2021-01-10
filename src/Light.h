@@ -38,6 +38,7 @@ public:
 
 protected:
     Light(ShaderProgram *shaderProgram) : shaderProgram(shaderProgram) {}
+    ~Light() {}
 
     ShaderProgram *shaderProgram;
 
@@ -55,6 +56,7 @@ class PointLight : public Light
 {
 public:
     PointLight(ShaderProgram *shaderProgram);
+    ~PointLight() = default;
 
     void setPosition(glm::vec3 position)
     {

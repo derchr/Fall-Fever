@@ -11,6 +11,7 @@
 #include "Light.h"
 #include "Framebuffer.h"
 #include "Menu.h"
+#include "World.h"
 
 
 class Controller
@@ -21,6 +22,7 @@ public:
 
     void run();
 
+    static ShaderProgram* getShaderProgramByName(std::vector<ShaderProgram*> shaderPrograms, const char *name);
     static void error_callback(int error, const char *description);
 
 private:
@@ -29,23 +31,15 @@ private:
     void updateWindowSize(ShaderProgram *pp_program);
     void updateExposure(ShaderProgram *shaderProgram);
 
-    void renderImGui(std::vector<Entity> *entites, PointLight *pointLight, glm::vec3 *lightColor, bool *rotateEntity, bool *rotateLightSource, ShaderProgram *postProcessingProgram, float *intensity, bool *drawShadows);
+    ShaderProgram* getShaderProgramByName(const char *name);
+
+    void renderImGui(World &world, PointLight *pointLight, glm::vec3 *lightColor, bool *rotateEntity, bool *rotateLightSource, ShaderProgram *postProcessingProgram, float *intensity, bool *drawShadows);
 
     Window *gameWindow;
     EventHandler *gameEventHandler;
     Camera *camera;
 
-    /*struct shaderProgram {
-
-    }*/
-
-    ShaderProgram *shaderProgram;
-    ShaderProgram *lightProgram;
-    ShaderProgram *skyboxProgram;
-    ShaderProgram *postProcessingProgram;
-    ShaderProgram *menuProgram;
-    ShaderProgram *directionalShadowDepthProgram;
-    ShaderProgram *pointShadowDepthProgram;
+    std::vector<ShaderProgram*> shaderPrograms;
 
     Framebuffer *pp_framebuffer;
 

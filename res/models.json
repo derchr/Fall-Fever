@@ -1,0 +1,36 @@
+{
+    "models": [
+        {
+            "unique_name": "backpack",
+            "path": "res/models/backpack.ffo"
+        },
+        {
+            "unique_name": "ground",
+            "path": "res/models/wood_floor.ffo"
+        },
+        {
+            "unique_name": "cube",
+            "path": "res/models/cube.ffo"
+        }
+    ],
+    "entities": [
+        {
+            "unique_name": "backpack",
+            "model": "backpack",
+            "shaderProgram": "defaultProgram"
+        },
+        {
+            "unique_name": "ground",
+            "model": "ground",
+            "shaderProgram": "defaultProgram"
+        },
+        {
+            "unique_name": "light",
+            "model": "cube",
+            "shaderProgram": "lightProgram"
+        }
+    ],
+    "skybox": {
+        "texturePath": "res/textures/skybox/"
+    }
+}

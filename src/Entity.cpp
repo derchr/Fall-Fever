@@ -3,14 +3,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/ext/matrix_transform.hpp>
 
+uint32_t Entity::id_counter = 0;
 
-Entity::Entity(Model *model, ShaderProgram *shaderProgram) :
+Entity::Entity(std::string name, Model *model, ShaderProgram *shaderProgram) :
+    unique_name(name),
     model(model),
     shaderProgram(shaderProgram)
 {
-
-    // Empty...
-
+    id = id_counter++;
 }
 
 void Entity::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition)
@@ -38,7 +38,7 @@ void Entity::drawDirectionalShadows(glm::mat4 viewProjMatrix, ShaderProgram *p_s
     p_shaderProgram->bind();
 
     glm::mat4 modelViewProj = viewProjMatrix * modelMatrix;
-    shaderProgram->setUniform("u_modelViewProjMatrix", modelViewProj);
+    shaderProgram->setUniform("u_modelViewProjMatrix", modelViewProj); // wtf is this
 
     // Draw the model
     model->drawWithoutTextures();

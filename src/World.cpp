@@ -1,10 +1,12 @@
 #include "World.h"
+#include "JsonParser.h"
+#include "Controller.h"
 
 #include <iostream>
 
-World::World(ShaderProgram *shaderProgram) :
-    shaderProgram(shaderProgram),
-    directionalLight(shaderProgram),
+World::World(std::vector<ShaderProgram*> shaderPrograms) :
+    shaderProgram(Controller::getShaderProgramByName(shaderPrograms, "defaultProgram")),
+    directionalLight(shaderProgram), // wtf is this
     depthMapDirectionalFBO(DEPTHMAP_NORMAL, SHADOW_RES)
 {
     // PointLights
@@ -24,6 +26,10 @@ World::World(ShaderProgram *shaderProgram) :
     shaderProgram->bind();
     shaderProgram->setUniform("u_material.shininess", 100.0f);
     shaderProgram->unbind();
+
+    JsonParser worldParser("res/models.json");
+    models = worldParser.getModels();
+    entities = worldParser.getEntities(models, shaderPrograms);
 }
 
 World::~World()
@@ -32,25 +38,44 @@ World::~World()
     for (auto it = depthMapPointFBO.begin(); it != depthMapPointFBO.end(); it++) {
         delete (*it);
     }
+    // Iterate over models and entities and delete all items
+    for (auto it = models.begin(); it != models.end(); it++) {
+        delete (*it);
+    }
+    for (auto it = entities.begin(); it != entities.end(); it++) {
+        delete (*it);
+    }
 }
 
-void World::addEntity(Entity entity)
+void World::addEntity(Entity *entity)
 {
-    uint32_t new_id = entities.size();
-    entity.setId(new_id);
     entities.push_back(entity);
 }
 
-void World::removeEntity(uint32_t id)
+void World::removeEntityByName(std::string name)
 {
     for (auto it = entities.begin(); it != entities.end(); it++) {
-        if (it->getId() == id) {
+        if ((*it)->getUniqueName() == name) {
             entities.erase(it);
+            return;
         }
     }
 
-    std::cout << "[Warning] Entity with ID " << id << " could not be removed." << std::endl;
+    std::cout << "[Warning] Entity with name " << name << " could not be removed." << std::endl;
 }
+
+void World::clearEntities()
+{
+    for (auto it = entities.begin(); it != entities.end(); it++) {
+        entities.erase(it);
+    }
+}
+
+void World::loadWorld ( unsigned int id )
+{
+    // Load World from File...
+}
+
 
 void World::updatePointLight(unsigned int lightId, bool active, glm::vec3 position, glm::vec3 color)
 {
@@ -71,7 +96,7 @@ void World::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition)
 {
     // Draw all entities
     for (auto it = entities.begin(); it != entities.end(); it++) {
-        it->draw(viewProjMatrix, viewPosition);
+        (*it)->draw(viewProjMatrix, viewPosition);
     }
 
     // Calculate shadows (unclear if it should belong here or somewhere else)
@@ -99,7 +124,7 @@ void World::calculateShadows(ShaderProgram *directionalShaderProgram, ShaderProg
     // Draw scene from light perspective
     // Draw all entities
     for (auto it = entities.begin(); it != entities.end(); it++) {
-        it->drawDirectionalShadows(directionalLightViewProjectionMatrix, directionalShaderProgram);
+        (*it)->drawDirectionalShadows(directionalLightViewProjectionMatrix, directionalShaderProgram);
     }
 
     depthMapDirectionalFBO.unbind();
@@ -147,7 +172,7 @@ void World::calculateShadows(ShaderProgram *directionalShaderProgram, ShaderProg
         // Draw scene from light perspective
         // Draw all entities
         for (auto it = entities.begin(); it != entities.end(); it++) {
-            it->drawPointShadows(pointShaderProgram);
+            (*it)->drawPointShadows(pointShaderProgram);
         }
 
         depthMapPointFBO[i]->unbind();
@@ -167,4 +192,37 @@ void World::calculateShadows(ShaderProgram *directionalShaderProgram, ShaderProg
     // Reset viewport size
     glViewport(VIEWPORT[0], VIEWPORT[1], VIEWPORT[2], VIEWPORT[3]);
     glCullFace(GL_FRONT);
+}
+
+Model* World::getModelByName(std::string name)
+{
+    for (auto it = models.begin(); it != models.end(); it++) {
+        if((*it)->getUniqueName() == name) {
+            return *it;
+        }
+    }
+    std::cout << "[Warning] Model could not be found by unique name \"" << name << "\"" << std::endl;
+    return nullptr;
+}
+
+Entity* World::getEntityByName(std::string name)
+{
+    for (auto it = entities.begin(); it != entities.end(); it++) {
+        if((*it)->getUniqueName() == name) {
+            return *it;
+        }
+    }
+    std::cout << "[Warning] Entity could not be found by unique name \"" << name << "\"" << std::endl;
+    return nullptr;
+}
+
+Entity* World::getEntityById(uint32_t id)
+{
+    for (auto it = entities.begin(); it != entities.end(); it++) {
+        if((*it)->getId() == id) {
+            return *it;
+        }
+    }
+    std::cout << "[Warning] Entity could not be found by ID \"" << id << "\"" << std::endl;
+    return nullptr;
 }

@@ -8,7 +8,7 @@
 class Model
 {
 public:
-    Model(const char *pathToModel);
+    Model(std::string &modelName, std::string &pathToModel);
     ~Model();
 
     void draw(ShaderProgram *shaderProgram);
@@ -19,12 +19,22 @@ public:
         return meshes[index];
     }
 
+    std::string getUniqueName()
+    {
+        return unique_name;
+    }
+
 private:
-    void loadModel(std::string pathToModel);
+    void loadModel(std::string &pathToModel);
 
     std::vector<Mesh *> meshes;
 
     std::vector<Texture *> loadedTextures;
 
     std::string directory;
+
+    static uint32_t id_counter;
+    uint32_t id;
+    std::string unique_name;
+
 };
