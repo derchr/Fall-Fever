@@ -276,11 +276,11 @@ void Controller::renderImGui(World &world, PointLight *pointLight, glm::vec3 *li
     ImGui::Checkbox("Rotate Object", rotateEntity);
 
     Entity *mainObject = world.getEntityById(0);
-    mainObject->setPosition(glm::vec3(translation[0], translation[1], translation[2]));
+    //mainObject->setPosition(glm::vec3(translation[0], translation[1], translation[2]));
     if (!*rotateEntity) {
-        mainObject->setRotation(glm::vec3(0.f, 1.0f, 0.f), rotation);
+        //mainObject->setRotation(glm::vec3(0.f, 1.0f, 0.f), rotation);
     }
-    mainObject->setScale(scale);
+    //mainObject->setScale(scale);
 
     // color picker
     ImGui::Text("\nLight Source");

@@ -1,11 +1,12 @@
 {
     "models": [
         {
+            "unique_name": "fallback",
+            "path": "res/models/fallback.ffo"
+        },
+        {
             "unique_name": "backpack",
-            "path": "res/models/backpack.ffo",
-            
-            "position": ["0.0", "0.0", "0.0"],
-            "rotation": ["0.0", "0.0", "0.0"]
+            "path": "res/models/backpack.ffo"
         },
         {
             "unique_name": "ground",
@@ -20,12 +21,15 @@
         {
             "unique_name": "backpack",
             "model": "backpack",
-            "shaderProgram": "defaultProgram"
+            "shaderProgram": "defaultProgram",
+            "position": [0.0, 1.0, 0.0],
+            "rotation": [0.0, 0.0, 0.0],
+            "scale": 0.6
         },
         {
             "unique_name": "ground",
             "model": "ground",
-            "shaderProgram": "defaultProgram"
+            "shaderProgram": "defaultProgram",
         },
         {
             "unique_name": "light",

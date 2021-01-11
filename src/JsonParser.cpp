@@ -54,6 +54,8 @@ std::vector<Entity*> JsonParser::getEntities(std::vector<Model*> &models, std::v
         std::string entity_name = entitiesJson[index]["unique_name"].asString();
         std::string entity_model = entitiesJson[index]["model"].asString();
         std::string entity_shaderProgram = entitiesJson[index]["shaderProgram"].asString();
+        glm::vec3 entitiy_position = {}, entity_rotation = {};
+        float entity_scale = 1.0f;
 
         ShaderProgram *shaderProgram = nullptr;
         for (auto it = shaderPrograms.begin(); it != shaderPrograms.end(); it++) {
@@ -73,7 +75,27 @@ std::vector<Entity*> JsonParser::getEntities(std::vector<Model*> &models, std::v
         if(!current_model)
             std::cout << "[Warning] Model could not be found by unique name \"" << entity_model << "\"" << std::endl;
 
+        const Json::Value positionJson = entitiesJson[index]["position"];
+        const Json::Value rotationJson = entitiesJson[index]["rotation"];
+        const Json::Value scaleJson = entitiesJson[index]["scale"];
+        if(!positionJson.empty()) {
+            entitiy_position.x = positionJson[0].asFloat();
+            entitiy_position.y = positionJson[1].asFloat();
+            entitiy_position.z = positionJson[2].asFloat();
+        }
+        if(!rotationJson.empty()) {
+            entity_rotation.s = rotationJson[0].asFloat();
+            entity_rotation.t = rotationJson[1].asFloat();
+            entity_rotation.p = rotationJson[2].asFloat();
+        }
+        if(!scaleJson.empty()) {
+            entity_scale = scaleJson.asFloat();
+        }
+
         Entity *current_entity = new Entity(entity_name, current_model, shaderProgram);
+        current_entity->setPosition(entitiy_position);
+        current_entity->setRotation(entity_rotation);
+        current_entity->setScale(entity_scale);
         temp_entities.push_back(current_entity);
         std::cout << "Loaded Entity \"" << entity_name << "\" with model \"" << entity_model << "\"" << std::endl;
     }
