@@ -10,8 +10,8 @@ bool EventHandler::firstMouseInput = 1;
 float EventHandler::mouseSensitivity = 0.5f;
 
 
-EventHandler::EventHandler(GLFWwindow *window) :
-    window(window)
+EventHandler::EventHandler(GLFWwindow *p_window) :
+    window(p_window)
 {
     glfwSetKeyCallback(window, key_callback);
     glfwSetCursorPosCallback(window, mouse_callback);

@@ -8,7 +8,7 @@ Framebuffer::Framebuffer(uint32_t width, uint32_t height, ShaderProgram *shaderP
 {
     glGenFramebuffers(1, &FBO);
 
-    generateTextutes(width, height);
+    generateTextures(width, height);
 }
 
 Framebuffer::~Framebuffer()
@@ -27,7 +27,7 @@ void Framebuffer::unbind()
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Framebuffer::render(GLuint customTextureId)
+void Framebuffer::render()
 {
     // Disable wireframe mode
     GLint wireframe;
@@ -36,11 +36,8 @@ void Framebuffer::render(GLuint customTextureId)
 
     shaderProgram->bind();
     glActiveTexture(GL_TEXTURE0);
-    if(customTextureId) {
-        glBindTexture(GL_TEXTURE_2D, customTextureId);
-    } else {
-        glBindTexture(GL_TEXTURE_2D, getTextureId());
-    }
+    glBindTexture(GL_TEXTURE_2D, getTextureId());
+
     GLint location = glGetUniformLocation(shaderProgram->getShaderProgramId(), "u_texture");
     glUniform1i(location, 0);
 
@@ -60,10 +57,10 @@ void Framebuffer::changeDimensions(uint32_t width, uint32_t height)
     // Delete old textures
     glDeleteTextures(2, textures);
 
-    generateTextutes(width, height);
+    generateTextures(width, height);
 }
 
-void Framebuffer::generateTextutes(uint32_t width, uint32_t height)
+void Framebuffer::generateTextures(uint32_t width, uint32_t height)
 {
     // Create new textures
     glGenTextures(2, textures);

@@ -9,6 +9,8 @@
 class Light
 {
 public:
+    virtual ~Light() {}
+
     virtual void update() = 0;
 
     void setActive(bool active)
@@ -38,7 +40,6 @@ public:
 
 protected:
     Light(ShaderProgram *shaderProgram) : shaderProgram(shaderProgram) {}
-    ~Light() {}
 
     ShaderProgram *shaderProgram;
 

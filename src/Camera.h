@@ -61,7 +61,6 @@ private:
     float speed = 2.0f;
 
     float fov;
-    float exposure = 1.0f;
 };
 
 

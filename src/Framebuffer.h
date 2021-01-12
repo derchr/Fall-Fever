@@ -13,7 +13,7 @@ public:
     void bind();
     void unbind();
 
-    void render(GLuint customTextureId = 0);
+    void render();
 
     void changeDimensions(uint32_t width, uint32_t height);
 
@@ -24,7 +24,7 @@ public:
     void setExposureCorrection(bool exposureCorrection);
 
 private:
-    void generateTextutes(uint32_t width, uint32_t height);
+    void generateTextures(uint32_t width, uint32_t height);
 
     GLuint FBO;
     GLuint textures[2];

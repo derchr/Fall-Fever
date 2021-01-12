@@ -115,7 +115,7 @@ void Controller::run()
     // This is the game loop
     while (!glfwWindowShouldClose(gameWindow->getGLFWwindow())) {
         // --- Timing ---
-        //limit_framerate();
+        limit_framerate();
 
         // --- Update game ---
 

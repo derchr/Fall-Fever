@@ -1,8 +1,8 @@
 #include "Widget.h"
 #include "VertexArray.h"
 
-Widget::Widget(Texture *texture, float x, float y, float w, float h) :
-    x(x), y(y), w(w), h(h)
+Widget::Widget(Texture *texture, float p_x, float p_y, float p_w, float p_h) :
+    x(p_x), y(p_y), w(p_w), h(p_h)
 {
     widgetTextures.push_back(texture);
     
