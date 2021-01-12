@@ -7,13 +7,15 @@
 class Framebuffer
 {
 public:
-    Framebuffer(uint32_t width, uint32_t height, ShaderProgram *ShaderProgram);
+    Framebuffer(uint32_t width, uint32_t height, ShaderProgram* shaderProgram);
     ~Framebuffer();
 
     void bind();
     void unbind();
 
     void render(GLuint customTextureId = 0);
+
+    void changeDimensions(uint32_t width, uint32_t height);
 
     GLuint getTextureId()
     {
@@ -22,6 +24,8 @@ public:
     void setExposureCorrection(bool exposureCorrection);
 
 private:
+    void generateTextutes(uint32_t width, uint32_t height);
+
     GLuint FBO;
     GLuint textures[2];
 

@@ -28,7 +28,7 @@ public:
 private:
     void limit_framerate();
 
-    void updateWindowSize(ShaderProgram *pp_program);
+    void updateWindowSize();
     void updateExposure(ShaderProgram *shaderProgram);
 
     ShaderProgram* getShaderProgramByName(const char *name);

@@ -79,16 +79,15 @@ Controller::~Controller()
     ImGui::DestroyContext();
 #endif
 
-    delete gameWindow;
-    delete gameEventHandler;
-    delete camera;
-
     for (auto it = shaderPrograms.begin(); it != shaderPrograms.end(); it++) {
         delete *it;
     }
 
-    delete pp_framebuffer;
+    delete camera;
     delete menu;
+    delete pp_framebuffer;
+    delete gameEventHandler;
+    delete gameWindow;
     glfwTerminate();
 }
 
@@ -116,7 +115,7 @@ void Controller::run()
     // This is the game loop
     while (!glfwWindowShouldClose(gameWindow->getGLFWwindow())) {
         // --- Timing ---
-        limit_framerate();
+        //limit_framerate();
 
         // --- Update game ---
 
@@ -174,7 +173,7 @@ void Controller::run()
 
         // Update window size
         if (gameWindow->checkWindowWasResized()) {
-            updateWindowSize(getShaderProgramByName("postProcessingProgram"));
+            updateWindowSize();
         }
 
         // --- Check events, handle input ---
@@ -218,13 +217,12 @@ void Controller::error_callback(int error, const char *description)
     fprintf(stderr, "Error: %s\n", description);
 }
 
-void Controller::updateWindowSize(ShaderProgram *pp_program)
+void Controller::updateWindowSize()
 {
     camera->updateAspectRatio(gameWindow->getWindowAspectRatio());
     gameEventHandler->setFirstMouseInput(1);
 
-    delete pp_framebuffer;
-    pp_framebuffer = new Framebuffer(gameWindow->getWindowWidth(), gameWindow->getWindowHeight(), pp_program);
+    pp_framebuffer->changeDimensions(gameWindow->getWindowWidth(), gameWindow->getWindowHeight());
 }
 
 void Controller::updateExposure(ShaderProgram *shaderProgram)
@@ -276,7 +274,7 @@ void Controller::renderImGui(World &world, PointLight *pointLight, glm::vec3 *li
     ImGui::Checkbox("Rotate Object", rotateEntity);
 
     Entity *mainObject = world.getEntityById(0);
-    //mainObject->setPosition(glm::vec3(translation[0], translation[1], translation[2]));
+    mainObject->setPosition(glm::vec3(translation[0], translation[1], translation[2]));
     if (!*rotateEntity) {
         //mainObject->setRotation(glm::vec3(0.f, 1.0f, 0.f), rotation);
     }

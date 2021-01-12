@@ -37,8 +37,10 @@ std::vector<Model*> JsonParser::getModels()
         std::string model_name = modelsJson[index]["unique_name"].asString();
         std::string model_path = modelsJson[index]["path"].asString();
         Model *current_model = new Model(model_name, model_path);
-        temp_models.push_back(current_model);
-        std::cout << "Loaded Model \"" << model_name << "\" from \"" << model_path << "\"" << std::endl;
+        if(current_model) {
+            temp_models.push_back(current_model);
+            std::cout << "Loaded Model \"" << model_name << "\" from \"" << model_path << "\"" << std::endl;
+        }
     }
 
     return temp_models;
