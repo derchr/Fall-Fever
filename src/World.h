@@ -48,8 +48,11 @@ private:
     DepthMap depthMapDirectionalFBO;
     std::vector<DepthMap *> depthMapPointFBO;
     // Shadow projection matrices
-    float near_plane = 1.0f, far_plane = 15.0f;
-    glm::mat4 directionalLightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-    float aspect = 1.0f, near = 1.0f, far = 25.0f;
-    glm::mat4 pointLightProjection = glm::perspective(glm::radians(90.0f), aspect, near, far);
+    const float near_plane_directional = 1.0f;
+    const float far_plane_directional = 15.0f;
+    glm::mat4 directionalLightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane_directional, far_plane_directional);
+    const float aspect_ratio_point = 1.0f;
+    const float near_plane_point = 1.0f;
+    const float far_plane_point = 25.0f;
+    glm::mat4 pointLightProjection = glm::perspective(glm::radians(90.0f), aspect_ratio_point, near_plane_point, far_plane_point);
 };

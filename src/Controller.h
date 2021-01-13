@@ -22,15 +22,14 @@ public:
 
     void run();
 
-    static ShaderProgram* getShaderProgramByName(std::vector<ShaderProgram*> shaderPrograms, const char *name);
-    static void error_callback(int error, const char *description);
-    
     void setMaxFps(uint16_t fps);
+
+    static ShaderProgram* getShaderProgramByName(std::vector<ShaderProgram*> shaderPrograms, const char *name);
 
 private:
     void limit_framerate();
 
-    void updateWindowSize();
+    void updateWindowDimensions();
     void updateExposure(ShaderProgram *shaderProgram);
 
     ShaderProgram* getShaderProgramByName(const char *name);

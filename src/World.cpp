@@ -163,7 +163,7 @@ void World::calculateShadows(ShaderProgram *directionalShaderProgram, ShaderProg
             pointShaderProgram->setUniform(("u_shadowMatrices[" + std::to_string(i) + "]").c_str(), viewProjMatrices[i]);
         }
 
-        pointShaderProgram->setUniform("pointShadowDepthMapFarPlane", far);
+        pointShaderProgram->setUniform("pointShadowDepthMapFarPlane", far_plane_point);
         pointShaderProgram->setUniform("v_lightPos", lightPos);
 
         // Draw scene from light perspective
@@ -176,7 +176,7 @@ void World::calculateShadows(ShaderProgram *directionalShaderProgram, ShaderProg
 
         shaderProgram->bind();
 
-        shaderProgram->setUniform("pointShadowDepthMapFarPlane", far);
+        shaderProgram->setUniform("pointShadowDepthMapFarPlane", far_plane_point);
 
         textureUnit = TEXTURE_TYPE_NUM_ITEMS * 2 + i + 1;
         shaderProgram->setUniform("u_texture_pointShadowMap0", (int)textureUnit);

@@ -12,13 +12,7 @@
 #include <imgui_impl_opengl3.h>
 #endif
 
-#ifdef __linux__
-#include <unistd.h>
-#endif
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
+#include "helper.h"
 #include "Controller.h"
 #include "VertexArray.h"
 #include "Texture.h"
@@ -31,14 +25,6 @@
 
 Controller::Controller()
 {
-    if (!glfwInit()) {
-        exit(-1);
-    }
-
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
     gameWindow = new Window();
     gameEventHandler = new EventHandler(gameWindow->getGLFWwindow());
 
@@ -47,14 +33,10 @@ Controller::Controller()
     JsonParser shaderParser("res/shaderPrograms.json");
     shaderPrograms = shaderParser.getShaderPrograms();
 
-    pp_framebuffer = new Framebuffer(INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT, getShaderProgramByName("postProcessingProgram"));
+    pp_framebuffer = new Framebuffer(gameWindow->getWindowWidth(), gameWindow->getWindowHeight(), getShaderProgramByName("postProcessingProgram"));
     menu = new Menu(pp_framebuffer, getShaderProgramByName("menuProgram"));
 
 #ifdef _DEBUG
-    glfwWindowHint(GLFW_MAXIMIZED, GL_TRUE);
-    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
-    glfwSetErrorCallback(error_callback);
-
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -85,7 +67,6 @@ Controller::~Controller()
     delete pp_framebuffer;
     delete gameEventHandler;
     delete gameWindow;
-    glfwTerminate();
 }
 
 void Controller::run()
@@ -169,8 +150,9 @@ void Controller::run()
         glfwSwapBuffers(gameWindow->getGLFWwindow());
 
         // Update window size
-        if (gameWindow->checkWindowWasResized()) {
-            updateWindowSize();
+        if (gameWindow->isWindowResized()) {
+            gameWindow->updateWindowDimensions();
+            updateWindowDimensions();
         }
 
         // --- Check events, handle input ---
@@ -194,12 +176,7 @@ void Controller::limit_framerate()
 
     double frameTime = 1 / (double)MAX_FPS;
     if (frameTime > lastTime) {
-#ifdef __linux__
-        usleep((frameTime - lastTime) * 1000000);
-#endif
-#ifdef _WIN32
-        Sleep((frameTime - lastTime) * 1000);
-#endif
+        Helper::sleep((frameTime - lastTime) * 1000000);
     }
 
     deltaTime = glfwGetTime() - startingTime;
@@ -207,14 +184,7 @@ void Controller::limit_framerate()
     startingTime = glfwGetTime();
 }
 
-// GLFW error function
-void Controller::error_callback(int error, const char *description)
-{
-    (void)error;
-    fprintf(stderr, "Error: %s\n", description);
-}
-
-void Controller::updateWindowSize()
+void Controller::updateWindowDimensions()
 {
     camera->updateAspectRatio(gameWindow->getWindowAspectRatio());
     gameEventHandler->setFirstMouseInput(1);
