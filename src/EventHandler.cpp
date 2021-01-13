@@ -7,7 +7,7 @@ double EventHandler::cameraMouseActionRegister[CAMERA_MOUSE_ACTION_NUM_ITEMS] = 
 bool EventHandler::windowActionRegister[WINDOW_ACTION_NUM_ITEMS] = {0};
 
 bool EventHandler::firstMouseInput = 1;
-float EventHandler::mouseSensitivity = 0.5f;
+float EventHandler::mouseSensitivity = 0.15f;
 
 
 EventHandler::EventHandler(GLFWwindow *p_window) :
@@ -113,8 +113,8 @@ void EventHandler::mouse_callback(GLFWwindow *window, double xpos, double ypos)
     deltaCursorPosX *= mouseSensitivity;
     deltaCursorPosY *= mouseSensitivity;
 
-    cameraMouseActionRegister[cameraMouseDeltaX] = deltaCursorPosX;
-    cameraMouseActionRegister[cameraMouseDeltaY] = deltaCursorPosY;
+    cameraMouseActionRegister[cameraMouseDeltaX] += deltaCursorPosX;
+    cameraMouseActionRegister[cameraMouseDeltaY] += deltaCursorPosY;
 }
 
 bool * EventHandler::getCameraActionRegister()

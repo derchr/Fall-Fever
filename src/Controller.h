@@ -24,6 +24,8 @@ public:
 
     static ShaderProgram* getShaderProgramByName(std::vector<ShaderProgram*> shaderPrograms, const char *name);
     static void error_callback(int error, const char *description);
+    
+    void setMaxFps(uint16_t fps);
 
 private:
     void limit_framerate();
@@ -46,7 +48,7 @@ private:
 
     Menu *menu;
 
-    const uint16_t MAX_FPS = 60;
+    uint16_t MAX_FPS = 60;
     double deltaTime;
 
     float exposure = 1.0f;

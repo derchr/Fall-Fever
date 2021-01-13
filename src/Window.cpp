@@ -37,27 +37,24 @@ Window::Window()
 
     // Enable multisampling (a bit redundant because most graphics drivers do this automatically)
     glEnable(GL_MULTISAMPLE);
+    
+    // Disable VSync since my sleep function handles this
+    glfwSwapInterval(0);
 
+#ifdef _DEBUG
     // Disable mouse cursor
-#ifdef _DEBUG
     mouseCatched = false;
-#endif
-    setCatchedCursor(mouseCatched);
-
-    // Enable primitive gamma correction
-    // glEnable(GL_FRAMEBUFFER_SRGB);
-
-    // Maximize in release build
-#ifndef _DEBUG
-    glfwMaximizeWindow(window);
-#endif
-
-#ifdef _DEBUG
+    
     std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback(openGLDebugCallback, NULL);
+#else
+    // Maximize in release build
+    glfwMaximizeWindow(window);
 #endif
+    
+    setCatchedCursor(mouseCatched);
 
     glViewport(0, 0, width, height);
 

@@ -251,6 +251,12 @@ ShaderProgram* Controller::getShaderProgramByName(std::vector<ShaderProgram*> sh
     return nullptr;
 }
 
+void Controller::setMaxFps(uint16_t fps)
+{
+    MAX_FPS = fps;
+}
+
+
 #ifdef _DEBUG
 void Controller::renderImGui(World &world, PointLight *pointLight, glm::vec3 *lightColor, bool *rotateEntity, bool *rotateLightSource, ShaderProgram *postProcessingProgram, float *intensity, bool *drawShadows)
 {
