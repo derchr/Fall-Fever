@@ -137,3 +137,28 @@ void Window::openGLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum s
                   << "Severity: " << severity << std::endl
                   << std::endl;
 }
+
+GLFWwindow* Window::getGLFWwindow()
+{
+    return window;
+}
+
+int Window::getWindowWidth()
+{
+    return width;
+}
+
+int Window::getWindowHeight()
+{
+    return height;
+}
+
+float Window::getWindowAspectRatio()
+{
+    return (float) width / (float) height;
+}
+
+bool Window::getMouseIsCatched()
+{
+    return mouseCatched;
+}

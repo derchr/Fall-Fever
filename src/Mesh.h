@@ -16,16 +16,14 @@ public:
     void draw(ShaderProgram *shaderProgram);
     void drawWithoutTextures();
 
-    VertexArray *getVertexArray()
-    {
-        return &vertexArray;
-    }
+    VertexArray *getVertexArray();
+
+private:
+    void setupMesh();
 
 private:
     uint32_t numElements;
     std::vector<Texture *> textures;
 
     VertexArray vertexArray;
-
-    void setupMesh();
 };

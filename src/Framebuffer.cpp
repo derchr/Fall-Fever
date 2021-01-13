@@ -91,6 +91,11 @@ void Framebuffer::setExposureCorrection(bool exposureCorrection)
     shaderProgram->unbind();
 }
 
+GLuint Framebuffer::getTextureId()
+{
+    return textures[0];
+}
+
 DepthMap::DepthMap(int TYPE, int RESOLUTION) :
     cubeMap(RESOLUTION)
 {
@@ -133,4 +138,19 @@ void DepthMap::bind()
 void DepthMap::unbind()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+GLuint DepthMap::getFBO()
+{
+    return depthMapFBO;
+}
+
+GLuint DepthMap::getDepthMap()
+{
+    return depthMap;
+}
+
+GLuint DepthMap::getCubeMapId()
+{
+    return cubeMap.getTextureId();
 }

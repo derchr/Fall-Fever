@@ -22,20 +22,15 @@ public:
     void setUniform(const char *name, glm::mat3 matrix) const;
     void setUniform(const char *name, glm::mat4 matrix) const;
 
-    GLuint getShaderProgramId()
-    {
-        return shaderProgramId;
-    }
-
-    std::string getUniqueName()
-    {
-        return unique_name;
-    }
+public:
+    GLuint getShaderProgramId();
+    std::string getUniqueName();
 
 private:
     std::string parse(const char *filename);
     GLuint compile(std::string shaderSource, GLenum type);
 
+private:
     GLuint shaderProgramId;
     std::string unique_name;
 };

@@ -14,21 +14,14 @@ public:
     void draw(ShaderProgram *shaderProgram);
     void drawWithoutTextures();
 
-    Mesh *getMesh(unsigned int index)
-    {
-        return meshes[index];
-    }
-
-    std::string getUniqueName()
-    {
-        return unique_name;
-    }
+    Mesh *getMesh(unsigned int index);
+    std::string getUniqueName();
 
 private:
     void loadModel(std::string &pathToModel);
 
+private:
     std::vector<Mesh *> meshes;
-
     std::vector<Texture *> loadedTextures;
 
     std::string directory;

@@ -115,3 +115,13 @@ void Model::loadModel(std::string &pathToModel)
 
     input.close();
 }
+
+Mesh* Model::getMesh(unsigned int index)
+{
+    return meshes[index];
+}
+
+std::string Model::getUniqueName()
+{
+    return unique_name;
+}

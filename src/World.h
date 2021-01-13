@@ -21,20 +21,9 @@ public:
     void updatePointLight(unsigned int lightId, bool active, glm::vec3 position, glm::vec3 color);
     void updateDirectionalLight(bool active, glm::vec3 direction, glm::vec3 color);
 
-    std::vector<Entity*> getEntities()
-    {
-        return entities;
-    }
-
-    PointLight *getPointLights()
-    {
-        return pointLights.data();
-    }
-    Skybox *getSkybox()
-    {
-        return skybox;
-    }
-
+    std::vector<Entity*> getEntities();
+    PointLight *getPointLights();
+    Skybox *getSkybox();
     Entity* getEntityByName(std::string name);
     Entity* getEntityById(uint32_t id);
     Model* getModelByName(std::string name);

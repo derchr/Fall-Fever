@@ -116,3 +116,23 @@ void EventHandler::mouse_callback(GLFWwindow *window, double xpos, double ypos)
     cameraMouseActionRegister[cameraMouseDeltaX] = deltaCursorPosX;
     cameraMouseActionRegister[cameraMouseDeltaY] = deltaCursorPosY;
 }
+
+bool * EventHandler::getCameraActionRegister()
+{
+    return cameraActionRegister;
+}
+
+bool * EventHandler::getWindowActionRegister()
+{
+    return windowActionRegister;
+}
+
+double * EventHandler::getCursorDelta()
+{
+    return cameraMouseActionRegister;
+}
+
+void EventHandler::setFirstMouseInput(bool val)
+{
+    firstMouseInput = val;
+}

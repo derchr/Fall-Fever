@@ -35,6 +35,7 @@ private:
 
     void renderImGui(World &world, PointLight *pointLight, glm::vec3 *lightColor, bool *rotateEntity, bool *rotateLightSource, ShaderProgram *postProcessingProgram, float *intensity, bool *drawShadows);
 
+private:
     Window *gameWindow;
     EventHandler *gameEventHandler;
     Camera *camera;
@@ -47,8 +48,6 @@ private:
 
     const uint16_t MAX_FPS = 60;
     double deltaTime;
-
-    bool wireFrameMode = 0;
 
     float exposure = 1.0f;
 };

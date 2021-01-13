@@ -13,34 +13,16 @@ public:
 
     virtual void update() = 0;
 
-    void setActive(bool active)
-    {
-        isActive = active;
-        update();
-    }
-    void setColor(glm::vec3 color)
-    {
-        lightColor = color;
-        diffuseColor = lightColor * glm::vec3(1.0f);
-        ambientColor = diffuseColor * glm::vec3(0.002f);
-        specularColor = lightColor * glm::vec3(1.0f);
-        update();
-    }
+    void setActive(bool active);
+    void setColor(glm::vec3 color);
+    void setShaderProgram(ShaderProgram *shaderProgram);
 
-    void setShaderProgram(ShaderProgram *shaderProgram)
-    {
-        this->shaderProgram = shaderProgram;
-        update();
-    }
-
-    glm::vec3 getColor()
-    {
-        return lightColor;
-    }
+    glm::vec3 getColor();
 
 protected:
     Light(ShaderProgram *shaderProgram) : shaderProgram(shaderProgram) {}
 
+protected:
     ShaderProgram *shaderProgram;
 
     bool isActive = false;
@@ -59,30 +41,17 @@ public:
     PointLight(ShaderProgram *shaderProgram);
     ~PointLight() = default;
 
-    void setPosition(glm::vec3 position)
-    {
-        this->position = position;
-        update();
-    }
+    void setPosition(glm::vec3 position);
+    void setParameters(float K_q);
+    void setId(unsigned int id);
 
-    void setParameters(float K_q)
-    {
-        this->K_q = K_q;
-    }
-
-    void setId(unsigned int id)
-    {
-        lightId = id;
-    }
-
-    glm::vec3 getPosition()
-    {
-        return position;
-    }
+    glm::vec3 getPosition();
 
 private:
     void update() override;
-    std::string _getStructMemberName();
+    std::string getStructMemberName();
+
+private:
     unsigned int lightId;
 
     glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -95,14 +64,11 @@ class DirectionalLight : public Light
 public:
     DirectionalLight(ShaderProgram *shaderProgram);
 
-    void setDirection(glm::vec3 direction)
-    {
-        this->direction = direction;
-        update();
-    }
+    void setDirection(glm::vec3 direction);
 
 private:
     void update() override;
 
+private:
     glm::vec3 direction;
 };

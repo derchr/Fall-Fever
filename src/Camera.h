@@ -16,39 +16,20 @@ public:
 
     void translate(glm::vec3 translateVector);
 
-    void setPosition(glm::vec3 position)
-    {
-        this->position = position;
-    }
-
     void lookAtTarget(glm::vec3 target);
     void lookForward();
 
-    glm::mat4 getView()
-    {
-        return viewMatrix;
-    }
-    glm::mat4 getProj()
-    {
-        return projectionMatrix;
-    }
-    glm::mat4 getViewProj()
-    {
-        return viewProjectionMatrix;
-    }
-    glm::vec3 getPosition()
-    {
-        return position;
-    }
-    glm::vec3 getDirection()
-    {
-        return frontVec;
-    }
+    glm::mat4 getView();
+    glm::mat4 getProj();
+    glm::mat4 getViewProj();
+    glm::vec3 getPosition();
+    glm::vec3 getDirection();
+
+    void setPosition(glm::vec3 position);
 
 private:
     glm::mat4 viewMatrix;
     glm::mat4 projectionMatrix;
-
     glm::mat4 viewProjectionMatrix;
 
     glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);

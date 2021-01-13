@@ -39,10 +39,6 @@ Controller::Controller()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-#ifndef _DEBUG
-    glfwWindowHint(GLFW_MAXIMIZED, GL_TRUE);
-#endif
-
     gameWindow = new Window();
     gameEventHandler = new EventHandler(gameWindow->getGLFWwindow());
 
@@ -55,6 +51,7 @@ Controller::Controller()
     menu = new Menu(pp_framebuffer, getShaderProgramByName("menuProgram"));
 
 #ifdef _DEBUG
+    glfwWindowHint(GLFW_MAXIMIZED, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
     glfwSetErrorCallback(error_callback);
 

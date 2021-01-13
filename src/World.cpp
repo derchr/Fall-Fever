@@ -223,3 +223,18 @@ Entity* World::getEntityById(uint32_t id)
     std::cout << "[Warning] Entity could not be found by ID \"" << id << "\"" << std::endl;
     return nullptr;
 }
+
+PointLight* World::getPointLights()
+{
+    return pointLights.data();
+}
+
+std::vector< Entity* > World::getEntities()
+{
+    return entities;
+}
+
+Skybox* World::getSkybox()
+{
+    return skybox;
+}

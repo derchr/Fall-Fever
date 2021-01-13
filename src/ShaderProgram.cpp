@@ -162,3 +162,13 @@ void ShaderProgram::setUniform(const char *name, glm::mat4 matrix) const
     GLint location = glGetUniformLocation(shaderProgramId, name);
     glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
 }
+
+GLuint ShaderProgram::getShaderProgramId()
+{
+    return shaderProgramId;
+}
+
+std::string ShaderProgram::getUniqueName()
+{
+    return unique_name;
+}

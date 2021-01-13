@@ -80,6 +80,21 @@ void Texture::unbind()
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+uint8_t Texture::getTextureType()
+{
+    return textureType;
+}
+
+std::string Texture::getPath()
+{
+    return texturePath;
+}
+
+GLuint Texture::getTextureId()
+{
+    return textureId;
+}
+
 CubeMap::CubeMap(const char *texturePseudoPath)
 {
     // Reserve space in vector so that elements can be accessed explicitly.
@@ -166,4 +181,9 @@ void CubeMap::fillTexturePathVector(const char *texturePseudoPath)
         texturePaths[cm_left]   = std::string(texturePseudoPath) + "left.png";
         texturePaths[cm_right]  = std::string(texturePseudoPath) + "right.png";
     }
+}
+
+GLuint CubeMap::getTextureId()
+{
+    return textureId;
 }

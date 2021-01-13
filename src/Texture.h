@@ -21,18 +21,9 @@ public:
     void bind(uint8_t textureUnit, ShaderProgram *shaderProgram, uint8_t textureTypeNum);
     void unbind();
 
-    uint8_t getTextureType()
-    {
-        return textureType;
-    }
-    std::string getPath()
-    {
-        return texturePath;
-    }
-    GLuint getTextureId()
-    {
-        return textureId;
-    }
+    uint8_t getTextureType();
+    std::string getPath();
+    GLuint getTextureId();
 
 private:
     std::string texturePath;
@@ -57,14 +48,12 @@ public:
     void bind(ShaderProgram *shaderProgram);
     void unbind();
 
-    GLuint getTextureId()
-    {
-        return textureId;
-    }
+    GLuint getTextureId();
 
 private:
     void fillTexturePathVector(const char *texturePseudoPath);
 
+private:
     std::vector<std::string> texturePaths;
 
     GLuint textureId;

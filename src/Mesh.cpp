@@ -40,3 +40,8 @@ void Mesh::drawWithoutTextures()
     glDrawElements(GL_TRIANGLES, numElements, GL_UNSIGNED_INT, 0);
     vertexArray.unbind();
 }
+
+VertexArray* Mesh::getVertexArray()
+{
+    return &vertexArray;
+}

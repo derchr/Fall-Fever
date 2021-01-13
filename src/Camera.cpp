@@ -91,3 +91,33 @@ void Camera::updateDirectionFromMouseInput(double *cameraMouseActionRegister)
     direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
     frontVec = glm::normalize(direction);
 }
+
+void Camera::setPosition(glm::vec3 position)
+{
+    this->position = position;
+}
+
+glm::mat4 Camera::getView()
+{
+    return viewMatrix;
+}
+
+glm::mat4 Camera::getProj()
+{
+    return projectionMatrix;
+}
+
+glm::mat4 Camera::getViewProj()
+{
+    return viewProjectionMatrix;
+}
+
+glm::vec3 Camera::getPosition()
+{
+    return position;
+}
+
+glm::vec3 Camera::getDirection()
+{
+    return frontVec;
+}

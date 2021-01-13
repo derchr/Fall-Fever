@@ -112,7 +112,40 @@ void Entity::updateModelMatrix()
     modelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
 }
 
+void Entity::setIsLightSource(bool temp)
+{
+    isLightSource = temp;
+}
 
+void Entity::setId(uint32_t id)
+{
+    this->id = id;
+}
+
+uint32_t Entity::getId()
+{
+    return id;
+}
+
+std::string Entity::getUniqueName()
+{
+    return unique_name;
+}
+
+glm::vec3 Entity::getPosition()
+{
+    return position;
+}
+
+glm::mat4 Entity::getModelMatrix()
+{
+    return modelMatrix;
+}
+
+bool Entity::getIsLightSource()
+{
+    return isLightSource;
+}
 
 Skybox::Skybox(Model *cubeModel, ShaderProgram *shaderProgram, const char *texturePseudoPath) :
     cubeModel(cubeModel),

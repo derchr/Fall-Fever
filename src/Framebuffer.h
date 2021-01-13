@@ -17,15 +17,13 @@ public:
 
     void changeDimensions(uint32_t width, uint32_t height);
 
-    GLuint getTextureId()
-    {
-        return textures[0];
-    }
+    GLuint getTextureId();
     void setExposureCorrection(bool exposureCorrection);
 
 private:
     void generateTextures(uint32_t width, uint32_t height);
 
+private:
     GLuint FBO;
     GLuint textures[2];
 
@@ -44,18 +42,9 @@ public:
     void bind();
     void unbind();
 
-    GLuint getFBO()
-    {
-        return depthMapFBO;
-    }
-    GLuint getDepthMap()
-    {
-        return depthMap;
-    }
-    GLuint getCubeMapId()
-    {
-        return cubeMap.getTextureId();
-    }
+    GLuint getFBO();
+    GLuint getDepthMap();
+    GLuint getCubeMapId();
 
 private:
     GLuint depthMapFBO;
