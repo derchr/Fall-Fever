@@ -9,9 +9,22 @@ Texture::Texture(const char *texturePath, uint8_t textureType)
     this->textureType = textureType;
 
     stbi_set_flip_vertically_on_load(1);
-    auto *textureBuffer = stbi_load(texturePath, &textureWidth, &textureHeight, &bitsPerPixel, STBI_rgb_alpha);
+    auto *textureBuffer = stbi_load(texturePath, &textureWidth, &textureHeight, &numComponents, 0);
 
-    // Push texture to grahics card;
+    GLenum internalFormat;
+    GLenum dataFormat;
+    if (numComponents == 1) {
+        internalFormat = GL_RED;
+        dataFormat = GL_RED;
+    } else if (numComponents == 3) {
+        internalFormat = (textureType == texture_diffuse) ? GL_SRGB8 : GL_RGB8;
+        dataFormat = GL_RGB;
+    } else if (numComponents == 4) {
+        internalFormat = (textureType == texture_diffuse) ? GL_SRGB8_ALPHA8 : GL_RGBA8;
+        dataFormat = GL_RGBA;
+    }
+
+    // Push texture to grahics card
     glGenTextures(1, &textureId);
     glBindTexture(GL_TEXTURE_2D, textureId);
 
@@ -28,11 +41,7 @@ Texture::Texture(const char *texturePath, uint8_t textureType)
         return;
     }
 
-    if (textureType == texture_diffuse) {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB8_ALPHA8, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureBuffer);
-    } else {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureBuffer);
-    }
+    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, textureWidth, textureHeight, 0, dataFormat, GL_UNSIGNED_BYTE, textureBuffer);
     //glGenerateMipmap(GL_TEXTURE_2D);
 
     stbi_image_free(textureBuffer);
@@ -114,14 +123,28 @@ CubeMap::CubeMap(const char *texturePseudoPath)
 
     for (unsigned int i = 0; i < CUBEMAP_FACES_NUM_ITEMS; i++) {
 
-        auto *textureBuffer = stbi_load(texturePaths[i].c_str(), &textureWidth, &textureHeight, &bitsPerPixel, STBI_rgb_alpha);
+        int32_t numComponents;
+        auto *textureBuffer = stbi_load(texturePaths[i].c_str(), &textureWidth, &textureHeight, &numComponents, 0);
+
+            GLenum internalFormat;
+            GLenum dataFormat;
+            if (numComponents == 1) {
+                internalFormat = GL_RED;
+                dataFormat = GL_RED;
+            } else if (numComponents == 3) {
+                internalFormat = GL_SRGB8;
+                dataFormat = GL_RGB;
+            } else if (numComponents == 4) {
+                internalFormat = GL_SRGB8_ALPHA8;
+                dataFormat = GL_RGBA;
+            }
 
         if (!textureBuffer) {
             std::cout << "[Warning] CubeMap Texture " << texturePaths[i].c_str() << " not found!" << std::endl;
             return;
         }
 
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_SRGB8_ALPHA8, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureBuffer);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, textureWidth, textureHeight, 0, dataFormat, GL_UNSIGNED_BYTE, textureBuffer);
 
         stbi_image_free(textureBuffer);
 
@@ -144,9 +167,9 @@ CubeMap::CubeMap(int RESOLUTION) :
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-    const int CUBEMAP_NUM_FACES = 6;
+    const unsigned int CUBEMAP_NUM_FACES = 6;
     for (unsigned int i = 0; i < CUBEMAP_NUM_FACES; i++) {
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, RESOLUTION, RESOLUTION, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT24, RESOLUTION, RESOLUTION, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     }
 
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);

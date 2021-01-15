@@ -6,7 +6,7 @@
 
 World::World(std::vector<ShaderProgram*> shaderPrograms) :
     shaderProgram(Controller::getShaderProgramByName(shaderPrograms, "defaultProgram")),
-    directionalLight(shaderProgram), // wtf is this
+    directionalLight(shaderProgram),
     depthMapDirectionalFBO(DEPTHMAP_NORMAL, SHADOW_RES)
 {
     // PointLights

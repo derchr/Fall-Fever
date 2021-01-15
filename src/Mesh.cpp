@@ -14,7 +14,7 @@ void Mesh::draw(ShaderProgram *shaderProgram)
     glBindTexture(GL_TEXTURE_2D, 0);
     // Bind all textures in order to its texture unit
     for (auto it = textures.begin(); it != textures.end(); it++) {
-        int i = it - textures.begin();
+        const int i = it - textures.begin();
 
         uint8_t currentTextureType = (*it)->getTextureType();
 

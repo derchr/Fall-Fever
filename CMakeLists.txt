@@ -13,7 +13,7 @@ set(OpenGL_GL_PREFERENCE "GLVND")
 
 find_package(GLFW3 REQUIRED)
 find_package(OpenGL REQUIRED)
-find_package(Freetype REQUIRED)
+#find_package(Freetype REQUIRED) Will be used in the future
 
 # Specify the C++ standard
 set(CMAKE_CXX_STANDARD 11)

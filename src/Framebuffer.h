@@ -25,7 +25,8 @@ private:
 
 private:
     GLuint FBO;
-    GLuint textures[2];
+    GLuint colorBuffer;
+    GLuint depthStencilBuffer;
 
     ShaderProgram *shaderProgram;
 };
@@ -38,6 +39,7 @@ class DepthMap
 public:
     // Normal depthMap with texture and point depthMap with cubeMap
     DepthMap(int TYPE, int RESOLUTION);
+    ~DepthMap();
 
     void bind();
     void unbind();
@@ -52,5 +54,5 @@ private:
     // Either a normal depthMap is used (Directional shadows)
     // or a cubeMap is used (Point shadows)
     GLuint depthMap;
-    CubeMap cubeMap;
+    CubeMap *cubeMap;
 };

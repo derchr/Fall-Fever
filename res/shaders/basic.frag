@@ -45,7 +45,7 @@ struct PointLight {
 #define NUM_POINT_LIGHTS 16
 uniform PointLight u_pointLight[NUM_POINT_LIGHTS];
 
-struct SpotLight {
+/*struct SpotLight {
     bool isActive;
     vec3 position;
     vec3 direction;
@@ -59,7 +59,7 @@ struct SpotLight {
     vec3 diffuse;
     vec3 specular;
 };
-uniform SpotLight u_spotLight;
+uniform SpotLight u_spotLight;*/
 
 uniform mat3 u_normalMatrix;
 uniform vec3 u_viewPosition;
@@ -84,7 +84,7 @@ uniform float pointShadowDepthMapFarPlane;
 
 vec3 directionalLightContribution(DirectionalLight light, vec3 normal, vec3 viewDir);
 vec3 pointLightContribution(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
-vec3 spotLightContribution(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
+//vec3 spotLightContribution(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 
 void computeShading(
     vec3 light_ambient, vec3 light_diffuse, vec3 light_specular,
@@ -110,6 +110,7 @@ void main() {
         fragmentColor += pointLightContribution(u_pointLight[i], normal, v_fragmentPosition, viewDir);
     }
 
+    // There are currently no spotlights
     //fragmentColor += spotLightContribution(u_spotLight, normal, v_fragmentPosition, viewDir);
 
     f_color = vec4(fragmentColor, 1.0f);
@@ -157,7 +158,7 @@ vec3 pointLightContribution(PointLight light, vec3 normal, vec3 fragPos, vec3 vi
     return (ambient + (1.0f - shadows) * (diffuse + specular));
 }
 
-vec3 spotLightContribution(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
+/*vec3 spotLightContribution(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
 
     // Only compute if light source is active
     if(!light.isActive)
@@ -181,7 +182,7 @@ vec3 spotLightContribution(SpotLight light, vec3 normal, vec3 fragPos, vec3 view
     specular *= intensity;
 
     return (ambient + diffuse + specular);
-}
+}*/
 
 void computeShading(
     vec3 light_ambient, vec3 light_diffuse, vec3 light_specular,
@@ -232,14 +233,10 @@ float computeDirectionalShadows(vec4 fragPosLightSpace, vec3 normal, vec3 lightD
     float shadow = 0.0;
     vec2 texelSize = 1.0 / textureSize(u_texture_directionalShadowMap, 0);
     for(int x = -1; x <= 1; x++) {
-
         for(int y = -1; y <= 1; y++) {
-
             float pcfDepth = texture(u_texture_directionalShadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
             shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
-
         }
-
     }
     shadow /= 9.0f;
 

@@ -30,7 +30,7 @@ private:
 
     int32_t textureWidth;
     int32_t textureHeight;
-    int32_t bitsPerPixel;
+    int32_t numComponents;
 
     GLuint textureId;
 
@@ -60,5 +60,4 @@ private:
 
     int32_t textureWidth;
     int32_t textureHeight;
-    int32_t bitsPerPixel;
 };

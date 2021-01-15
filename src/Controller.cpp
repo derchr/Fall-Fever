@@ -34,7 +34,15 @@ Controller::Controller()
     shaderPrograms = shaderParser.getShaderPrograms();
 
     pp_framebuffer = new Framebuffer(gameWindow->getWindowWidth(), gameWindow->getWindowHeight(), getShaderProgramByName("postProcessingProgram"));
+
     menu = new Menu(pp_framebuffer, getShaderProgramByName("menuProgram"));
+
+    // Show loading screen...
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    menu->showLoadingScreen();
+    glfwSwapBuffers(gameWindow->getGLFWwindow());
+
+    world = new World(shaderPrograms);
 
 #ifdef _DEBUG
     // Setup Dear ImGui context
@@ -62,6 +70,7 @@ Controller::~Controller()
         delete *it;
     }
 
+    delete world;
     delete camera;
     delete menu;
     delete pp_framebuffer;
@@ -71,18 +80,9 @@ Controller::~Controller()
 
 void Controller::run()
 {
-    glClearColor(0.0015f, 0.0015f, 0.0015f, 1.0f);
-
     updateExposure(getShaderProgramByName("postProcessingProgram"));
-    
-    // Show loading screen...
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    menu->showLoadingScreen();
-    glfwSwapBuffers(gameWindow->getGLFWwindow());
 
-    World world(shaderPrograms);
-
-    Entity *lightSource = world.getEntityByName("light");
+    Entity *lightSource = world->getEntityByName("light");
     lightSource->setScale(0.1f);
     lightSource->setRotation(glm::vec3(0.f));
     lightSource->setPosition(glm::vec3(-2.f, 1.5f, 2.f));
@@ -92,6 +92,7 @@ void Controller::run()
 
     // This is the game loop
     while (!glfwWindowShouldClose(gameWindow->getGLFWwindow())) {
+
         // --- Timing ---
         limit_framerate();
 
@@ -101,15 +102,15 @@ void Controller::run()
         if (rotateLightSource) {
             float radius = 4.0;
             glm::vec3 newPos = glm::vec3(-cos(glfwGetTime() * 0.5), 0.5f, sin(glfwGetTime() * 0.5)) * radius;
-            world.getEntityByName("light")->setPosition(newPos);
+            world->getEntityByName("light")->setPosition(newPos);
         }
         if (rotateEntity) {
-            world.getEntityById(0)->rotate(glm::vec3(0.0f, 1.0f, 0.0f), -0.2f * deltaTime);
+            world->getEntityById(0)->rotate(glm::vec3(0.0f, 1.0f, 0.0f), -0.2f * deltaTime);
         }
         static glm::vec3 lightColor = glm::vec3(1.f);
         static float intensity = 20.f;
-        world.updatePointLight(0, true, world.getEntityByName("light")->getPosition(), lightColor * intensity);
-        world.updateDirectionalLight(true, glm::vec3(-0.2f, -1.0f, -0.3f), lightColor * 0.25f);
+        world->updatePointLight(0, true, world->getEntityByName("light")->getPosition(), lightColor * intensity);
+        world->updateDirectionalLight(true, glm::vec3(-0.2f, -1.0f, -0.3f), lightColor * 0.25f);
         getShaderProgramByName("lightProgram")->bind();
         getShaderProgramByName("lightProgram")->setUniform("v_lightColor", lightColor * 100.0f);
         getShaderProgramByName("lightProgram")->unbind();
@@ -124,7 +125,7 @@ void Controller::run()
         getShaderProgramByName("defaultProgram")->unbind();
         if (drawShadows || firstRun) {
             firstRun = false;
-            world.calculateShadows(getShaderProgramByName("directionalShadowDepthProgram"), getShaderProgramByName("pointShadowDepthProgram"));
+            world->calculateShadows(getShaderProgramByName("directionalShadowDepthProgram"), getShaderProgramByName("pointShadowDepthProgram"));
         }
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -137,14 +138,14 @@ void Controller::run()
 
         glViewport(0, 0, gameWindow->getWindowWidth(), gameWindow->getWindowHeight());
 
-        world.getSkybox()->draw(camera->getView(), camera->getProj());
-        world.draw(camera->getViewProj(), camera->getPosition());
+        world->getSkybox()->draw(camera->getView(), camera->getProj());
+        world->draw(camera->getViewProj(), camera->getPosition());
 
         pp_framebuffer->unbind();
         pp_framebuffer->render();
 
 #ifdef _DEBUG
-        renderImGui(world, &world.getPointLights()[0], &lightColor, &rotateEntity, &rotateLightSource, getShaderProgramByName("postProcessingProgram"), &intensity, &drawShadows);
+        renderImGui(world, &world->getPointLights()[0], &lightColor, &rotateEntity, &rotateLightSource, getShaderProgramByName("postProcessingProgram"), &intensity, &drawShadows);
 #endif
 
         glfwSwapBuffers(gameWindow->getGLFWwindow());
@@ -228,7 +229,7 @@ void Controller::setMaxFps(uint16_t fps)
 
 
 #ifdef _DEBUG
-void Controller::renderImGui(World &world, PointLight *pointLight, glm::vec3 *lightColor, bool *rotateEntity, bool *rotateLightSource, ShaderProgram *postProcessingProgram, float *intensity, bool *drawShadows)
+void Controller::renderImGui(World *world, PointLight *pointLight, glm::vec3 *lightColor, bool *rotateEntity, bool *rotateLightSource, ShaderProgram *postProcessingProgram, float *intensity, bool *drawShadows)
 {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -246,12 +247,12 @@ void Controller::renderImGui(World &world, PointLight *pointLight, glm::vec3 *li
     ImGui::SliderFloat("Scale", &scale, 0.02, 2.0);
     ImGui::Checkbox("Rotate Object", rotateEntity);
 
-    Entity *mainObject = world.getEntityById(0);
+    Entity *mainObject = world->getEntityById(0);
     mainObject->setPosition(glm::vec3(translation[0], translation[1], translation[2]));
     if (!*rotateEntity) {
-        //mainObject->setRotation(glm::vec3(0.f, 1.0f, 0.f), rotation);
+        mainObject->setRotation(glm::vec3(0.f, 1.0f, 0.f), rotation);
     }
-    //mainObject->setScale(scale);
+    mainObject->setScale(scale);
 
     // color picker
     ImGui::Text("\nLight Source");

@@ -34,18 +34,21 @@ private:
 
     ShaderProgram* getShaderProgramByName(const char *name);
 
-    void renderImGui(World &world, PointLight *pointLight, glm::vec3 *lightColor, bool *rotateEntity, bool *rotateLightSource, ShaderProgram *postProcessingProgram, float *intensity, bool *drawShadows);
+    void renderImGui(World *world, PointLight *pointLight, glm::vec3 *lightColor, bool *rotateEntity, bool *rotateLightSource, ShaderProgram *postProcessingProgram, float *intensity, bool *drawShadows);
 
 private:
     Window *gameWindow;
     EventHandler *gameEventHandler;
+
+    World *world;
+
     Camera *camera;
+    Menu *menu;
 
     std::vector<ShaderProgram*> shaderPrograms;
 
     Framebuffer *pp_framebuffer;
 
-    Menu *menu;
 
     uint16_t MAX_FPS = 60;
     double deltaTime;

@@ -22,7 +22,7 @@ Window::Window()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 #ifdef _DEBUG
-    glfwSetErrorCallback(error_callback);
+    glfwSetErrorCallback(glfw_error_callback);
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 #else
     // Maximize in release build
@@ -50,13 +50,12 @@ Window::Window()
     }
 
 #ifdef _DEBUG
+    std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageCallback(Helper::gl_debug_callback, NULL);
+
     // Disable mouse cursor
     mouseCatched = false;
-
-    std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
-    glEnable(GL_DEBUG_OUTPUT);
-    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-    glDebugMessageCallback(openGLDebugCallback, NULL);
 #endif
 
     // Enable z buffer
@@ -134,7 +133,7 @@ void Window::handleActionRegister(bool *windowActionRegister)
 }
 
 // GLFW error function
-void Window::error_callback(int error, const char *description)
+void Window::glfw_error_callback(int error, const char *description)
 {
     fprintf(stderr, "[Error] GLFW Error %d: %s\n", error, description);
 }
@@ -144,21 +143,6 @@ void Window::framebuffer_size_callback(GLFWwindow *window, int width, int height
 {
     (void)window;
     glViewport(0, 0, width, height);
-}
-
-void Window::openGLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
-{
-    (void)length;
-    (void)userParam;
-
-    if (severity == GL_DEBUG_SEVERITY_HIGH || severity == GL_DEBUG_SEVERITY_MEDIUM)
-        std::cout << "[OpenGL Error]" << std::endl
-                  << "Message: " << message << std::endl
-                  << "Source: " << source << std::endl
-                  << "Type: " << type << std::endl
-                  << "ID: " << id << std::endl
-                  << "Severity: " << severity << std::endl
-                  << std::endl;
 }
 
 GLFWwindow* Window::getGLFWwindow()
