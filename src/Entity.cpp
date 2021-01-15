@@ -38,7 +38,7 @@ void Entity::drawDirectionalShadows(glm::mat4 viewProjMatrix, ShaderProgram *p_s
     p_shaderProgram->bind();
 
     glm::mat4 modelViewProj = viewProjMatrix * modelMatrix;
-    shaderProgram->setUniform("u_modelViewProjMatrix", modelViewProj); // wtf is this
+    p_shaderProgram->setUniform("u_modelViewProjMatrix", modelViewProj);
 
     // Draw the model
     model->drawWithoutTextures();
