@@ -39,7 +39,7 @@ Controller::Controller()
 
     // Show loading screen...
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    menu->showLoadingScreen();
+    menu->showScreenByName("loadingScreen");
     glfwSwapBuffers(gameWindow->getGLFWwindow());
 
     world = new World(shaderPrograms);
@@ -135,8 +135,6 @@ void Controller::run()
         camera->lookForward();
         camera->updateVPM();
 
-        glViewport(0, 0, gameWindow->getWindowWidth(), gameWindow->getWindowHeight());
-
         world->getSkybox()->draw(camera->getView(), camera->getProj());
         world->draw(camera->getViewProj(), camera->getPosition());
 
@@ -146,7 +144,6 @@ void Controller::run()
 #ifdef _DEBUG
         renderImGui(world, world->getPointLights()[0], &lightColor, &rotateEntity, &rotateLightSource, getShaderProgramByName("postProcessingProgram"), &intensity, &drawShadows);
 #endif
-
         glfwSwapBuffers(gameWindow->getGLFWwindow());
 
         // Update window size

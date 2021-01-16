@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include "Screen.h"
 #include "Framebuffer.h"
 #include "JsonParser.h"
@@ -10,14 +12,15 @@ public:
     Menu(Framebuffer *p_framebuffer, ShaderProgram *p_shaderProgram);
     ~Menu();
 
-    void showLoadingScreen();
+    void showScreenByName(const char *unique_name);
 
 private:
     Framebuffer *framebuffer;
     ShaderProgram *shaderProgram;
 
-    Screen *loadingScreen;
+    std::vector<Screen*> screens;
+    /*Screen *loadingScreen;
     Screen *mainMenuScreen;
     Screen *optionMenuScreen;
-    Screen *pauseMenuScreen;
+    Screen *pauseMenuScreen;*/
 };

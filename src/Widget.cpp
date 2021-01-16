@@ -9,10 +9,10 @@ Widget::Widget(Texture *texture, float p_x, float p_y, float p_w, float p_h) :
     const double ofst = 0.005;
     
     double widgetVerticesData[12] = {
-        x + w + ofst,       -1.0f + 2*y - ofst, 0.0f,   // Bottom right
-        -1.0f + 2*x - ofst, y + h + ofst,       0.0f,   // Top left
-        -1.0f + 2*x-ofst,   -1.0f + 2*y - ofst, 0.0f,   // Bottom left
-        x + w + ofst,       y + h + ofst,       0.0f    // Top right
+        2 * (x + w) - 1.0f + ofst,  2 * (y) - 1.0f - ofst,      0.0f,   // Bottom right
+        2 * (x) - 1.0f - ofst,      2 * (y + h) - 1.0f + ofst,  0.0f,   // Top left
+        2 * (x) - 1.0f - ofst,      2 * (y) - 1.0f - ofst,      0.0f,   // Bottom left
+        2 * (x + w) - 1.0f + ofst,  2 * (y + h) - 1.0f + ofst,  0.0f    // Top right
     };
     
     unsigned int widgetIndicesData[6] = {

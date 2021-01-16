@@ -86,6 +86,7 @@ void Framebuffer::generateTextures(uint32_t width, uint32_t height)
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         std::cout << "[Error] Framebuffer is not complete!" << std::endl;
 
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     unbind();
 }
 

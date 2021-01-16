@@ -4,26 +4,21 @@
 #include "Framebuffer.h"
 #include "Widget.h"
 
-enum screenType
-{
-    loadingScreen,
-    mainMenu,
-    optionMenu,
-    pauseMenu,
-    SCREEN_TYPE_NUM_ITEMS
-};
-
 class Screen
 {
 public:
-    Screen(screenType p_type, Framebuffer *framebuffer, ShaderProgram *shaderProgram);
+    Screen(std::string &name, std::vector<Widget*> widgets, Framebuffer *framebuffer, ShaderProgram *shaderProgram);
     ~Screen();
     
     void addWidget(Widget *widget);
     void draw();
+
+    std::string getUniqueName();
     
 private:
-    screenType type;
+    uint32_t id;
+    static uint32_t id_counter;
+    std::string unique_name;
 
     Framebuffer *framebuffer;
     ShaderProgram *shaderProgram;

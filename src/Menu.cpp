@@ -1,23 +1,27 @@
 #include "Menu.h"
+#include "JsonParser.h"
 
 Menu::Menu(Framebuffer *p_framebuffer, ShaderProgram *p_shaderProgram) :
     framebuffer(p_framebuffer), shaderProgram(p_shaderProgram)
 {
-    mainMenuScreen = new Screen(screenType::mainMenu, framebuffer, shaderProgram);
-    pauseMenuScreen = new Screen(screenType::pauseMenu, framebuffer, shaderProgram);
-    loadingScreen = new Screen(screenType::loadingScreen, framebuffer, shaderProgram);
-    optionMenuScreen = new Screen(screenType::optionMenu, framebuffer, shaderProgram);
+    JsonParser screenParser("res/screens.json");
+    screens = screenParser.getScreens(shaderProgram, framebuffer);
 }
 
 Menu::~Menu()
 {
-    delete mainMenuScreen;
-    delete pauseMenuScreen;
-    delete loadingScreen;
-    delete optionMenuScreen;
+    // Iterate over screens delete all items
+    for (auto it = screens.begin(); it != screens.end(); it++) {
+        delete (*it);
+    }
 }
 
-void Menu::showLoadingScreen()
+void Menu::showScreenByName(const char *unique_name)
 {
-    loadingScreen->draw();
+    for (auto it = screens.begin(); it != screens.end(); it++) {
+        if((*it)->getUniqueName() == unique_name) {
+            (*it)->draw();
+            break;
+        }
+    }
 }

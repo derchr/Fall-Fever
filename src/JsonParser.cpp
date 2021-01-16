@@ -209,6 +209,50 @@ std::vector<Light*> JsonParser::getLights(ShaderProgram* shaderProgram)
     return temp_lights;
 }
 
+std::vector<Screen*> JsonParser::getScreens(ShaderProgram *menuProgram, Framebuffer *framebuffer)
+{
+    std::vector<Screen*> temp_screens;
+
+    const Json::Value loadingScreenJson = root["loadingScreen"];
+    const Json::Value mainMenuScreenJson = root["mainMenuScreen"];
+
+    std::string name;
+    Screen *screen;
+
+    name = "loadingScreen";
+    screen = new Screen(name, getWidgetsFromScreen(loadingScreenJson), framebuffer, menuProgram);
+    temp_screens.push_back(screen);
+
+    name = "mainMenuScreen";
+    screen = new Screen(name, getWidgetsFromScreen(mainMenuScreenJson), framebuffer, menuProgram);
+    temp_screens.push_back(screen);
+
+    return temp_screens;
+}
+
+std::vector<Widget*> JsonParser::getWidgetsFromScreen(const Json::Value &screenJson)
+{
+    std::vector<Widget*> temp_widgets;
+
+    // Iterate over widgets
+    unsigned int index = 0;
+    for (; index < screenJson.size(); index++) {
+        const Json::Value currentWidgetJson = screenJson[index];
+        const Json::Value currentWidgetTextureJson =currentWidgetJson["texture"];
+        const Json::Value currentWidgetPosition =currentWidgetJson["position"];
+        const Json::Value currentWidgetDimensions =currentWidgetJson["dimensions"];
+        Texture *currentWidgetTexture = new Texture(currentWidgetTextureJson.asString().c_str(), textureType::texture_diffuse);
+        Widget *currentWidget = new Widget(
+            currentWidgetTexture,
+            currentWidgetPosition[0].asFloat(),
+            currentWidgetPosition[1].asFloat(),
+            currentWidgetDimensions[0].asFloat(),
+            currentWidgetDimensions[1].asFloat()
+        );
+        temp_widgets.push_back(currentWidget);
+    }
+    return temp_widgets;
+}
 
 Skybox *JsonParser::getSkybox(Model *cubeModel, ShaderProgram *skyboxProgram)
 {

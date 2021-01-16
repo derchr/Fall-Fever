@@ -29,7 +29,7 @@
         {
             "unique_name": "ground",
             "model": "ground",
-            "shaderProgram": "defaultProgram",
+            "shaderProgram": "defaultProgram"
         },
         {
             "unique_name": "light",

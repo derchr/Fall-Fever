@@ -1,0 +1,21 @@
+{
+    "loadingScreen": [
+        {
+            "position": [0.0, 0.0],
+            "dimensions": [1.0, 1.0],
+            "texture": "res/textures/loading.png"
+        }
+    ],
+    "mainMenuScreen": [
+        {
+            "position": [0.5, 0.5],
+            "dimensions": [0.25, 0.25],
+            "texture": "res/textures/container.png"
+        },
+        {
+            "position": [0.75, 0.0],
+            "dimensions": [0.25, 0.25],
+            "texture": "res/textures/tex2.png"
+        }
+    ]
+}
