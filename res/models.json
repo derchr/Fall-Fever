@@ -20,7 +20,7 @@
     "entities": [
         {
             "unique_name": "backpack",
-            "model": "backpvack",
+            "model": "backpack",
             "shaderProgram": "defaultProgram",
             "position": [0.0, 1.0, 0.0],
             "rotation": [0.0, 0.0, 0.0],
