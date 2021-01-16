@@ -1,8 +1,12 @@
 #include "Widget.h"
 #include "VertexArray.h"
 
-Widget::Widget(Texture *texture, float p_x, float p_y, float p_w, float p_h) :
-    x(p_x), y(p_y), w(p_w), h(p_h)
+Widget::Widget(std::string &name, Texture *texture, float p_x, float p_y, float p_w, float p_h) :
+    x(p_x),
+    y(p_y),
+    w(p_w),
+    h(p_h),
+    unique_name(name)
 {
     widgetTextures.push_back(texture);
     
@@ -37,9 +41,31 @@ Widget::~Widget()
     delete widgetMesh;
 }
 
+std::string Widget::getUniqueName()
+{
+    return unique_name;
+}
+
 void Widget::draw(ShaderProgram *shaderProgram)
 {
     shaderProgram->bind();
     widgetMesh->draw(shaderProgram);
     shaderProgram->unbind();
+}
+
+bool Widget::isHovered(Window *window)
+{
+    double xpos, ypos, width, height;
+    glfwGetCursorPos(window->getGLFWwindow(), &xpos, &ypos);
+    width = window->getWindowWidth();
+    height = window->getWindowHeight();
+
+    double xrel = xpos / width;
+    double yrel = -ypos / height + 1;
+
+    bool isHovered = false;
+    if(xrel >= x && xrel <= x + w && yrel >= y && yrel <= y + h)
+        isHovered = true;
+
+    return isHovered;
 }

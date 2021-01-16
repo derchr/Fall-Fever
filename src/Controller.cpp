@@ -129,7 +129,7 @@ void Controller::run()
         }
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+        menu->showScreenByName("mainMenuScreen");
         pp_framebuffer->bind();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -162,6 +162,8 @@ void Controller::run()
         }
         
         gameWindow->handleActionRegister(gameEventHandler->getWindowActionRegister());
+
+        menu->handleMouseButtonActionRegister(gameEventHandler->getMouseButtonActionRegister(), gameWindow);
     }
 }
 

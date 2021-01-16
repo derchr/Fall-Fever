@@ -1,3 +1,5 @@
+#pragma once
+
 enum cameraActions {
     cameraUp,
     cameraDown,
@@ -18,4 +20,11 @@ enum windowActions {
     wireFrameToggle,
     mouseCatchToggle,
     WINDOW_ACTION_NUM_ITEMS
+};
+
+enum mouseButtonActions {
+    leftClicked,
+    rightClicked,
+    middleClicked,
+    MOUSE_BUTTON_ACTION_NUM_ITEMS
 };

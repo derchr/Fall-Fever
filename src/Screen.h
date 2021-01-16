@@ -14,6 +14,8 @@ public:
     void draw();
 
     std::string getUniqueName();
+    std::vector<Widget*> getWidgets();
+    Widget *getWidgetByName(const char* name);
     
 private:
     uint32_t id;

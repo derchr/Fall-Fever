@@ -238,11 +238,13 @@ std::vector<Widget*> JsonParser::getWidgetsFromScreen(const Json::Value &screenJ
     unsigned int index = 0;
     for (; index < screenJson.size(); index++) {
         const Json::Value currentWidgetJson = screenJson[index];
-        const Json::Value currentWidgetTextureJson =currentWidgetJson["texture"];
-        const Json::Value currentWidgetPosition =currentWidgetJson["position"];
-        const Json::Value currentWidgetDimensions =currentWidgetJson["dimensions"];
+        const Json::Value currentWidgetTextureJson = currentWidgetJson["texture"];
+        const Json::Value currentWidgetPosition = currentWidgetJson["position"];
+        const Json::Value currentWidgetDimensions = currentWidgetJson["dimensions"];
+        std::string name = currentWidgetJson["unique_name"].asString();
         Texture *currentWidgetTexture = new Texture(currentWidgetTextureJson.asString().c_str(), textureType::texture_diffuse);
         Widget *currentWidget = new Widget(
+            name,
             currentWidgetTexture,
             currentWidgetPosition[0].asFloat(),
             currentWidgetPosition[1].asFloat(),

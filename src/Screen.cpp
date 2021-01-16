@@ -27,6 +27,20 @@ std::string Screen::getUniqueName()
     return unique_name;
 }
 
+std::vector<Widget*> Screen::getWidgets()
+{
+    return widgets;
+}
+
+Widget *Screen::getWidgetByName(const char* name)
+{
+    for (auto it = widgets.begin(); it != widgets.end(); it++) {
+        if((*it)->getUniqueName() == name)
+            return *it;
+    }
+    return nullptr;
+}
+
 void Screen::addWidget(Widget *widget)
 {
     widgets.push_back(widget);
