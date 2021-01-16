@@ -69,6 +69,8 @@ public:
 
     void setDirection(glm::vec3 direction);
 
+    glm::vec3 getDirection();
+
 private:
     void update() override;
 

@@ -19,12 +19,12 @@ World::World(std::vector<ShaderProgram*> shaderPrograms) :
     shaderProgram->setUniform("u_material.shininess", 100.0f);
     shaderProgram->unbind();
 
-    JsonParser modelParser("res/models.json");
+    JsonParser modelParser("data/models.json");
     models = modelParser.getModels();
     entities = modelParser.getEntities(models, shaderPrograms);
     skybox = modelParser.getSkybox(getModelByName("cube"), Controller::getShaderProgramByName(shaderPrograms, "skyboxProgram"));
 
-    JsonParser lightParser("res/lights.json");
+    JsonParser lightParser("data/lights.json");
     lights = lightParser.getLights(shaderProgram);
 }
 

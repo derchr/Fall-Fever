@@ -4,7 +4,7 @@
 Menu::Menu(Framebuffer *p_framebuffer, ShaderProgram *p_shaderProgram) :
     framebuffer(p_framebuffer), shaderProgram(p_shaderProgram)
 {
-    JsonParser screenParser("res/screens.json");
+    JsonParser screenParser("data/screens.json");
     screens = screenParser.getScreens(shaderProgram, framebuffer);
 }
 

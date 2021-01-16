@@ -43,4 +43,3 @@ void Widget::draw(ShaderProgram *shaderProgram)
     widgetMesh->draw(shaderProgram);
     shaderProgram->unbind();
 }
-

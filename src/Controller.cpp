@@ -30,7 +30,7 @@ Controller::Controller()
 
     camera = new Camera(90.0f, gameWindow->getWindowAspectRatio());
 
-    JsonParser shaderParser("res/shaderPrograms.json");
+    JsonParser shaderParser("data/shaderPrograms.json");
     shaderPrograms = shaderParser.getShaderPrograms();
 
     pp_framebuffer = new Framebuffer(gameWindow->getWindowWidth(), gameWindow->getWindowHeight(), getShaderProgramByName("postProcessingProgram"));
@@ -110,6 +110,7 @@ void Controller::run()
         static glm::vec3 lightColor = glm::vec3(1.f);
         static float intensity = 20.f;
         world->updatePointLight(0, true, world->getEntityByName("light")->getPosition(), lightColor, intensity);
+        world->updateDirectionalLight(true, world->getDirectionalLight()->getDirection(), lightColor);
         getShaderProgramByName("lightProgram")->bind();
         getShaderProgramByName("lightProgram")->setUniform("v_lightColor", lightColor * 100.0f);
         getShaderProgramByName("lightProgram")->unbind();

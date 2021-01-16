@@ -2,19 +2,19 @@
     "models": [
         {
             "unique_name": "fallback",
-            "path": "res/models/fallback.ffo"
+            "path": "data/res/models/fallback.ffo"
         },
         {
             "unique_name": "backpack",
-            "path": "res/models/backpack.ffo"
+            "path": "data/res/models/backpack.ffo"
         },
         {
             "unique_name": "ground",
-            "path": "res/models/wood_floor.ffo"
+            "path": "data/res/models/wood_floor.ffo"
         },
         {
             "unique_name": "cube",
-            "path": "res/models/cube.ffo"
+            "path": "data/res/models/cube.ffo"
         }
     ],
     "entities": [
@@ -38,6 +38,6 @@
         }
     ],
     "skybox": {
-        "texturePath": "res/textures/skybox/"
+        "texturePath": "data/res/textures/skybox/"
     }
 }

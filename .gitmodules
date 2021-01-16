@@ -1,0 +1,7 @@
+[submodule "resources"]
+	path = data/res
+	url = git@gitlab.com:4VRDriver/fall-fever-resources.git
+
+[submodule "data/res"]
+	path = data/res
+	url = git@gitlab.com:4VRDriver/fall-fever-resources.git
