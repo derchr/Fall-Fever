@@ -41,9 +41,6 @@ private:
 
     // Lights
     std::vector<Light*> lights;
-    //DirectionalLight directionalLight;
-    //std::vector<PointLight> pointLights;
-    //SpotLight spotLight;
 
     // Shadows
     const int SHADOW_RES = 4096 / 4;

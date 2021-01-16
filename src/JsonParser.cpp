@@ -74,8 +74,11 @@ std::vector<Entity*> JsonParser::getEntities(std::vector<Model*> &models, std::v
                 current_model = *it;
             }
         }
-        if(!current_model)
+        if(!current_model) {
+            // Apply fallback model (first model in vector)
+            current_model = models[0];
             std::cout << "[Warning] Model could not be found by unique name \"" << entity_model << "\"" << std::endl;
+        }
 
         const Json::Value positionJson = entitiesJson[index]["position"];
         const Json::Value rotationJson = entitiesJson[index]["rotation"];
