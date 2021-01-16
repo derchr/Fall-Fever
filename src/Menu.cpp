@@ -1,6 +1,8 @@
 #include "Menu.h"
 #include "JsonParser.h"
 #include "eventActions.h"
+#include "helper.h"
+
 #include <iostream>
 Menu::Menu(Framebuffer *p_framebuffer, ShaderProgram *p_shaderProgram) :
     framebuffer(p_framebuffer), shaderProgram(p_shaderProgram)
@@ -25,6 +27,11 @@ Screen *Menu::getScreenByName(const char* unique_name)
         }
     }
     return nullptr;
+}
+
+Screen *Menu::getActiveScreen()
+{
+    return activeScreen;
 }
 
 void Menu::showScreenByName(const char *unique_name)

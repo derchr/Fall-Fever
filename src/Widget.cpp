@@ -10,13 +10,11 @@ Widget::Widget(std::string &name, Texture *texture, float p_x, float p_y, float 
 {
     widgetTextures.push_back(texture);
     
-    const double ofst = 0.005;
-    
     double widgetVerticesData[12] = {
-        2 * (x + w) - 1.0f + ofst,  2 * (y) - 1.0f - ofst,      0.0f,   // Bottom right
-        2 * (x) - 1.0f - ofst,      2 * (y + h) - 1.0f + ofst,  0.0f,   // Top left
-        2 * (x) - 1.0f - ofst,      2 * (y) - 1.0f - ofst,      0.0f,   // Bottom left
-        2 * (x + w) - 1.0f + ofst,  2 * (y + h) - 1.0f + ofst,  0.0f    // Top right
+        2 * (x + w) - 1.0f,  2 * (y) - 1.0f,      0.0f,   // Bottom right
+        2 * (x) - 1.0f,      2 * (y + h) - 1.0f,  0.0f,   // Top left
+        2 * (x) - 1.0f,      2 * (y) - 1.0f,      0.0f,   // Bottom left
+        2 * (x + w) - 1.0f,  2 * (y + h) - 1.0f,  0.0f    // Top right
     };
     
     unsigned int widgetIndicesData[6] = {

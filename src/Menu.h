@@ -15,6 +15,8 @@ public:
     Screen *getScreenByName(const char *unique_name);
     void showScreenByName(const char *unique_name);
 
+    Screen *getActiveScreen();
+
     void resetActiveScreen();
 
     void handleMouseButtonActionRegister(bool *mouseButtonActionRegister, Window* window);

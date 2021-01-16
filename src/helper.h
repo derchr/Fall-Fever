@@ -1,8 +1,10 @@
 #pragma once
 
 #include <stdint.h>
+#include <iostream>
 #include <string>
 #include <algorithm>
+#include <GLFW/glfw3.h>
 
 #ifdef __linux__
 #include <unistd.h>

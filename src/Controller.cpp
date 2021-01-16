@@ -42,6 +42,9 @@ Controller::Controller()
     menu->showScreenByName("loadingScreen");
     glfwSwapBuffers(gameWindow->getGLFWwindow());
 
+    // Show main menu when loading is finished...
+    menu->showScreenByName("mainMenuScreen");
+
     world = new World(shaderPrograms);
 
 #ifdef _DEBUG
@@ -129,22 +132,27 @@ void Controller::run()
         }
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        menu->showScreenByName("mainMenuScreen");
-        pp_framebuffer->bind();
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        camera->lookForward();
-        camera->updateVPM();
+        auto activeScreen = menu->getActiveScreen();
+        if(activeScreen) {
+            activeScreen->draw();
+        } else {
+            pp_framebuffer->bind();
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        world->getSkybox()->draw(camera->getView(), camera->getProj());
-        world->draw(camera->getViewProj(), camera->getPosition());
+            camera->lookForward();
+            camera->updateVPM();
 
-        pp_framebuffer->unbind();
-        pp_framebuffer->render();
+            world->getSkybox()->draw(camera->getView(), camera->getProj());
+            world->draw(camera->getViewProj(), camera->getPosition());
+
+            pp_framebuffer->unbind();
+            pp_framebuffer->render();
 
 #ifdef _DEBUG
-        renderImGui(world, world->getPointLights()[0], &lightColor, &rotateEntity, &rotateLightSource, getShaderProgramByName("postProcessingProgram"), &intensity, &drawShadows);
+            renderImGui(world, world->getPointLights()[0], &lightColor, &rotateEntity, &rotateLightSource, getShaderProgramByName("postProcessingProgram"), &intensity, &drawShadows);
 #endif
+        }
         glfwSwapBuffers(gameWindow->getGLFWwindow());
 
         // Update window size
