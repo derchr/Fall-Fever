@@ -2,7 +2,21 @@
 
 #include <string>
 
+uint32_t Light::id_counter = 0;
+
 // Light
+
+Light::Light(glm::vec3 color, float intensity, ShaderProgram* shaderProgram) :
+     shaderProgram(shaderProgram),
+     intensity(intensity)
+{
+    id = id_counter++;
+    lightColor = color * intensity;
+    diffuseColor = lightColor * glm::vec3(1.0f);
+    ambientColor = diffuseColor * glm::vec3(0.002f);
+    specularColor = lightColor * glm::vec3(1.0f);
+}
+
 
 glm::vec3 Light::getColor()
 {
@@ -17,12 +31,18 @@ void Light::setShaderProgram(ShaderProgram* shaderProgram)
 
 void Light::setColor(glm::vec3 color)
 {
-    lightColor = color;
+    lightColor = color * intensity;
     diffuseColor = lightColor * glm::vec3(1.0f);
     ambientColor = diffuseColor * glm::vec3(0.002f);
     specularColor = lightColor * glm::vec3(1.0f);
     update();
 }
+
+void Light::setIntensity(float intensity)
+{
+    this->intensity = intensity;
+}
+
 
 void Light::setActive(bool active)
 {
@@ -32,8 +52,9 @@ void Light::setActive(bool active)
 
 // PointLight
 
-PointLight::PointLight(ShaderProgram *shaderProgram) :
-    Light(shaderProgram)
+PointLight::PointLight(glm::vec3 position, glm::vec3 color, float intensity, ShaderProgram *shaderProgram) :
+    Light(color, intensity, shaderProgram),
+    position(position)
 {
     // Empty
 }
@@ -54,7 +75,7 @@ void PointLight::update()
 
 std::string PointLight::getStructMemberName()
 {
-    std::string temp = "u_pointLight[" + std::to_string(lightId) + "].";
+    std::string temp = "u_pointLight[" + std::to_string(id) + "].";
     return temp;
 }
 
@@ -74,15 +95,11 @@ void PointLight::setParameters(float K_q)
     this->K_q = K_q;
 }
 
-void PointLight::setId(unsigned int id)
-{
-    this->lightId = id;
-}
-
 // DirectionalLight
 
-DirectionalLight::DirectionalLight(ShaderProgram *shaderProgram) :
-    Light(shaderProgram)
+DirectionalLight::DirectionalLight(glm::vec3 direction, glm::vec3 color, float intensity, ShaderProgram *shaderProgram) :
+    Light(color, intensity, shaderProgram),
+    direction(direction)
 {
     // Empty
 }

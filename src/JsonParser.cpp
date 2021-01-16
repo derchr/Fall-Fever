@@ -130,6 +130,83 @@ std::vector<ShaderProgram *> JsonParser::getShaderPrograms()
     return temp_shaderPrograms;
 }
 
+std::vector<Light*> JsonParser::getLights(ShaderProgram* shaderProgram)
+{
+    std::vector<Light*> temp_lights;
+    glm::vec3 light_direction = {1.0f, 0.0f, 0.0f};
+    glm::vec3 light_position = {};
+    glm::vec3 light_color = {1.0f, 1.0f, 1.0f};
+    float light_intensity = 10.0f;
+
+    const Json::Value directionalLightsJson = root["directionalLight"];
+
+    const Json::Value directionJson = directionalLightsJson["direction"];
+    Json::Value colorJson = directionalLightsJson["color"];
+    Json::Value intensityJson = directionalLightsJson["intensity"];
+
+    if(!intensityJson.empty()) {
+        light_intensity = intensityJson.asFloat();
+    }
+    if(!directionJson.empty()) {
+        light_direction.x = directionJson[0].asFloat();
+        light_direction.y = directionJson[1].asFloat();
+        light_direction.z = directionJson[2].asFloat();
+    }
+    if(!colorJson.empty()) {
+        light_color.x = colorJson[0].asFloat();
+        light_color.y = colorJson[1].asFloat();
+        light_color.z = colorJson[2].asFloat();
+    }
+
+    DirectionalLight *current_directionalLight = new DirectionalLight(light_direction, light_color, light_intensity, shaderProgram);
+    current_directionalLight->setActive(true);
+    temp_lights.push_back(current_directionalLight);
+
+    // Pointlights
+    const Json::Value pointLightsJson = root["pointLights"];
+
+
+    unsigned int index = 0;
+    for (; index < pointLightsJson.size(); index++) {
+        PointLight *current_pointLight;
+
+        const Json::Value positionJson = pointLightsJson[index]["position"];
+        colorJson = pointLightsJson[index]["color"];
+        intensityJson = pointLightsJson[index]["intensity"];
+
+        if(!intensityJson.empty()) {
+            light_intensity = intensityJson.asFloat();
+        }
+        if(!positionJson.empty()) {
+            light_position.x = positionJson[0].asFloat();
+            light_position.y = positionJson[1].asFloat();
+            light_position.z = positionJson[2].asFloat();
+        }
+        if(!colorJson.empty()) {
+            light_color.x = colorJson[0].asFloat();
+            light_color.y = colorJson[1].asFloat();
+            light_color.z = colorJson[2].asFloat();
+        }
+
+        current_pointLight = new PointLight(light_position, light_color, light_intensity, shaderProgram);
+        current_pointLight->setActive(true);
+        temp_lights.push_back(current_pointLight);
+    }
+
+    // In case there aren't enough PointLights defined in the Json file
+    for(; NUM_POINT_LIGHTS - index > 0; index++) {
+        const glm::vec3 default_position(0.0f);
+        const glm::vec3 default_color(1.0f);
+        const float default_intensity = 10.0f;
+        PointLight *current_pointLight = new PointLight(default_position, default_color, default_intensity, shaderProgram);
+        current_pointLight->setActive(false);
+        temp_lights.push_back(current_pointLight);
+    }
+
+    return temp_lights;
+}
+
+
 Skybox *JsonParser::getSkybox(Model *cubeModel, ShaderProgram *skyboxProgram)
 {
     Skybox* temp_skybox;

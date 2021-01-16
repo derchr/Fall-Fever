@@ -18,11 +18,12 @@ public:
     void removeEntityByName(std::string name);
     void clearEntities();
 
-    void updatePointLight(unsigned int lightId, bool active, glm::vec3 position, glm::vec3 color);
+    void updatePointLight(unsigned int lightId, bool active, glm::vec3 position, glm::vec3 color, float intensity);
     void updateDirectionalLight(bool active, glm::vec3 direction, glm::vec3 color);
 
     std::vector<Entity*> getEntities();
-    PointLight *getPointLights();
+    std::vector<PointLight*> getPointLights();
+    DirectionalLight * getDirectionalLight();
     Skybox *getSkybox();
     Entity* getEntityByName(std::string name);
     Entity* getEntityById(uint32_t id);
@@ -39,8 +40,9 @@ private:
     Skybox *skybox;
 
     // Lights
-    DirectionalLight directionalLight;
-    std::vector<PointLight> pointLights;
+    std::vector<Light*> lights;
+    //DirectionalLight directionalLight;
+    //std::vector<PointLight> pointLights;
     //SpotLight spotLight;
 
     // Shadows

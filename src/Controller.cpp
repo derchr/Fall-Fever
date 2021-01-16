@@ -109,8 +109,7 @@ void Controller::run()
         }
         static glm::vec3 lightColor = glm::vec3(1.f);
         static float intensity = 20.f;
-        world->updatePointLight(0, true, world->getEntityByName("light")->getPosition(), lightColor * intensity);
-        world->updateDirectionalLight(true, glm::vec3(-0.2f, -1.0f, -0.3f), lightColor * 0.25f);
+        world->updatePointLight(0, true, world->getEntityByName("light")->getPosition(), lightColor, intensity);
         getShaderProgramByName("lightProgram")->bind();
         getShaderProgramByName("lightProgram")->setUniform("v_lightColor", lightColor * 100.0f);
         getShaderProgramByName("lightProgram")->unbind();
@@ -145,7 +144,7 @@ void Controller::run()
         pp_framebuffer->render();
 
 #ifdef _DEBUG
-        renderImGui(world, &world->getPointLights()[0], &lightColor, &rotateEntity, &rotateLightSource, getShaderProgramByName("postProcessingProgram"), &intensity, &drawShadows);
+        renderImGui(world, world->getPointLights()[0], &lightColor, &rotateEntity, &rotateLightSource, getShaderProgramByName("postProcessingProgram"), &intensity, &drawShadows);
 #endif
 
         glfwSwapBuffers(gameWindow->getGLFWwindow());

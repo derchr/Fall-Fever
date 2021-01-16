@@ -4,7 +4,7 @@
 
 #include "ShaderProgram.h"
 
-#define NUM_POINT_LIGHTS 16
+#define NUM_POINT_LIGHTS 4
 
 class Light
 {
@@ -15,18 +15,24 @@ public:
 
     void setActive(bool active);
     void setColor(glm::vec3 color);
+    void setIntensity(float intensity);
     void setShaderProgram(ShaderProgram *shaderProgram);
 
     glm::vec3 getColor();
 
 protected:
-    Light(ShaderProgram *shaderProgram) : shaderProgram(shaderProgram) {}
+    Light(glm::vec3 color, float intensity, ShaderProgram *shaderProgram);
 
 protected:
     ShaderProgram *shaderProgram;
 
-    bool isActive = false;
+    uint32_t id;
+    static uint32_t id_counter;
+
+    bool isActive;
     bool shouldCastShadow = true;
+
+    float intensity;
 
     // Color
     glm::vec3 lightColor;
@@ -38,12 +44,11 @@ protected:
 class PointLight : public Light
 {
 public:
-    PointLight(ShaderProgram *shaderProgram);
+    PointLight(glm::vec3 position, glm::vec3 color, float intensity, ShaderProgram *shaderProgram);
     ~PointLight() = default;
 
     void setPosition(glm::vec3 position);
     void setParameters(float K_q);
-    void setId(unsigned int id);
 
     glm::vec3 getPosition();
 
@@ -52,8 +57,6 @@ private:
     std::string getStructMemberName();
 
 private:
-    unsigned int lightId;
-
     glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
 
     float K_q = 0.032f;
@@ -62,7 +65,7 @@ private:
 class DirectionalLight : public Light
 {
 public:
-    DirectionalLight(ShaderProgram *shaderProgram);
+    DirectionalLight(glm::vec3 direction, glm::vec3 color, float intensity, ShaderProgram *shaderProgram);
 
     void setDirection(glm::vec3 direction);
 
