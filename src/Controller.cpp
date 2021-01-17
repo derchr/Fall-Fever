@@ -172,7 +172,9 @@ void Controller::run()
         menu->writeWindowActions(gameEventHandler->getWindowActionRegister());
         gameWindow->handleWindowActionRegister(gameEventHandler->getWindowActionRegister());
 
-        menu->handleMouseButtonActionRegister(gameEventHandler->getMouseButtonActionRegister(), gameWindow);
+        // Handle widget pressed event only when a screen is currently active
+        if (menu->getActiveScreen())
+            menu->handleMouseButtonActionRegister(gameEventHandler->getMouseButtonActionRegister(), gameWindow);
     }
 }
 

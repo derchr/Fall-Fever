@@ -29,9 +29,3 @@ enum mouseButtonActions {
     middleClicked,
     MOUSE_BUTTON_ACTION_NUM_ITEMS
 };
-
-enum widgetPressedActions {
-    playClicked,
-    exitClicked,
-    WIDGET_PRESSED_ACTION_NUM_ITEMS
-};

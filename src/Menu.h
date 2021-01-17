@@ -26,8 +26,6 @@ public:
     void onPlayPressed();
     void onExitPressed();
 
-    void (*widgetPressedActionRegister[widgetPressedActions::WIDGET_PRESSED_ACTION_NUM_ITEMS])();
-
 private:
     Framebuffer *framebuffer;
     ShaderProgram *shaderProgram;

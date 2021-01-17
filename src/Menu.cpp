@@ -4,11 +4,6 @@
 #include "helper.h"
 #include <iostream>
 
-void (Menu::*widgetPressedActionRegister[widgetPressedActions::WIDGET_PRESSED_ACTION_NUM_ITEMS])() = {
-    &Menu::onPlayPressed,
-    &Menu::onExitPressed
-};
-
 Menu::Menu(Framebuffer *p_framebuffer, ShaderProgram *p_shaderProgram) :
     framebuffer(p_framebuffer), shaderProgram(p_shaderProgram)
 {
