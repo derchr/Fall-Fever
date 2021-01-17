@@ -9,22 +9,25 @@
     ],
     "mainMenuScreen": [
         {
-            "unique_name": "exit",
-            "position": [0.4, 0.2],
-            "dimensions": [0.25, 0.10],
-            "texture": "data/res/textures/exit.png"
-        },
-        {
             "unique_name": "play",
             "position": [0.4, 0.5],
             "dimensions": [0.25, 0.1],
-            "texture": "data/res/textures/play.png"
+            "texture": "data/res/textures/play.png",
+            "callbackId": 1
+        },
+        {
+            "unique_name": "exit",
+            "position": [0.4, 0.2],
+            "dimensions": [0.25, 0.10],
+            "texture": "data/res/textures/exit.png",
+            "callbackId": 2
         },
         {
             "unique_name": "background",
             "position": [0.0, 0.0],
             "dimensions": [1.0, 1.0],
-            "texture": "data/res/textures/mainMenu.png"
+            "texture": "data/res/textures/mainMenu.png",
+            "callbackId": 0
         }
     ]
 }

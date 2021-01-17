@@ -169,7 +169,8 @@ void Controller::run()
             camera->updateDirectionFromMouseInput(gameEventHandler->getCursorDelta());
         }
         
-        gameWindow->handleActionRegister(gameEventHandler->getWindowActionRegister());
+        menu->writeWindowActions(gameEventHandler->getWindowActionRegister());
+        gameWindow->handleWindowActionRegister(gameEventHandler->getWindowActionRegister());
 
         menu->handleMouseButtonActionRegister(gameEventHandler->getMouseButtonActionRegister(), gameWindow);
     }

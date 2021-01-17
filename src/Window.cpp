@@ -113,10 +113,10 @@ void Window::setCatchedCursor(bool value)
     }
 }
 
-void Window::handleActionRegister(bool *windowActionRegister)
+void Window::handleWindowActionRegister(bool *windowActionRegister)
 {
-    if (windowActionRegister[wireFrameToggle]) {
-        windowActionRegister[wireFrameToggle] = 0;
+    if (windowActionRegister[windowActions::wireFrameToggle]) {
+        windowActionRegister[windowActions::wireFrameToggle] = 0;
         wireFrameMode = !wireFrameMode;
         if (wireFrameMode) {
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -125,10 +125,14 @@ void Window::handleActionRegister(bool *windowActionRegister)
         }
     }
 
-    if (windowActionRegister[mouseCatchToggle]) {
-        windowActionRegister[mouseCatchToggle] = 0;
+    if (windowActionRegister[windowActions::mouseCatchToggle]) {
+        windowActionRegister[windowActions::mouseCatchToggle] = 0;
         mouseCatched = !mouseCatched;
         setCatchedCursor(mouseCatched);
+    }
+
+    if (windowActionRegister[windowActions::windowShouldClose]) {
+        glfwSetWindowShouldClose(window, true);
     }
 }
 

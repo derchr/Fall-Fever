@@ -1,12 +1,14 @@
 #include "Widget.h"
 #include "VertexArray.h"
+#include "Menu.h"
 
-Widget::Widget(std::string &name, Texture *texture, float p_x, float p_y, float p_w, float p_h) :
+Widget::Widget(std::string &name, Texture *texture, float p_x, float p_y, float p_w, float p_h, uint16_t callbackId) :
     x(p_x),
     y(p_y),
     w(p_w),
     h(p_h),
-    unique_name(name)
+    unique_name(name),
+    callbackId(callbackId)
 {
     widgetTextures.push_back(texture);
     
@@ -42,6 +44,11 @@ Widget::~Widget()
 std::string Widget::getUniqueName()
 {
     return unique_name;
+}
+
+uint16_t Widget::getCallbackId()
+{
+    return callbackId;
 }
 
 void Widget::draw(ShaderProgram *shaderProgram)

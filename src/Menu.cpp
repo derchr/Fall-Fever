@@ -2,8 +2,13 @@
 #include "JsonParser.h"
 #include "eventActions.h"
 #include "helper.h"
-
 #include <iostream>
+
+void (Menu::*widgetPressedActionRegister[widgetPressedActions::WIDGET_PRESSED_ACTION_NUM_ITEMS])() = {
+    &Menu::onPlayPressed,
+    &Menu::onExitPressed
+};
+
 Menu::Menu(Framebuffer *p_framebuffer, ShaderProgram *p_shaderProgram) :
     framebuffer(p_framebuffer), shaderProgram(p_shaderProgram)
 {
@@ -58,7 +63,27 @@ void Menu::handleMouseButtonActionRegister(bool *mouseButtonActionRegister, Wind
         for (auto it = widgets.begin(); it != widgets.end(); it++) {
             if ((*it)->isHovered(window)) {
                 std::cout << (*it)->getUniqueName() << " clicked!" << std::endl;
+                if((*it)->getCallbackId() == 1)
+                    resetActiveScreen();
+                if((*it)->getCallbackId() == 2)
+                    shouldExit = true;
             }
         }
     }
+}
+
+void Menu::writeWindowActions(bool *windowActionRegister)
+{
+    if (shouldExit)
+        windowActionRegister[windowActions::windowShouldClose] = true;
+}
+
+void Menu::onPlayPressed()
+{
+    std::cout << "Hello, from Widget play in Menu :)" << std::endl;
+}
+
+void Menu::onExitPressed()
+{
+
 }

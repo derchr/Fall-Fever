@@ -19,6 +19,7 @@ enum cameraMouseActions {
 enum windowActions {
     wireFrameToggle,
     mouseCatchToggle,
+    windowShouldClose,
     WINDOW_ACTION_NUM_ITEMS
 };
 
@@ -27,4 +28,10 @@ enum mouseButtonActions {
     rightClicked,
     middleClicked,
     MOUSE_BUTTON_ACTION_NUM_ITEMS
+};
+
+enum widgetPressedActions {
+    playClicked,
+    exitClicked,
+    WIDGET_PRESSED_ACTION_NUM_ITEMS
 };

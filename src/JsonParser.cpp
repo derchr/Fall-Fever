@@ -249,7 +249,8 @@ std::vector<Widget*> JsonParser::getWidgetsFromScreen(const Json::Value &screenJ
             currentWidgetPosition[0].asFloat(),
             currentWidgetPosition[1].asFloat(),
             currentWidgetDimensions[0].asFloat(),
-            currentWidgetDimensions[1].asFloat()
+            currentWidgetDimensions[1].asFloat(),
+            currentWidgetJson["callbackId"].asUInt()
         );
         temp_widgets.push_back(currentWidget);
     }

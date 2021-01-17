@@ -4,6 +4,8 @@
 #include "Framebuffer.h"
 #include "Widget.h"
 
+class Menu;
+
 class Screen
 {
 public:

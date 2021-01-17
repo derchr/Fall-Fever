@@ -18,7 +18,7 @@ public:
     bool isWindowResized();
     void updateWindowDimensions();
 
-    void handleActionRegister(bool *windowActionRegister);
+    void handleWindowActionRegister(bool *windowActionRegister);
 
 private:
     static void glfw_error_callback(int error, const char *description);
