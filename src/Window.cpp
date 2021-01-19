@@ -6,7 +6,6 @@
 #include "defines.h"
 #include "helper.h"
 
-
 Window::Window()
 {
     // Initialize GLFW

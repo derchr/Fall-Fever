@@ -168,8 +168,7 @@ std::vector<Light*> JsonParser::getLights(ShaderProgram* shaderProgram)
     // Pointlights
     const Json::Value pointLightsJson = root["pointLights"];
 
-
-    unsigned int index = 0;
+    int index = 0;
     for (; index < pointLightsJson.size(); index++) {
         PointLight *current_pointLight;
 

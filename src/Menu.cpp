@@ -2,7 +2,6 @@
 #include "JsonParser.h"
 #include "eventActions.h"
 #include "helper.h"
-#include <iostream>
 
 Menu::Menu(Framebuffer *p_framebuffer, ShaderProgram *p_shaderProgram) :
     framebuffer(p_framebuffer), shaderProgram(p_shaderProgram)
@@ -75,7 +74,7 @@ void Menu::writeWindowActions(bool *windowActionRegister)
 
 void Menu::onPlayPressed()
 {
-    std::cout << "Hello, from Widget play in Menu :)" << std::endl;
+
 }
 
 void Menu::onExitPressed()

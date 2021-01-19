@@ -4,7 +4,7 @@
 
 #include "ShaderProgram.h"
 
-#define NUM_POINT_LIGHTS 4
+#define NUM_POINT_LIGHTS 1
 
 class Light
 {

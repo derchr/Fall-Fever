@@ -75,7 +75,8 @@ void PointLight::update()
 
 std::string PointLight::getStructMemberName()
 {
-    std::string temp = "u_pointLight[" + std::to_string(id) + "].";
+    // id - 1 because id 0 is always the DirectionalLight!
+    std::string temp = "u_pointLight[" + std::to_string(id - 1) + "].";
     return temp;
 }
 
