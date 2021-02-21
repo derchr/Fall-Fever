@@ -4,3 +4,4 @@ build
 res/models
 res/textures
 .kdev4
+.cache

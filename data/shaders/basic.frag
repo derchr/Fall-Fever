@@ -5,42 +5,39 @@ layout(location = 0) out vec4 f_color;
 in vec3 v_normal;
 in vec2 v_texCoord;
 in vec3 v_fragmentPosition;
+in vec3 v_fragmentPositionTangent;
 in vec4 v_fragmentPositionDirectionalLightSpace;
+
+in vec3 v_lightDirectionTangent;
+in vec3 v_lightPositionTangent0;
+//in vec3 v_lightPositionTangent1;
+//in vec3 v_lightPositionTangent2;
+//in vec3 v_lightPositionTangent3;
+
+in vec3 v_viewPositionTangent;
 
 struct Material {
     sampler2D texture_diffuse0;
     sampler2D texture_diffuse1;
     sampler2D texture_specular0;
-    sampler2D texture_specular1;
     sampler2D texture_normal0;
-    sampler2D texture_normal1;
     sampler2D texture_height0;
-    sampler2D texture_height1;
     sampler2D texture_gloss0;
-    sampler2D texture_gloss1;
     float shininess;
 };
 uniform Material u_material;
 
 struct DirectionalLight {
-    bool isActive;
     vec3 direction;
-
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
+    bool isActive;
+    vec3 color;
 };
 uniform DirectionalLight u_directionalLight;
 
 struct PointLight {
-    bool isActive;
     vec3 position;
-    
-    float K_q;
-
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
+    bool isActive;
+    vec3 color;
 };
 #define NUM_POINT_LIGHTS 1
 uniform PointLight u_pointLight[NUM_POINT_LIGHTS];
@@ -62,7 +59,6 @@ uniform PointLight u_pointLight[NUM_POINT_LIGHTS];
 uniform SpotLight u_spotLight;*/
 
 uniform mat3 u_normalMatrix;
-uniform vec3 u_viewPosition;
 
 uniform sampler2D u_texture_directionalShadowMap;
 uniform samplerCube u_texture_pointShadowMap0;
@@ -101,17 +97,18 @@ void main() {
 
     vec3 fragmentColor = vec3(0.0f);
 
-    vec3 normal = normalize(u_normalMatrix * v_normal);
-    vec3 viewDir = normalize(u_viewPosition - v_fragmentPosition);
+    vec3 normal = texture(u_material.texture_normal0, v_texCoord).rgb;
+    normal = normalize(normal * 2.0 - 1.0);
+    vec3 viewDir = normalize(v_viewPositionTangent - v_fragmentPositionTangent);
 
     fragmentColor += directionalLightContribution(u_directionalLight, normal, viewDir);
 
     for(int i = 0; i < NUM_POINT_LIGHTS; i++) {
-        fragmentColor += pointLightContribution(u_pointLight[i], normal, v_fragmentPosition, viewDir);
+        fragmentColor += pointLightContribution(u_pointLight[i], normal, v_fragmentPositionTangent, viewDir);
     }
 
     // There are currently no spotlights
-    //fragmentColor += spotLightContribution(u_spotLight, normal, v_fragmentPosition, viewDir);
+    //fragmentColor += spotLightContribution(u_spotLight, normal, v_fragmentPositionTangent, viewDir);
 
     f_color = vec4(fragmentColor, 1.0f);
 
@@ -123,10 +120,15 @@ vec3 directionalLightContribution(DirectionalLight light, vec3 normal, vec3 view
     if(!light.isActive)
         return vec3(0.0f);
 
-    vec3 lightDir = normalize(-light.direction);
+    //vec3 lightDir = normalize(-light.direction);
+    vec3 lightDir = normalize(-v_lightDirectionTangent);
+
+    vec3 diffuseColor = light.color;
+    vec3 specularColor = light.color;
+    vec3 ambientColor = light.color * 0.002f;
 
     vec3 ambient, diffuse, specular;
-    computeShading(light.ambient, light.diffuse, light.specular, lightDir, viewDir, normal, ambient, diffuse, specular);
+    computeShading(ambientColor, diffuseColor, specularColor, lightDir, viewDir, normal, ambient, diffuse, specular);
 
     float shadows = 0.0f;
     if(b_drawShadows)
@@ -141,19 +143,23 @@ vec3 pointLightContribution(PointLight light, vec3 normal, vec3 fragPos, vec3 vi
     if(!light.isActive)
         return vec3(0.0f);
 
-    vec3 lightDir = normalize(light.position - fragPos);
+    vec3 lightDir = normalize(v_lightPositionTangent0 - fragPos);
+
+    vec3 diffuseColor = light.color;
+    vec3 specularColor = light.color;
+    vec3 ambientColor = light.color * 0.002f;
 
     vec3 ambient, diffuse, specular;
-    computeShading(light.ambient, light.diffuse, light.specular, lightDir, viewDir, normal, ambient, diffuse, specular);
+    computeShading(ambientColor, diffuseColor, specularColor, lightDir, viewDir, normal, ambient, diffuse, specular);
 
-    float attenuation = computeAttenuation(light.position, fragPos, light.K_q);
-    ambient *= attenuation;
-    diffuse *= attenuation;
-    specular *= attenuation;
+    float attenuation = computeAttenuation(v_lightPositionTangent0, fragPos, 0.032f);
+    //ambient *= attenuation;
+    //diffuse *= attenuation;
+    //specular *= attenuation;
 
     float shadows = 0.0f;
     if(b_drawShadows)
-        shadows = computePointShadows(fragPos, light.position);
+        shadows = computePointShadows(v_fragmentPosition, light.position);
 
     return (ambient + (1.0f - shadows) * (diffuse + specular));
 }
@@ -240,7 +246,6 @@ float computeDirectionalShadows(vec4 fragPosLightSpace, vec3 normal, vec3 lightD
     }
     shadow /= 9.0f;
 
-
     return shadow;
 }
 
@@ -253,9 +258,9 @@ float computePointShadows(vec3 fragPos, vec3 lightPos) {
     float currentDepth = length(fragToLight);
 
     float shadow = 0.0;
-    float bias   = 0.05;
-    int samples  = 20;
-    float viewDistance = length(u_viewPosition - fragPos);
+    float bias = 0.05;
+    int samples = 20;
+    float viewDistance = length(v_viewPositionTangent - fragPos);
     float diskRadius = 0.05;
 
     for(int i = 0; i < samples; ++i) {

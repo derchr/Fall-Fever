@@ -36,9 +36,6 @@ protected:
 
     // Color
     glm::vec3 lightColor;
-    glm::vec3 diffuseColor;
-    glm::vec3 ambientColor;
-    glm::vec3 specularColor;
 };
 
 class PointLight : public Light
@@ -48,7 +45,6 @@ public:
     ~PointLight() = default;
 
     void setPosition(glm::vec3 position);
-    void setParameters(float K_q);
 
     glm::vec3 getPosition();
 
@@ -58,8 +54,6 @@ private:
 
 private:
     glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
-
-    float K_q = 0.032f;
 };
 
 class DirectionalLight : public Light

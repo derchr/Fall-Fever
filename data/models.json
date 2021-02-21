@@ -15,6 +15,10 @@
         {
             "unique_name": "cube",
             "path": "data/res/models/cube.ffo"
+        },
+        {
+            "unique_name": "container",
+            "path": "data/res/models/container.ffo"
         }
     ],
     "entities": [
@@ -27,6 +31,13 @@
             "scale": 0.6
         },
         {
+            "unique_name": "container",
+            "model": "container",
+            "shaderProgram": "defaultProgram",
+            "position": [10.0, 1.0, 0.0],
+            "rotation": [45.0, 45.0, 45.0]
+        },
+        {
             "unique_name": "ground",
             "model": "ground",
             "shaderProgram": "defaultProgram"
@@ -35,6 +46,12 @@
             "unique_name": "light",
             "model": "cube",
             "shaderProgram": "lightProgram"
+        }
+    ],
+    "textures" : [
+        {
+            "unique_name": "fallback_normal",
+            "path": "data/res/models/tex/fallback_normal.png"
         }
     ],
     "skybox": {

@@ -12,9 +12,6 @@ Light::Light(glm::vec3 color, float intensity, ShaderProgram* shaderProgram) :
 {
     id = id_counter++;
     lightColor = color * intensity;
-    diffuseColor = lightColor * glm::vec3(1.0f);
-    ambientColor = diffuseColor * glm::vec3(0.002f);
-    specularColor = lightColor * glm::vec3(1.0f);
 }
 
 
@@ -32,9 +29,6 @@ void Light::setShaderProgram(ShaderProgram* shaderProgram)
 void Light::setColor(glm::vec3 color)
 {
     lightColor = color * intensity;
-    diffuseColor = lightColor * glm::vec3(1.0f);
-    ambientColor = diffuseColor * glm::vec3(0.002f);
-    specularColor = lightColor * glm::vec3(1.0f);
     update();
 }
 
@@ -65,10 +59,7 @@ void PointLight::update()
 
     shaderProgram->setUniform((getStructMemberName() + "isActive").c_str(), isActive);
     shaderProgram->setUniform((getStructMemberName() + "position").c_str(), position);
-    shaderProgram->setUniform((getStructMemberName() + "ambient").c_str(), ambientColor);
-    shaderProgram->setUniform((getStructMemberName() + "diffuse").c_str(), diffuseColor);
-    shaderProgram->setUniform((getStructMemberName() + "specular").c_str(), specularColor);
-    shaderProgram->setUniform((getStructMemberName() + "K_q").c_str(), K_q);
+    shaderProgram->setUniform((getStructMemberName() + "color").c_str(), lightColor);
 
     shaderProgram->unbind();
 }
@@ -91,11 +82,6 @@ void PointLight::setPosition(glm::vec3 position)
     update();
 }
 
-void PointLight::setParameters(float K_q)
-{
-    this->K_q = K_q;
-}
-
 // DirectionalLight
 
 DirectionalLight::DirectionalLight(glm::vec3 direction, glm::vec3 color, float intensity, ShaderProgram *shaderProgram) :
@@ -111,9 +97,7 @@ void DirectionalLight::update()
 
     shaderProgram->setUniform("u_directionalLight.isActive", isActive);
     shaderProgram->setUniform("u_directionalLight.direction", direction);
-    shaderProgram->setUniform("u_directionalLight.ambient", ambientColor);
-    shaderProgram->setUniform("u_directionalLight.diffuse", diffuseColor);
-    shaderProgram->setUniform("u_directionalLight.specular", specularColor);
+    shaderProgram->setUniform("u_directionalLight.color", lightColor);
 
     shaderProgram->unbind();
 }

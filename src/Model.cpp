@@ -77,6 +77,18 @@ void Model::loadModel(std::string &pathToModel)
         loadedTextures.push_back(newTex);
     }
 
+    // When there is no normal map bound, please use fallback texture
+    bool hasNormalMap = false;
+    for (auto it = textureTypes.begin(); it != textureTypes.end(); it++) {
+        if (*it == textureType::texture_normal)
+            hasNormalMap = true;
+    }
+
+    if (!hasNormalMap) {
+        Texture *newTex = new Texture("data/res/models/tex/fallback_normal.png", textureType::texture_normal);
+        loadedTextures.push_back(newTex);
+    }
+
     // Here starts the first mesh
     uint32_t numMeshes;
     input.read((char *) &numMeshes, sizeof(uint32_t));
@@ -107,6 +119,11 @@ void Model::loadModel(std::string &pathToModel)
             uint32_t currentTextureId;
             input.read((char *) &currentTextureId, sizeof(uint32_t));
             meshTextures.push_back(loadedTextures[currentTextureId]);
+        }
+
+        if (!hasNormalMap) {
+            // This will be the last texture
+            meshTextures.push_back(loadedTextures[numTextures]);
         }
 
         Mesh *currentMesh = new Mesh(meshVertices, meshIndices, meshTextures);

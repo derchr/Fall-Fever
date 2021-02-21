@@ -1,5 +1,5 @@
 if(UNIX)
-    set(CMAKE_GENERATOR "Ninja" CACHE INTERNAL "" FORCE)
+    set(CMAKE_GENERATOR "Unix Makefiles" CACHE INTERNAL "" FORCE)
 endif(UNIX)
 
 if(WIN32)

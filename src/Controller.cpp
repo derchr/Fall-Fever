@@ -266,15 +266,12 @@ void Controller::renderImGui(World *world, PointLight *pointLight, glm::vec3 *li
 
     // color picker
     ImGui::Text("\nLight Source");
-    static float K_q = 1.0f;
-    ImGui::SliderFloat("Attenuation Parameter", &K_q, 0, 1.5f);
 
     updateExposure(postProcessingProgram);
-    pointLight->setParameters(K_q);
 
     static float color[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 
-    ImGui::SliderFloat("Intensity", intensity, 0, 50.f);
+    ImGui::SliderFloat("Intensity", intensity, 0, 250.f);
 
     ImGui::ColorEdit3("Color", color);
     lightColor->x = color[0];

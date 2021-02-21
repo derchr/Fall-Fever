@@ -159,6 +159,18 @@ Mesh processMesh(aiMesh *mesh, const aiScene *scene, Model *model) {
         vector.y = mesh->mNormals[i].y;
         vector.z = mesh->mNormals[i].z;
         vertex.normalVec = vector;
+        
+        // Tangents
+        vector.x = mesh->mTangents[i].x;
+        vector.y = mesh->mTangents[i].y;
+        vector.z = mesh->mTangents[i].z;
+        vertex.tangentVec = vector;
+
+        // Bitangents
+        vector.x = mesh->mBitangents[i].x;
+        vector.y = mesh->mBitangents[i].y;
+        vector.z = mesh->mBitangents[i].z;
+        vertex.bitangentVec = vector;
 
         // Texture UV mapping
         if(mesh->mTextureCoords[0]) {
@@ -191,9 +203,10 @@ Mesh processMesh(aiMesh *mesh, const aiScene *scene, Model *model) {
         std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, texture_specular, &currentMesh, model);
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 
-        std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_NORMALS, texture_normal, &currentMesh, model);
+        std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, texture_normal, &currentMesh, model);
         textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 
+        // Not entirely sure if aiTextureType_HEIGHT is correct
         std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, texture_height, &currentMesh, model);
         textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
     }
