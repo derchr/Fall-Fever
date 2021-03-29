@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <future>
 
 JsonParser::JsonParser(std::string path)
 {
@@ -33,14 +34,35 @@ std::vector<Model*> JsonParser::getModels()
 
     const Json::Value modelsJson = root["models"];
 
+    struct ModelSkeleton {
+        std::string model_name;
+        std::string model_path;
+    };
+
+    std::vector<ModelSkeleton> model_skeletons;
+
     for (unsigned int index = 0; index < modelsJson.size(); index++) {
         std::string model_name = modelsJson[index]["unique_name"].asString();
         std::string model_path = modelsJson[index]["path"].asString();
-        Model *current_model = new Model(model_name, model_path);
-        if(current_model) {
-            temp_models.push_back(current_model);
-            std::cout << "Loaded Model \"" << model_name << "\" from \"" << model_path << "\"" << std::endl;
-        }
+        ModelSkeleton model_skeleton = {model_name, model_path};
+        model_skeletons.push_back(model_skeleton);
+    }
+
+    std::vector<std::future<void>> futures;
+
+    std::mutex s_ModelsMutex;
+    auto* temp_models_ptr = &temp_models;
+    for (auto model_skeleton : model_skeletons) {
+        auto loadModel = [&]() {
+            Model *current_model = new Model(model_skeleton.model_name, model_skeleton.model_path);
+            if(current_model) {
+                std::lock_guard<std::mutex> lock(s_ModelsMutex);
+                temp_models_ptr->push_back(current_model);
+                std::cout << "Loaded Model \"" << model_skeleton.model_name << "\" from \"" << model_skeleton.model_path << "\"" << std::endl;
+            }
+        };
+
+        futures.push_back(std::async(std::launch::async, loadModel));
     }
 
     return temp_models;

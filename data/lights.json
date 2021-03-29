@@ -6,7 +6,7 @@
     },
     "pointLights": [
         {
-            "intensity": 10.0,
+            "intensity": 4.0,
             "position": [0.0, 1.0, 0.0],
             "color": [1.0, 1.0, 1.0]
         }
