@@ -22,7 +22,7 @@ Screen::~Screen()
     }
 }
 
-std::string Screen::getUniqueName()
+const std::string& Screen::getUniqueName()
 {
     return unique_name;
 }

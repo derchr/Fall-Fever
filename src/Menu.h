@@ -13,8 +13,8 @@ public:
     Menu(Framebuffer *p_framebuffer, ShaderProgram *p_shaderProgram);
     ~Menu();
 
-    Screen *getScreenByName(const char *unique_name);
-    void showScreenByName(const char *unique_name);
+    Screen *getScreenByName(const std::string& unique_name);
+    void showScreenByName(const std::string& unique_name);
 
     Screen *getActiveScreen();
     void writeWindowActions(bool *windowActionRegister);

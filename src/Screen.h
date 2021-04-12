@@ -15,7 +15,7 @@ public:
     void addWidget(Widget *widget);
     void draw();
 
-    std::string getUniqueName();
+    const std::string& getUniqueName();
     std::vector<Widget*> getWidgets();
     Widget *getWidgetByName(const char* name);
     

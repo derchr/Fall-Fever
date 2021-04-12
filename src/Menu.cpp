@@ -3,6 +3,8 @@
 #include "eventActions.h"
 #include "helper.h"
 
+#include <iostream>
+
 Menu::Menu(Framebuffer *p_framebuffer, ShaderProgram *p_shaderProgram) :
     framebuffer(p_framebuffer), shaderProgram(p_shaderProgram)
 {
@@ -18,7 +20,7 @@ Menu::~Menu()
     }
 }
 
-Screen *Menu::getScreenByName(const char* unique_name)
+Screen *Menu::getScreenByName(const std::string& unique_name)
 {
     for (auto it = screens.begin(); it != screens.end(); it++) {
         if((*it)->getUniqueName() == unique_name) {
@@ -33,7 +35,7 @@ Screen *Menu::getActiveScreen()
     return activeScreen;
 }
 
-void Menu::showScreenByName(const char *unique_name)
+void Menu::showScreenByName (const std::string& unique_name)
 {
     auto it = screens.begin();
     for (; it != screens.end(); it++) {
