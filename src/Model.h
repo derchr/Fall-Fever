@@ -8,7 +8,7 @@
 class Model
 {
 public:
-    Model(std::string &modelName, std::string &pathToModel);
+    Model(const std::string& modelName, const std::string& pathToModel);
     ~Model();
 
     void draw(ShaderProgram *shaderProgram);
@@ -18,7 +18,7 @@ public:
     std::string getUniqueName();
 
 private:
-    void loadModel(std::string &pathToModel);
+    void loadModel(const std::string &pathToModel);
 
 private:
     std::vector<Mesh *> meshes;

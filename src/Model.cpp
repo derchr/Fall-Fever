@@ -5,7 +5,7 @@
 
 uint32_t Model::id_counter = 0;
 
-Model::Model(std::string &modelName, std::string &modelPath) :
+Model::Model(const std::string &modelName, const std::string &modelPath) :
     unique_name(modelName)
 {
     directory = modelPath.substr(0, modelPath.find_last_of('/'));
@@ -38,7 +38,7 @@ void Model::drawWithoutTextures()
     }
 }
 
-void Model::loadModel(std::string &pathToModel)
+void Model::loadModel(const std::string &pathToModel)
 {
     std::ifstream input(pathToModel, std::ios::in | std::ios::binary);
 
