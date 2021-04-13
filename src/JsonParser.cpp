@@ -4,7 +4,7 @@
 #include <iostream>
 #include <future>
 
-JsonParser::JsonParser(std::string path)
+JsonParser::JsonParser(const std::string& path)
 {
     std::ifstream file(path.c_str(), std::ifstream::binary);
 
@@ -28,17 +28,6 @@ JsonParser::~JsonParser()
 
 }
 
-static std::mutex s_ModelsMutex;
-
-static void loadModel(const std::string modelName, const std::string modelPath, std::vector<Model*>* model_vec) {
-    Model *current_model = new Model(modelName, modelPath);
-    if(current_model) {
-        std::lock_guard<std::mutex> lock(s_ModelsMutex);
-        model_vec->push_back(current_model);
-        std::cout << "Loaded Model \"" << modelName << "\" from \"" << modelPath << "\"" << std::endl;
-    }
-}
-
 std::vector<Model*> JsonParser::getModels()
 {
     std::vector<Model*> temp_models;
@@ -60,19 +49,20 @@ std::vector<Model*> JsonParser::getModels()
     }
 
     std::vector<std::future<void>> futures;
+    std::mutex mutex;
 
     auto* temp_models_ptr = &temp_models;
     for (const auto& model_skeleton : model_skeletons) {
-        /*auto loadModel = [](const std::string& modelName, const std::string& modelPath, std::mutex& mutex, std::vector<Model*>* model_vec) {
-            Model *current_model = new Model(modelName, modelPath);
+        auto loadModel = [&]() {
+            Model *current_model = new Model(model_skeleton.model_name, model_skeleton.model_path);
             if(current_model) {
                 std::lock_guard<std::mutex> lock(mutex);
-                model_vec->push_back(current_model);
-                std::cout << "Loaded Model \"" << modelName << "\" from \"" << modelPath << "\"" << std::endl;
+                temp_models_ptr->push_back(current_model);
+                std::cout << "Loaded Model \"" << model_skeleton.model_name << "\" from \"" << model_skeleton.model_path << "\"" << std::endl;
             }
-        };*/
+        };
 
-        futures.push_back(std::async(std::launch::async, loadModel, model_skeleton.model_name, model_skeleton.model_path, temp_models_ptr));
+        futures.push_back(std::async(std::launch::async, loadModel));
         }
 
     return temp_models;

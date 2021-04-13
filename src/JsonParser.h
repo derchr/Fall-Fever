@@ -13,7 +13,7 @@
 class JsonParser
 {
 public:
-    JsonParser(std::string path);
+    JsonParser(const std::string& path);
     ~JsonParser();
 
     std::vector<Model*> getModels();
