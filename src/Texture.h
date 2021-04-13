@@ -15,7 +15,7 @@ enum cubeMapFaces {cm_right, cm_left, cm_top, cm_bottom, cm_back, cm_front, CUBE
 class Texture
 {
 public:
-    Texture(const char *texturePath, uint8_t textureType);
+    Texture(const std::string& texturePath, uint8_t textureType);
     ~Texture();
 
     void bind(uint8_t textureUnit, ShaderProgram *shaderProgram, uint8_t textureTypeNum);

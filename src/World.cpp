@@ -21,6 +21,11 @@ World::World(std::vector<ShaderProgram*> shaderPrograms) :
 
     JsonParser modelParser("data/models.json");
     models = modelParser.getModels();
+
+    for (const auto& it : models) {
+        it->prepareModel();
+    }
+
     entities = modelParser.getEntities(models, shaderPrograms);
     skybox = modelParser.getSkybox(getModelByName("cube"), Controller::getShaderProgramByName(shaderPrograms, "skyboxProgram"));
 

@@ -5,7 +5,7 @@
 
 uint32_t Model::id_counter = 0;
 
-Model::Model(std::string &modelName, std::string &modelPath) :
+Model::Model(const std::string &modelName, const std::string &modelPath) :
     unique_name(modelName)
 {
     directory = modelPath.substr(0, modelPath.find_last_of('/'));
@@ -24,6 +24,11 @@ Model::~Model()
 
 void Model::draw(ShaderProgram *shaderProgram)
 {
+    if (!model_prepared) {
+        std::cout << "WARNING: Model not prepared! Unable to draw!" << std::endl;
+        return;
+    }
+
     // Iterate through every mesh and call the draw function
     for (auto it = meshes.begin(); it != meshes.end(); it++) {
         (*it)->draw(shaderProgram);
@@ -32,13 +37,18 @@ void Model::draw(ShaderProgram *shaderProgram)
 
 void Model::drawWithoutTextures()
 {
+    if (!model_prepared) {
+        std::cout << "WARNING: Model not prepared! Unable to draw!" << std::endl;
+        return;
+    }
+
     // Iterate through every mesh and call the draw function
     for (auto it = meshes.begin(); it != meshes.end(); it++) {
         (*it)->drawWithoutTextures();
     }
 }
 
-void Model::loadModel(std::string &pathToModel)
+void Model::loadModel(const std::string &pathToModel)
 {
     std::ifstream input(pathToModel, std::ios::in | std::ios::binary);
 
@@ -71,10 +81,15 @@ void Model::loadModel(std::string &pathToModel)
         textureSources.push_back(currentTextureSource);
     }
 
+
     for (unsigned int i = 0; i < numTextures; i++) {
-        std::string textureSource = directory + '/' + textureSources[i].c_str();
-        Texture *newTex = new Texture(textureSource.c_str(), textureTypes[i]);
-        loadedTextures.push_back(newTex);
+        TexturePrototype texture_prototype;
+        std::string texturePath = directory + '/' + textureSources[i].c_str();
+
+        texture_prototype.texturePath = std::move(texturePath);
+        texture_prototype.textureType = textureTypes[i];
+
+        modelTexturePrototypes.push_back(texture_prototype);
     }
 
     // When there is no normal map bound, please use fallback texture
@@ -85,8 +100,12 @@ void Model::loadModel(std::string &pathToModel)
     }
 
     if (!hasNormalMap) {
-        Texture *newTex = new Texture("data/res/models/tex/fallback_normal.png", textureType::texture_normal);
-        loadedTextures.push_back(newTex);
+        TexturePrototype texture_prototype;
+
+        texture_prototype.texturePath = "data/res/models/tex/fallback_normal.png";
+        texture_prototype.textureType = textureType::texture_normal;
+
+        modelTexturePrototypes.push_back(texture_prototype);
     }
 
     // Here starts the first mesh
@@ -94,6 +113,8 @@ void Model::loadModel(std::string &pathToModel)
     input.read((char *) &numMeshes, sizeof(uint32_t));
 
     for (unsigned int j = 0; j < numMeshes; j++) {
+
+        MeshPrototype mesh_prototype;
 
         uint32_t numMeshVertices, numMeshIndices, numMeshTextureIds;
 
@@ -109,29 +130,52 @@ void Model::loadModel(std::string &pathToModel)
         std::vector<Vertex> meshVertices;
         meshVertices.resize(numMeshVertices);
         input.read((char *) meshVertices.data(), vertexBlockSize);
+        mesh_prototype.meshVertices = std::move(meshVertices);
 
         std::vector<uint32_t> meshIndices;
         meshIndices.resize(numMeshIndices);
         input.read((char *) meshIndices.data(), indexBlockSize);
+        mesh_prototype.meshIndices = std::move(meshIndices);
 
-        std::vector<Texture *> meshTextures;
         for (unsigned int i = 0; i < numMeshTextureIds; i++) {
             uint32_t currentTextureId;
             input.read((char *) &currentTextureId, sizeof(uint32_t));
-            meshTextures.push_back(loadedTextures[currentTextureId]);
+            mesh_prototype.textureIds.push_back(currentTextureId);
         }
 
         if (!hasNormalMap) {
             // This will be the last texture
-            meshTextures.push_back(loadedTextures[numTextures]);
+            mesh_prototype.textureIds.push_back(numTextures);
         }
 
-        Mesh *currentMesh = new Mesh(meshVertices, meshIndices, meshTextures);
-        meshes.push_back(currentMesh);
+        modelMeshPrototypes.push_back(std::move(mesh_prototype));
     }
 
     input.close();
 }
+
+void Model::prepareModel()
+{
+    model_prepared = true;
+
+    // Create textures on GPU
+    for (auto& it : modelTexturePrototypes) {
+        Texture *newTex = new Texture(it.texturePath.c_str(), it.textureType);
+        loadedTextures.push_back(newTex);
+    }
+
+    // Create meshes on GPU
+    for (const auto& it : modelMeshPrototypes) {
+        std::vector<Texture *> meshTextures;
+        for (const auto it2 : it.textureIds) {
+            meshTextures.push_back(loadedTextures[it2]);
+        }
+
+        Mesh *currentMesh = new Mesh(std::move(it.meshVertices), std::move(it.meshIndices), meshTextures);
+        meshes.push_back(currentMesh);
+    }
+}
+
 
 Mesh* Model::getMesh(unsigned int index)
 {

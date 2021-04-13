@@ -3,13 +3,11 @@
 #include <stb/stb_image.h>
 #include <iostream>
 
-Texture::Texture(const char *texturePath, uint8_t textureType)
+Texture::Texture(const std::string& texturePath, uint8_t textureType) :
+    texturePath(texturePath), textureType(textureType)
 {
-    this->texturePath = texturePath;
-    this->textureType = textureType;
-
     stbi_set_flip_vertically_on_load(1);
-    auto *textureBuffer = stbi_load(texturePath, &textureWidth, &textureHeight, &numComponents, 0);
+    auto *textureBuffer = stbi_load(texturePath.c_str(), &textureWidth, &textureHeight, &numComponents, 0);
 
     GLenum internalFormat;
     GLenum dataFormat;

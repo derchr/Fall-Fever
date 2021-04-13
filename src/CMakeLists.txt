@@ -29,6 +29,7 @@ target_link_libraries(
     ${OPENGL_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     imgui
+    pthread
 )
 
 target_compile_options(Fall-Fever PRIVATE -Wall -Wextra -pedantic)

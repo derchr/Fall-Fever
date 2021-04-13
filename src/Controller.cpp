@@ -111,7 +111,7 @@ void Controller::run()
             world->getEntityById(0)->rotate(glm::vec3(0.0f, 1.0f, 0.0f), -0.2f * deltaTime);
         }
         static glm::vec3 lightColor = glm::vec3(1.f);
-        static float intensity = 20.f;
+        static float intensity = 7.5f;
         world->updatePointLight(0, true, world->getEntityByName("light")->getPosition(), lightColor, intensity);
         world->updateDirectionalLight(true, world->getDirectionalLight()->getDirection(), lightColor);
         getShaderProgramByName("lightProgram")->bind();
