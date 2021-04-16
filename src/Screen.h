@@ -1,5 +1,7 @@
 #pragma once
 
+#include <unordered_map>
+
 #include "ShaderProgram.h"
 #include "Framebuffer.h"
 #include "Widget.h"
@@ -9,15 +11,15 @@ class Menu;
 class Screen
 {
 public:
-    Screen(std::string &name, std::vector<Widget*> widgets, Framebuffer *framebuffer, ShaderProgram *shaderProgram);
+    Screen(const std::string& name, std::vector<Widget*> widgets, Framebuffer* framebuffer, ShaderProgram* shaderProgram);
     ~Screen();
     
     void addWidget(Widget *widget);
-    void draw();
+    void draw() const;
 
-    const std::string& getUniqueName();
-    std::vector<Widget*> getWidgets();
-    Widget *getWidgetByName(const char* name);
+    const std::string& getUniqueName() const;
+    std::vector<Widget*> getWidgets() const;
+    Widget *getWidgetByName(const std::string& name) const;
     
 private:
     uint32_t id;
@@ -29,4 +31,6 @@ private:
     
     std::vector<Texture*> textures;
     std::vector<Widget*> widgets;
+
+    mutable std::unordered_map<std::string, Widget*> m_widget_name_cache;
 };

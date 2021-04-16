@@ -210,7 +210,7 @@ void Controller::updateExposure(ShaderProgram *shaderProgram)
     shaderProgram->unbind();
 }
 
-ShaderProgram* Controller::getShaderProgramByName(const char *name)
+ShaderProgram* Controller::getShaderProgramByName(const std::string& name)
 {
     for (auto it = shaderPrograms.begin(); it != shaderPrograms.end(); it++) {
         if((*it)->getUniqueName() == name) {
@@ -221,7 +221,7 @@ ShaderProgram* Controller::getShaderProgramByName(const char *name)
     return nullptr;
 }
 
-ShaderProgram* Controller::getShaderProgramByName(std::vector<ShaderProgram*> shaderPrograms, const char *name)
+ShaderProgram* Controller::getShaderProgramByName(std::vector<ShaderProgram*> shaderPrograms, const std::string& name)
 {
     for (auto it = shaderPrograms.begin(); it != shaderPrograms.end(); it++) {
         if((*it)->getUniqueName() == name) {
@@ -236,7 +236,6 @@ void Controller::setMaxFps(uint16_t fps)
 {
     MAX_FPS = fps;
 }
-
 
 #ifdef _DEBUG
 void Controller::renderImGui(World *world, PointLight *pointLight, glm::vec3 *lightColor, bool *rotateEntity, bool *rotateLightSource, ShaderProgram *postProcessingProgram, float *intensity, bool *drawShadows)

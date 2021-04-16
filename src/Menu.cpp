@@ -20,31 +20,34 @@ Menu::~Menu()
     }
 }
 
-Screen *Menu::getScreenByName(const std::string& unique_name)
+Screen *Menu::getScreenByName(const std::string& name) const
 {
-    for (auto it = screens.begin(); it != screens.end(); it++) {
-        if((*it)->getUniqueName() == unique_name) {
-            return *it;
+    if (m_screen_name_cache.find(name) != m_screen_name_cache.end())
+        return m_screen_name_cache[name];
+
+    for (auto it : screens) {
+        if(it->getUniqueName() == name) {
+            m_screen_name_cache[name] = it;
+            return it;
         }
     }
+
     return nullptr;
 }
 
-Screen *Menu::getActiveScreen()
+Screen *Menu::getActiveScreen() const
 {
     return activeScreen;
 }
 
-void Menu::showScreenByName (const std::string& unique_name)
+void Menu::showScreenByName(const std::string& name)
 {
-    auto it = screens.begin();
-    for (; it != screens.end(); it++) {
-        if((*it)->getUniqueName() == unique_name) {
-            (*it)->draw();
-            break;
-        }
-    }
-    activeScreen = *it;
+    Screen* screen = getScreenByName(name);
+
+    if (!screen) return;
+
+    screen->draw();
+    activeScreen = screen;
 }
 
 void Menu::resetActiveScreen()
@@ -58,7 +61,7 @@ void Menu::handleMouseButtonActionRegister(bool *mouseButtonActionRegister, Wind
         auto widgets = activeScreen->getWidgets();
         for (auto it = widgets.begin(); it != widgets.end(); it++) {
             if ((*it)->isHovered(window)) {
-                std::cout << (*it)->getUniqueName() << " clicked!" << std::endl;
+                // std::cout << (*it)->getUniqueName() << " clicked!" << std::endl;
                 if((*it)->getCallbackId() == 1)
                     resetActiveScreen();
                 if((*it)->getCallbackId() == 2)

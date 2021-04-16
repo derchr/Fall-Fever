@@ -24,7 +24,7 @@ public:
 
     void setMaxFps(uint16_t fps);
 
-    static ShaderProgram* getShaderProgramByName(std::vector<ShaderProgram*> shaderPrograms, const char *name);
+    static ShaderProgram* getShaderProgramByName(std::vector<ShaderProgram*> shaderPrograms, const std::string& name);
 
 private:
     void limit_framerate();
@@ -32,7 +32,7 @@ private:
     void updateWindowDimensions();
     void updateExposure(ShaderProgram *shaderProgram);
 
-    ShaderProgram* getShaderProgramByName(const char *name);
+    ShaderProgram* getShaderProgramByName(const std::string& name);
 
     void renderImGui(World *world, PointLight *pointLight, glm::vec3 *lightColor, bool *rotateEntity, bool *rotateLightSource, ShaderProgram *postProcessingProgram, float *intensity, bool *drawShadows);
 

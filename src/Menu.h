@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
 
 #include "Screen.h"
 #include "Framebuffer.h"
@@ -13,10 +14,10 @@ public:
     Menu(Framebuffer *p_framebuffer, ShaderProgram *p_shaderProgram);
     ~Menu();
 
-    Screen *getScreenByName(const std::string& unique_name);
-    void showScreenByName(const std::string& unique_name);
+    Screen *getScreenByName(const std::string& name) const;
+    void showScreenByName(const std::string& name);
 
-    Screen *getActiveScreen();
+    Screen *getActiveScreen() const;
     void writeWindowActions(bool *windowActionRegister);
 
     void resetActiveScreen();
@@ -38,4 +39,6 @@ private:
     Screen *mainMenuScreen;
     Screen *optionMenuScreen;
     Screen *pauseMenuScreen;*/
+
+    mutable std::unordered_map<std::string, Screen*> m_screen_name_cache;
 };

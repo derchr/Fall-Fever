@@ -30,8 +30,8 @@ void Model::draw(ShaderProgram *shaderProgram)
     }
 
     // Iterate through every mesh and call the draw function
-    for (auto it = meshes.begin(); it != meshes.end(); it++) {
-        (*it)->draw(shaderProgram);
+    for (auto mesh : meshes) {
+        mesh->draw(shaderProgram);
     }
 }
 
@@ -43,8 +43,8 @@ void Model::drawWithoutTextures()
     }
 
     // Iterate through every mesh and call the draw function
-    for (auto it = meshes.begin(); it != meshes.end(); it++) {
-        (*it)->drawWithoutTextures();
+    for (auto mesh : meshes) {
+        mesh->drawWithoutTextures();
     }
 }
 
@@ -53,7 +53,7 @@ void Model::loadModel(const std::string &pathToModel)
     std::ifstream input(pathToModel, std::ios::in | std::ios::binary);
 
     if (!input.is_open()) {
-        std::cout << "Could not find model file " << pathToModel << std::endl;
+        std::cerr << "Could not find model file " << pathToModel << std::endl;
         return;
     }
 

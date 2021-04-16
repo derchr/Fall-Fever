@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
+#include <chrono>
 #include <GLFW/glfw3.h>
 
 #ifdef __linux__
@@ -134,5 +135,25 @@ static void gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum seve
             << "Severity: " << _severity << std::endl
             << std::endl;
 }
+
+class Timer {
+public:
+    Timer(const std::string& name) : name(name) {
+        start = std::chrono::high_resolution_clock::now();
+    }
+
+    ~Timer() {
+        end = std::chrono::high_resolution_clock::now();
+
+        duration = end - start;
+        float ms = duration.count() * 1000.0f;
+
+        std::cout << "Timer " << name << " took " << ms << "ms!" << std::endl;
+    }
+private:
+    std::string name;
+    std::chrono::high_resolution_clock::time_point start, end;
+    std::chrono::duration<float> duration;
+};
 
 }
