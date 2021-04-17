@@ -4,7 +4,7 @@
 #include "Window.h"
 #include "eventActions.h"
 #include "defines.h"
-#include "helper.h"
+#include "Helper.h"
 
 Window::Window()
 {

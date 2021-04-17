@@ -12,7 +12,7 @@
 #include <imgui_impl_opengl3.h>
 #endif
 
-#include "helper.h"
+#include "Helper.h"
 #include "Controller.h"
 #include "VertexArray.h"
 #include "Texture.h"
@@ -150,7 +150,7 @@ void Controller::run()
             pp_framebuffer->render();
 
 #ifdef _DEBUG
-            renderImGui(world, world->getPointLights()[0], &lightColor, &rotateEntity, &rotateLightSource, getShaderProgramByName("postProcessingProgram"), &intensity, &drawShadows);
+            renderImGui(world, &lightColor, &rotateEntity, &rotateLightSource, getShaderProgramByName("postProcessingProgram"), &intensity, &drawShadows);
 #endif
         }
         glfwSwapBuffers(gameWindow->getGLFWwindow());
@@ -238,7 +238,7 @@ void Controller::setMaxFps(uint16_t fps)
 }
 
 #ifdef _DEBUG
-void Controller::renderImGui(World *world, PointLight *pointLight, glm::vec3 *lightColor, bool *rotateEntity, bool *rotateLightSource, ShaderProgram *postProcessingProgram, float *intensity, bool *drawShadows)
+void Controller::renderImGui(World *world, glm::vec3 *lightColor, bool *rotateEntity, bool *rotateLightSource, ShaderProgram *postProcessingProgram, float *intensity, bool *drawShadows)
 {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();

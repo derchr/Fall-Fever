@@ -1,5 +1,5 @@
 #include "Screen.h"
-#include "helper.h"
+#include "Helper.h"
 
 uint32_t Screen::id_counter = 0;
 

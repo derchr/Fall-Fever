@@ -17,6 +17,7 @@ add_executable(Fall-Fever
     Screen.cpp
     Menu.cpp
     JsonParser.cpp
+    Helper.cpp
 )
 
 target_link_libraries(

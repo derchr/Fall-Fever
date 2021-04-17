@@ -34,7 +34,7 @@ private:
 
     ShaderProgram* getShaderProgramByName(const std::string& name);
 
-    void renderImGui(World *world, PointLight *pointLight, glm::vec3 *lightColor, bool *rotateEntity, bool *rotateLightSource, ShaderProgram *postProcessingProgram, float *intensity, bool *drawShadows);
+    void renderImGui(World *world, glm::vec3 *lightColor, bool *rotateEntity, bool *rotateLightSource, ShaderProgram *postProcessingProgram, float *intensity, bool *drawShadows);
 
 private:
     Window *gameWindow;

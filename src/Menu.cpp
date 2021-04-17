@@ -1,7 +1,7 @@
 #include "Menu.h"
 #include "JsonParser.h"
 #include "eventActions.h"
-#include "helper.h"
+#include "Helper.h"
 
 #include <iostream>
 

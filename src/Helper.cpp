@@ -1,11 +1,7 @@
-#pragma once
+#include "Helper.h"
 
-#include <stdint.h>
 #include <iostream>
-#include <string>
 #include <algorithm>
-#include <chrono>
-#include <GLFW/glfw3.h>
 
 #ifdef __linux__
 #include <unistd.h>
@@ -14,20 +10,18 @@
 #include <windows.h>
 #endif
 
-namespace Helper
-{
-static void sleep(uint32_t us)
+void Helper::sleep(uint32_t us)
 {
 #ifdef __linux__
     usleep(us);
 #endif
 #ifdef _WIN32
-    // I really don't know why I have to divide by 2000 and not 1000 but this way it works even on Windows
+    // I don't know why I have to divide by 2000 and not 1000 but this way it works even on Windows
     Sleep(us / 2000);
 #endif
 }
 
-static void gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
+void Helper::gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
 {
     (void)length;
     (void)userParam;
@@ -136,24 +130,17 @@ static void gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum seve
             << std::endl;
 }
 
-class Timer {
-public:
-    Timer(const std::string& name) : name(name) {
-        start = std::chrono::high_resolution_clock::now();
-    }
+Helper::Timer::Timer(const std::string& name) : name(name)
+{
+    start = std::chrono::high_resolution_clock::now();
+}
 
-    ~Timer() {
-        end = std::chrono::high_resolution_clock::now();
+Helper::Timer::~Timer()
+{
+    end = std::chrono::high_resolution_clock::now();
 
-        duration = end - start;
-        float ms = duration.count() * 1000.0f;
+    duration = end - start;
+    float ms = duration.count() * 1000.0f;
 
-        std::cout << "Timer " << name << " took " << ms << "ms!" << std::endl;
-    }
-private:
-    std::string name;
-    std::chrono::high_resolution_clock::time_point start, end;
-    std::chrono::duration<float> duration;
-};
-
+    std::cout << "Timer " << name << " took " << ms << "ms!" << std::endl;
 }
