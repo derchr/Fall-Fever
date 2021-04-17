@@ -124,7 +124,7 @@ vec3 directionalLightContribution(DirectionalLight light, vec3 normal, vec3 view
     vec3 lightDir = normalize(-v_lightDirectionTangent);
 
     vec3 diffuseColor = light.color;
-    vec3 specularColor = light.color;
+    vec3 specularColor = light.color * 0.5f;
     vec3 ambientColor = light.color * 0.002f;
 
     vec3 ambient, diffuse, specular;
@@ -146,7 +146,7 @@ vec3 pointLightContribution(PointLight light, vec3 normal, vec3 fragPos, vec3 vi
     vec3 lightDir = normalize(v_lightPositionTangent0 - fragPos);
 
     vec3 diffuseColor = light.color;
-    vec3 specularColor = light.color;
+    vec3 specularColor = light.color * 0.5f;
     vec3 ambientColor = light.color * 0.002f;
 
     vec3 ambient, diffuse, specular;
