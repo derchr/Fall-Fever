@@ -1,4 +1,5 @@
 #include "Light.h"
+#include "ShaderProgram.h"
 
 #include <string>
 

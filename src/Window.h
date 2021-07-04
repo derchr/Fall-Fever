@@ -1,8 +1,8 @@
 #pragma once
 
-#include "EventHandler.h"
+#include "definitions/eventActions.h"
 
-#include <GLFW/glfw3.h>
+class GLFWwindow;
 
 class Window
 {
@@ -27,7 +27,7 @@ private:
     static void framebuffer_size_callback(GLFWwindow *window, int width, int height);
     void setCatchedCursor(bool value);
 
-    GLFWwindow *window;
+    GLFWwindow *m_window;
 
     int m_posX, m_posY;
     int m_width, m_height;

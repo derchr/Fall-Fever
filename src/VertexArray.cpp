@@ -1,8 +1,8 @@
-#include <cstddef>
-#include <vector>
-
 #include "VertexArray.h"
 #include "definitions/models.h"
+
+#include <cstddef>
+#include <vector>
 
 VertexArray::VertexArray(void *vertexData, void *indexData, uint32_t numVertices, uint32_t numIndices)
 {

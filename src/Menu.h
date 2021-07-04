@@ -1,12 +1,15 @@
 #pragma once
 
+#include "definitions/eventActions.h"
+
 #include <string>
 #include <unordered_map>
+#include <vector>
 
-#include "FrameBuffer.h"
-#include "JsonParser.h"
-#include "Screen.h"
-#include "EventHandler.h"
+class ShaderProgram;
+class FrameBuffer;
+class Screen;
+class Window;
 
 class Menu
 {

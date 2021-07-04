@@ -1,14 +1,16 @@
 #pragma once
 
-#include "Camera.h"
-#include "Entity.h"
-#include "EventHandler.h"
-#include "FrameBuffer.h"
-#include "Light.h"
-#include "Menu.h"
-#include "ShaderProgram.h"
-#include "Window.h"
-#include "World.h"
+#include <memory>
+#include <vector>
+#include <glm/glm.hpp>
+
+class ShaderProgram;
+class Window;
+class EventHandler;
+class World;
+class Camera;
+class Menu;
+class FrameBuffer;
 
 class Controller
 {

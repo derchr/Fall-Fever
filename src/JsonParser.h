@@ -1,14 +1,17 @@
 #pragma once
 
-#include "Entity.h"
-#include "Light.h"
-#include "Model.h"
-#include "Screen.h"
-#include "ShaderProgram.h"
-
 #include <jsoncpp/json/json.h>
 #include <string>
 #include <vector>
+
+class Model;
+class Entity;
+class Light;
+class Screen;
+class Skybox;
+class ShaderProgram;
+class FrameBuffer;
+class Widget;
 
 class JsonParser
 {

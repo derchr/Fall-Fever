@@ -1,9 +1,13 @@
 #pragma once
 
+#include "definitions/models.h"
+
 #include <string>
 #include <vector>
 
-#include "Mesh.h"
+class ShaderProgram;
+class Mesh;
+class Texture;
 
 struct TexturePrototype
 {

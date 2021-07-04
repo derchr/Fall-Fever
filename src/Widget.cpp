@@ -1,6 +1,11 @@
 #include "Widget.h"
 #include "Menu.h"
+#include "Mesh.h"
+#include "ShaderProgram.h"
+#include "Window.h"
 #include "VertexArray.h"
+
+#include <GLFW/glfw3.h>
 
 Widget::Widget(std::string &name, Texture *texture, float p_x, float p_y, float p_w, float p_h, uint16_t callbackId)
     : m_posX(p_x), m_posY(p_y), m_width(p_w), m_height(p_h), m_uniqueName(name), m_callbackId(callbackId)

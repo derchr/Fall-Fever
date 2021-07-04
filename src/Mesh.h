@@ -1,11 +1,12 @@
 #pragma once
 
+#include "definitions/models.h"
+#include "VertexArray.h"
+
 #include <vector>
 
-#include "ShaderProgram.h"
-#include "Texture.h"
-#include "VertexArray.h"
-#include "definitions/models.h"
+class ShaderProgram;
+class Texture;
 
 class Mesh
 {

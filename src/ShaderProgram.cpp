@@ -1,10 +1,10 @@
+#include "ShaderProgram.h"
+
 #include <fstream>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <string>
-
-#include "ShaderProgram.h"
 
 ShaderProgram::ShaderProgram(const std::string &name, const std::string &vertexShaderPath,
                              const std::string &fragmentShaderPath)

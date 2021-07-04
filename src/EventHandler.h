@@ -1,15 +1,9 @@
 #pragma once
 
-#include <GLFW/glfw3.h>
-#include <unordered_map>
-
 #include "definitions/enumHash.h"
 #include "definitions/eventActions.h"
 
-typedef std::unordered_map<CameraAction, bool, EnumClassHash> CameraActionMap;
-typedef std::unordered_map<CameraMouseAction, double, EnumClassHash> CameraMouseActionMap;
-typedef std::unordered_map<WindowAction, bool, EnumClassHash> WindowActionMap;
-typedef std::unordered_map<MouseButtonAction, bool, EnumClassHash> MouseButtonActionMap;
+class GLFWwindow;
 
 class EventHandler
 {

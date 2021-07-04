@@ -1,5 +1,6 @@
 #include "EventHandler.h"
 
+#include "GLFW/glfw3.h"
 #include <iostream>
 
 CameraActionMap EventHandler::s_cameraActionMap = {{CameraAction::Forward, false}, {CameraAction::Backward, false},

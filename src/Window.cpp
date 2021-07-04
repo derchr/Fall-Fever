@@ -1,10 +1,11 @@
-#include <glad/glad.h>
-#include <iostream>
-
-#include "Helper.h"
 #include "Window.h"
-#include "definitions/eventActions.h"
+#include "Helper.h"
+#include "ShaderProgram.h"
 #include "definitions/window.h"
+
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+#include <iostream>
 
 Window::Window()
 {
@@ -28,19 +29,19 @@ Window::Window()
     glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
 #endif
 
-    window = glfwCreateWindow(m_width, m_height, "OpenGL", NULL, NULL);
-    if (!window) {
+    m_window = glfwCreateWindow(m_width, m_height, "OpenGL", NULL, NULL);
+    if (!m_window) {
         std::cout << "Failed to create window" << std::endl;
     }
 
     // Wait for window to maximize (in case)
     Helper::sleep(1000);
 
-    glfwGetWindowPos(window, &m_posX, &m_posY);
-    glfwGetWindowSize(window, &m_width, &m_height);
+    glfwGetWindowPos(m_window, &m_posX, &m_posY);
+    glfwGetWindowSize(m_window, &m_width, &m_height);
 
     // Create OpenGL context
-    glfwMakeContextCurrent(window);
+    glfwMakeContextCurrent(m_window);
 
     // Initialize GLAD
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -81,23 +82,23 @@ Window::Window()
 
 Window::~Window()
 {
-    glfwDestroyWindow(window);
+    glfwDestroyWindow(m_window);
     glfwTerminate();
 }
 
 bool Window::isWindowResized()
 {
     int new_width, new_height, new_posx, new_posy;
-    glfwGetFramebufferSize(window, &new_width, &new_height);
-    glfwGetWindowPos(window, &new_posx, &new_posy);
+    glfwGetFramebufferSize(m_window, &new_width, &new_height);
+    glfwGetWindowPos(m_window, &new_posx, &new_posy);
 
     return !(new_width == m_width && new_height == m_height && new_posx == m_posX && new_posy == m_posY);
 }
 
 void Window::updateWindowDimensions()
 {
-    glfwGetFramebufferSize(window, &m_width, &m_height);
-    glfwGetWindowPos(window, &m_posX, &m_posY);
+    glfwGetFramebufferSize(m_window, &m_width, &m_height);
+    glfwGetWindowPos(m_window, &m_posX, &m_posY);
 
     glViewport(0, 0, m_width, m_height);
 }
@@ -105,9 +106,9 @@ void Window::updateWindowDimensions()
 void Window::setCatchedCursor(bool value)
 {
     if (value) {
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     } else {
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
 }
 
@@ -130,7 +131,7 @@ void Window::handleWindowActionMap(WindowActionMap &windowActionMap)
     }
 
     if (windowActionMap.at(WindowAction::WindowShouldClose)) {
-        glfwSetWindowShouldClose(window, true);
+        glfwSetWindowShouldClose(m_window, true);
     }
 }
 
@@ -149,7 +150,7 @@ void Window::framebuffer_size_callback(GLFWwindow *window, int width, int height
 
 GLFWwindow *Window::getGLFWwindow()
 {
-    return window;
+    return m_window;
 }
 
 int Window::getWindowWidth()

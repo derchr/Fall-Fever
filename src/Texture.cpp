@@ -1,4 +1,5 @@
 #include "Texture.h"
+#include "ShaderProgram.h"
 
 #include <iostream>
 #include <stb/stb_image.h>

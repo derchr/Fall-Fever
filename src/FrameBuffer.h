@@ -1,8 +1,9 @@
 #pragma once
 
-#include "ShaderProgram.h"
-#include "Texture.h"
 #include <glad/glad.h>
+
+class ShaderProgram;
+class CubeMap;
 
 class FrameBuffer
 {

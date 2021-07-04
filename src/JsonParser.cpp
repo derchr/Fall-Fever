@@ -1,4 +1,11 @@
 #include "JsonParser.h"
+#include "Entity.h"
+#include "Light.h"
+#include "Model.h"
+#include "Screen.h"
+#include "ShaderProgram.h"
+#include "Texture.h"
+#include "Widget.h"
 
 #include <fstream>
 #include <future>

@@ -1,6 +1,11 @@
 #include "Menu.h"
 #include "Helper.h"
 #include "JsonParser.h"
+#include "ShaderProgram.h"
+#include "FrameBuffer.h"
+#include "Screen.h"
+#include "Window.h"
+#include "Widget.h"
 #include "definitions/eventActions.h"
 
 #include <iostream>

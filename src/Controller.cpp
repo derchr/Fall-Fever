@@ -6,6 +6,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <GLFW/glfw3.h>
+
 #ifdef _DEBUG
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -22,6 +24,13 @@
 #include "VertexArray.h"
 #include "Widget.h"
 #include "World.h"
+#include "Menu.h"
+#include "Camera.h"
+#include "Light.h"
+#include "Window.h"
+#include "Texture.h"
+#include "ShaderProgram.h"
+#include "EventHandler.h"
 
 Controller::Controller()
 {

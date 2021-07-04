@@ -1,11 +1,13 @@
 #pragma once
 
-#include "Model.h"
-#include "ShaderProgram.h"
 #include "Texture.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
+
+class VertexArray;
+class ShaderProgram;
+class Model;
 
 class Entity
 {
@@ -25,7 +27,6 @@ public:
     void setRotation(glm::vec3 axis, float radians);
     void setScale(float scaleFactor);
     void setIsLightSource(bool temp);
-    void setId(uint32_t id);
 
     uint32_t getId();
     std::string getUniqueName();
@@ -36,7 +37,7 @@ public:
 private:
     void updateModelMatrix();
 
-    uint32_t m_id;
+    const uint32_t m_id;
     static uint32_t s_idCounter;
     std::string m_uniqueName;
 

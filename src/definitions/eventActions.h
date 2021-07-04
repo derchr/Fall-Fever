@@ -1,5 +1,8 @@
 #pragma once
 
+#include "enumHash.h"
+#include <unordered_map>
+
 enum class CameraAction
 {
     Up,
@@ -33,3 +36,8 @@ enum class MouseButtonAction
     MiddleClicked,
     MOUSE_BUTTON_ACTION_NUM_ITEMS
 };
+
+typedef std::unordered_map<CameraAction, bool, EnumClassHash> CameraActionMap;
+typedef std::unordered_map<CameraMouseAction, double, EnumClassHash> CameraMouseActionMap;
+typedef std::unordered_map<WindowAction, bool, EnumClassHash> WindowActionMap;
+typedef std::unordered_map<MouseButtonAction, bool, EnumClassHash> MouseButtonActionMap;

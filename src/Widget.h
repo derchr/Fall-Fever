@@ -1,12 +1,15 @@
 #pragma once
 
-#include "FrameBuffer.h"
-#include "Mesh.h"
-#include "Texture.h"
-#include "Window.h"
-#include "definitions/eventActions.h"
+#include "definitions/models.h"
+
+#include <string>
+#include <vector>
 
 class Menu;
+class ShaderProgram;
+class Texture;
+class Window;
+class Mesh;
 
 class Widget
 {

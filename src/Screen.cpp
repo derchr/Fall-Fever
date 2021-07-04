@@ -1,4 +1,9 @@
 #include "Screen.h"
+#include "Menu.h"
+#include "Widget.h"
+#include "FrameBuffer.h"
+#include "ShaderProgram.h"
+#include "Texture.h"
 #include "Helper.h"
 
 uint32_t Screen::s_idCounter = 0;

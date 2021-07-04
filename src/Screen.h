@@ -1,12 +1,14 @@
 #pragma once
 
+#include <string>
+#include <vector>
 #include <unordered_map>
 
-#include "FrameBuffer.h"
-#include "ShaderProgram.h"
-#include "Widget.h"
-
 class Menu;
+class Widget;
+class FrameBuffer;
+class ShaderProgram;
+class Texture;
 
 class Screen
 {

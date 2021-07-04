@@ -1,4 +1,7 @@
 #include "Model.h"
+#include "Mesh.h"
+#include "ShaderProgram.h"
+#include "Texture.h"
 
 #include <fstream>
 #include <iostream>

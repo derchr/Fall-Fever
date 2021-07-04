@@ -1,6 +1,12 @@
 #include "World.h"
+#include "Entity.h"
 #include "Controller.h"
+#include "Model.h"
+#include "Light.h"
 #include "JsonParser.h"
+#include "Camera.h"
+#include "Texture.h"
+#include "ShaderProgram.h"
 
 #include <iostream>
 

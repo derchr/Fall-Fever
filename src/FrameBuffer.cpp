@@ -1,5 +1,8 @@
 #include "FrameBuffer.h"
 
+#include "ShaderProgram.h"
+#include "Texture.h"
+
 #include <cstddef>
 #include <iostream>
 

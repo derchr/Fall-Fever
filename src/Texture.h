@@ -1,13 +1,13 @@
 #pragma once
 
-#include "ShaderProgram.h"
-
 #include "definitions/models.h"
 
 #include <cstdint>
 #include <glad/glad.h>
 #include <string>
 #include <vector>
+
+class ShaderProgram;
 
 // Order is important!
 enum cubeMapFaces

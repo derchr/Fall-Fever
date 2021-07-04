@@ -1,12 +1,21 @@
 #pragma once
 
-#include <vector>
-
-#include "Camera.h"
-#include "Entity.h"
 #include "FrameBuffer.h"
-#include "Light.h"
-#include "ShaderProgram.h"
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+#include <vector>
+#include <string>
+
+class Camera;
+class Entity;
+class Light;
+class PointLight;
+class DirectionalLight;
+class ShaderProgram;
+class Skybox;
+class Model;
 
 class World
 {

@@ -1,8 +1,9 @@
 #pragma once
 
-#include <glad/glad.h>
-
 #include "definitions/models.h"
+
+#include <glad/glad.h>
+#include <vector>
 
 class VertexArray
 {

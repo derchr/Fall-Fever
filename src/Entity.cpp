@@ -1,4 +1,8 @@
 #include "Entity.h"
+#include "VertexArray.h"
+#include "Mesh.h"
+#include "ShaderProgram.h"
+#include "Model.h"
 
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -6,9 +10,8 @@
 uint32_t Entity::s_idCounter = 0;
 
 Entity::Entity(const std::string &name, Model *model, ShaderProgram *shaderProgram)
-    : m_uniqueName(name), m_model(model), m_shaderProgram(shaderProgram)
+    : m_uniqueName(name), m_model(model), m_shaderProgram(shaderProgram), m_id(s_idCounter++)
 {
-    m_id = s_idCounter++;
 }
 
 void Entity::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition)
@@ -113,11 +116,6 @@ void Entity::updateModelMatrix()
 void Entity::setIsLightSource(bool temp)
 {
     m_isLightSource = temp;
-}
-
-void Entity::setId(uint32_t id)
-{
-    this->m_id = id;
 }
 
 uint32_t Entity::getId()

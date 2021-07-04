@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ShaderProgram.h"
-#include "EventHandler.h"
+#include "definitions/eventActions.h"
+
 #include <glm/glm.hpp>
 
 class Camera

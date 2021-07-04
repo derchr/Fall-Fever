@@ -1,10 +1,11 @@
 #pragma once
 
 #include <glm/glm.hpp>
-
-#include "ShaderProgram.h"
+#include <string>
 
 #define NUM_POINT_LIGHTS 1
+
+class ShaderProgram;
 
 class Light
 {
