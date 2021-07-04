@@ -6,7 +6,7 @@
 #include "Framebuffer.h"
 #include "JsonParser.h"
 #include "Screen.h"
-#include "eventActions.h"
+#include "EventHandler.h"
 
 class Menu
 {
@@ -18,11 +18,11 @@ public:
     void showScreenByName(const std::string &name);
 
     Screen *getActiveScreen() const;
-    void writeWindowActions(bool *windowActionRegister);
+    void writeWindowActions(WindowActionMap &windowActionMap);
 
     void resetActiveScreen();
 
-    void handleMouseButtonActionRegister(bool *mouseButtonActionRegister, Window *window);
+    void handleMouseButtonActionMap(const MouseButtonActionMap &mouseButtonActionMap, Window *window);
 
     void onPlayPressed();
     void onExitPressed();

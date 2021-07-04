@@ -167,17 +167,17 @@ void Controller::run()
         // --- Check events, handle input ---
         gameEventHandler->handleEvents();
 
-        camera->updatePositionFromKeyboardInput(gameEventHandler->getCameraActionRegister(), deltaTime);
+        camera->updatePositionFromKeyboardInput(gameEventHandler->getCameraActionMap(), deltaTime);
         if (gameWindow->getMouseIsCatched()) {
-            camera->updateDirectionFromMouseInput(gameEventHandler->getCursorDelta());
+            camera->updateDirectionFromMouseInput(gameEventHandler->getCameraMouseActionMap());
         }
 
-        menu->writeWindowActions(gameEventHandler->getWindowActionRegister());
-        gameWindow->handleWindowActionRegister(gameEventHandler->getWindowActionRegister());
+        menu->writeWindowActions(gameEventHandler->getWindowActionMap());
+        gameWindow->handleWindowActionMap(gameEventHandler->getWindowActionMap());
 
         // Handle widget pressed event only when a screen is currently active
         if (menu->getActiveScreen())
-            menu->handleMouseButtonActionRegister(gameEventHandler->getMouseButtonActionRegister(), gameWindow);
+            menu->handleMouseButtonActionMap(gameEventHandler->getMouseButtonActionMap(), gameWindow);
     }
 }
 

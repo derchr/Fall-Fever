@@ -2,10 +2,20 @@
 
 #include <iostream>
 
-double EventHandler::cameraMouseActionRegister[CAMERA_MOUSE_ACTION_NUM_ITEMS] = {0.0, 0.0};
-bool EventHandler::cameraActionRegister[CAMERA_ACTION_NUM_ITEMS] = {0};
-bool EventHandler::mouseButtonActionRegister[MOUSE_BUTTON_ACTION_NUM_ITEMS] = {0};
-bool EventHandler::windowActionRegister[WINDOW_ACTION_NUM_ITEMS] = {0};
+CameraActionMap EventHandler::cameraActionMap = {{CameraAction::Forward, false}, {CameraAction::Backward, false},
+                                                 {CameraAction::Up, false},      {CameraAction::Down, false},
+                                                 {CameraAction::Left, false},    {CameraAction::Right, false}};
+
+CameraMouseActionMap EventHandler::cameraMouseActionMap = {{CameraMouseAction::DeltaX, 0.0},
+                                                           {CameraMouseAction::DeltaY, 0.0}};
+
+WindowActionMap EventHandler::windowActionMap = {{WindowAction::WireFrameToggle, false},
+                                                 {WindowAction::MouseCatchToggle, false},
+                                                 {WindowAction::WindowShouldClose, false}};
+
+MouseButtonActionMap EventHandler::mouseButtonActionMap = {{MouseButtonAction::LeftClicked, false},
+                                                           {MouseButtonAction::RightClicked, false},
+                                                           {MouseButtonAction::MiddleClicked, false}};
 
 bool EventHandler::firstMouseInput = 1;
 float EventHandler::mouseSensitivity = 0.15f;
@@ -25,10 +35,17 @@ void EventHandler::handleEvents()
 
 void EventHandler::clearActionRegisters()
 {
-    // std::fill_n(cameraActionRegister, CAMERA_ACTION_NUM_ITEMS, 0);
-    std::fill_n(cameraMouseActionRegister, CAMERA_MOUSE_ACTION_NUM_ITEMS, 0.0);
-    std::fill_n(windowActionRegister, WINDOW_ACTION_NUM_ITEMS, 0);
-    std::fill_n(mouseButtonActionRegister, MOUSE_BUTTON_ACTION_NUM_ITEMS, 0);
+    for (auto &element : cameraMouseActionMap) {
+        element.second = 0.0;
+    }
+
+    for (auto &element : windowActionMap) {
+        element.second = 0.0;
+    }
+
+    for (auto &element : mouseButtonActionMap) {
+        element.second = 0.0;
+    }
 }
 
 void EventHandler::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
@@ -39,55 +56,55 @@ void EventHandler::key_callback(GLFWwindow *window, int key, int scancode, int a
     (void)mods;
 
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-        windowActionRegister[windowActions::windowShouldClose] = 1;
+        windowActionMap[WindowAction::WindowShouldClose] = 1;
     }
 
     if (key == GLFW_KEY_O && action == GLFW_PRESS) {
-        windowActionRegister[windowActions::wireFrameToggle] = 1;
+        windowActionMap[WindowAction::WireFrameToggle] = 1;
     }
     if (key == GLFW_KEY_LEFT_CONTROL && action == GLFW_PRESS) {
-        windowActionRegister[windowActions::mouseCatchToggle] = 1;
+        windowActionMap[WindowAction::MouseCatchToggle] = 1;
         firstMouseInput = 1;
     }
 
     // Movement press
     if (key == GLFW_KEY_W && action == GLFW_PRESS) {
-        cameraActionRegister[cameraActions::cameraForward] = 1;
+        cameraActionMap[CameraAction::Forward] = 1;
     }
     if (key == GLFW_KEY_S && action == GLFW_PRESS) {
-        cameraActionRegister[cameraActions::cameraBackward] = 1;
+        cameraActionMap[CameraAction::Backward] = 1;
     }
     if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
-        cameraActionRegister[cameraActions::cameraUp] = 1;
+        cameraActionMap[CameraAction::Up] = 1;
     }
     if (key == GLFW_KEY_LEFT_SHIFT && action == GLFW_PRESS) {
-        cameraActionRegister[cameraActions::cameraDown] = 1;
+        cameraActionMap[CameraAction::Down] = 1;
     }
     if (key == GLFW_KEY_A && action == GLFW_PRESS) {
-        cameraActionRegister[cameraActions::cameraLeft] = 1;
+        cameraActionMap[CameraAction::Left] = 1;
     }
     if (key == GLFW_KEY_D && action == GLFW_PRESS) {
-        cameraActionRegister[cameraActions::cameraRight] = 1;
+        cameraActionMap[CameraAction::Right] = 1;
     }
 
     // Movement release
     if (key == GLFW_KEY_W && action == GLFW_RELEASE) {
-        cameraActionRegister[cameraActions::cameraForward] = 0;
+        cameraActionMap[CameraAction::Forward] = 0;
     }
     if (key == GLFW_KEY_S && action == GLFW_RELEASE) {
-        cameraActionRegister[cameraActions::cameraBackward] = 0;
+        cameraActionMap[CameraAction::Backward] = 0;
     }
     if (key == GLFW_KEY_SPACE && action == GLFW_RELEASE) {
-        cameraActionRegister[cameraActions::cameraUp] = 0;
+        cameraActionMap[CameraAction::Up] = 0;
     }
     if (key == GLFW_KEY_LEFT_SHIFT && action == GLFW_RELEASE) {
-        cameraActionRegister[cameraActions::cameraDown] = 0;
+        cameraActionMap[CameraAction::Down] = 0;
     }
     if (key == GLFW_KEY_A && action == GLFW_RELEASE) {
-        cameraActionRegister[cameraActions::cameraLeft] = 0;
+        cameraActionMap[CameraAction::Left] = 0;
     }
     if (key == GLFW_KEY_D && action == GLFW_RELEASE) {
-        cameraActionRegister[cameraActions::cameraRight] = 0;
+        cameraActionMap[CameraAction::Right] = 0;
     }
 }
 
@@ -114,8 +131,8 @@ void EventHandler::mouse_callback(GLFWwindow *window, double xpos, double ypos)
     deltaCursorPosX *= mouseSensitivity;
     deltaCursorPosY *= mouseSensitivity;
 
-    cameraMouseActionRegister[cameraMouseActions::cameraMouseDeltaX] += deltaCursorPosX;
-    cameraMouseActionRegister[cameraMouseActions::cameraMouseDeltaY] += deltaCursorPosY;
+    cameraMouseActionMap[CameraMouseAction::DeltaX] += deltaCursorPosX;
+    cameraMouseActionMap[CameraMouseAction::DeltaY] += deltaCursorPosY;
 }
 
 void EventHandler::mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
@@ -124,31 +141,31 @@ void EventHandler::mouse_button_callback(GLFWwindow *window, int button, int act
     (void)mods;
 
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
-        mouseButtonActionRegister[mouseButtonActions::leftClicked] = true;
+        mouseButtonActionMap[MouseButtonAction::LeftClicked] = true;
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
-        mouseButtonActionRegister[mouseButtonActions::rightClicked] = true;
+        mouseButtonActionMap[MouseButtonAction::RightClicked] = true;
     if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS)
-        mouseButtonActionRegister[mouseButtonActions::middleClicked] = true;
+        mouseButtonActionMap[MouseButtonAction::MiddleClicked] = true;
 }
 
-bool *EventHandler::getCameraActionRegister()
+const CameraActionMap &EventHandler::getCameraActionMap() const
 {
-    return cameraActionRegister;
+    return cameraActionMap;
 }
 
-bool *EventHandler::getWindowActionRegister()
+WindowActionMap &EventHandler::getWindowActionMap() const
 {
-    return windowActionRegister;
+    return windowActionMap;
 }
 
-bool *EventHandler::getMouseButtonActionRegister()
+const MouseButtonActionMap &EventHandler::getMouseButtonActionMap() const
 {
-    return mouseButtonActionRegister;
+    return mouseButtonActionMap;
 }
 
-double *EventHandler::getCursorDelta()
+const CameraMouseActionMap &EventHandler::getCameraMouseActionMap() const
 {
-    return cameraMouseActionRegister;
+    return cameraMouseActionMap;
 }
 
 void EventHandler::setFirstMouseInput(bool val)

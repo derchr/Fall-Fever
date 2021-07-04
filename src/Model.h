@@ -7,7 +7,7 @@
 
 struct TexturePrototype
 {
-    uint32_t textureType;
+    TextureType textureType;
     std::string texturePath;
 };
 

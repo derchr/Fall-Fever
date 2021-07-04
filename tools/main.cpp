@@ -17,7 +17,7 @@
 #include <cassert>
 #include <fstream>
 
-#include "../src/defines.h"
+#include "../src/definitions/models.h"
 #include "primitiveModel.h"
 
 void processNode(aiNode *node, const aiScene *scene, Model *model);
@@ -196,18 +196,22 @@ Mesh processMesh(aiMesh *mesh, const aiScene *scene, Model *model) {
     // Material
     if(mesh->mMaterialIndex > 0) {
         aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
-        
-        std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, texture_diffuse, &currentMesh, model);
+
+        std::vector<Texture> diffuseMaps = loadMaterialTextures(
+            material, aiTextureType_DIFFUSE, static_cast<int>(TextureType::Diffuse), &currentMesh, model);
         textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
-        std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, texture_specular, &currentMesh, model);
+        std::vector<Texture> specularMaps = loadMaterialTextures(
+            material, aiTextureType_SPECULAR, static_cast<int>(TextureType::Specular), &currentMesh, model);
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 
-        std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, texture_normal, &currentMesh, model);
+        std::vector<Texture> normalMaps = loadMaterialTextures(
+            material, aiTextureType_HEIGHT, static_cast<int>(TextureType::Normal), &currentMesh, model);
         textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 
         // Not entirely sure if aiTextureType_HEIGHT is correct
-        std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, texture_height, &currentMesh, model);
+        std::vector<Texture> heightMaps = loadMaterialTextures(
+            material, aiTextureType_HEIGHT, static_cast<int>(TextureType::Height), &currentMesh, model);
         textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
     }
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "EventHandler.h"
+
 #include <GLFW/glfw3.h>
 
 class Window
@@ -18,7 +20,7 @@ public:
     bool isWindowResized();
     void updateWindowDimensions();
 
-    void handleWindowActionRegister(bool *windowActionRegister);
+    void handleWindowActionMap(WindowActionMap &windowActionMap);
 
 private:
     static void glfw_error_callback(int error, const char *description);

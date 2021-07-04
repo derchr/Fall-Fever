@@ -5,7 +5,7 @@
 #include "ShaderProgram.h"
 #include "Texture.h"
 #include "VertexArray.h"
-#include "defines.h"
+#include "definitions/models.h"
 
 class Mesh
 {

@@ -1,5 +1,5 @@
 #include "Camera.h"
-#include "eventActions.h"
+#include "definitions/eventActions.h"
 
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -40,43 +40,44 @@ void Camera::lookForward()
     viewMatrix = glm::lookAt(position, position + frontVec, upVec);
 }
 
-void Camera::updatePositionFromKeyboardInput(bool *cameraActionRegister, float deltaTime)
+void Camera::updatePositionFromKeyboardInput(const CameraActionMap &cameraActionMap, float deltaTime)
 {
     glm::vec3 frontVecWithoutY = glm::vec3(frontVec.x, 0.0f, frontVec.z);
 
     glm::vec3 deltaPos = glm::vec3(0.0f, 0.0f, 0.0f);
 
-    if (cameraActionRegister[cameraForward]) {
+    if (cameraActionMap.at(CameraAction::Forward)) {
         deltaPos += speed * deltaTime * glm::normalize(frontVecWithoutY);
     }
-    if (cameraActionRegister[cameraBackward]) {
+    if (cameraActionMap.at(CameraAction::Backward)) {
         deltaPos -= speed * deltaTime * glm::normalize(frontVecWithoutY);
     }
-    if (cameraActionRegister[cameraLeft]) {
+    if (cameraActionMap.at(CameraAction::Left)) {
         deltaPos -= speed * deltaTime * glm::normalize(glm::cross(frontVec, upVec));
     }
-    if (cameraActionRegister[cameraRight]) {
+    if (cameraActionMap.at(CameraAction::Right)) {
         deltaPos += speed * deltaTime * glm::normalize(glm::cross(frontVec, upVec));
     }
-    if (cameraActionRegister[cameraUp]) {
+    if (cameraActionMap.at(CameraAction::Up)) {
         deltaPos += speed * deltaTime * upVec;
     }
-    if (cameraActionRegister[cameraDown]) {
+    if (cameraActionMap.at(CameraAction::Down)) {
         deltaPos -= speed * deltaTime * upVec;
     }
 
     position += deltaPos;
 }
 
-void Camera::updateDirectionFromMouseInput(double *cameraMouseActionRegister)
+void Camera::updateDirectionFromMouseInput(const CameraMouseActionMap &cameraMouseActionMap)
 {
 
-    if (cameraMouseActionRegister[cameraMouseDeltaX] == 0 && cameraMouseActionRegister[cameraMouseDeltaY] == 0) {
+    if (cameraMouseActionMap.at(CameraMouseAction::DeltaX) == 0 &&
+        cameraMouseActionMap.at(CameraMouseAction::DeltaY) == 0) {
         return;
     }
 
-    yaw += cameraMouseActionRegister[cameraMouseDeltaX];
-    pitch += cameraMouseActionRegister[cameraMouseDeltaY];
+    yaw += cameraMouseActionMap.at(CameraMouseAction::DeltaX);
+    pitch += cameraMouseActionMap.at(CameraMouseAction::DeltaY);
 
     if (pitch > 89.0f) {
         pitch = 89.0f;

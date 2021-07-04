@@ -136,7 +136,7 @@ void World::calculateShadows(ShaderProgram *directionalShaderProgram, ShaderProg
     shaderProgram->setUniform("u_directionalLightViewProjMatrix", directionalLightViewProjectionMatrix);
 
     // Send shadowMap to basic shader
-    int textureUnit = TEXTURE_TYPE_NUM_ITEMS * 2;
+    int textureUnit = static_cast<int>(TextureType::TEXTURE_TYPE_NUM_ITEMS) * 2;
     shaderProgram->setUniform("u_texture_directionalShadowMap", (int)textureUnit);
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_2D, depthMapDirectionalFBO.getDepthMap());
@@ -190,7 +190,7 @@ void World::calculateShadows(ShaderProgram *directionalShaderProgram, ShaderProg
 
         shaderProgram->setUniform("pointShadowDepthMapFarPlane", far_plane_point);
 
-        textureUnit = TEXTURE_TYPE_NUM_ITEMS * 2 + i + 1;
+        textureUnit = static_cast<int>(TextureType::TEXTURE_TYPE_NUM_ITEMS) * 2 + i + 1;
         shaderProgram->setUniform("u_texture_pointShadowMap0", (int)textureUnit);
         glActiveTexture(GL_TEXTURE0 + textureUnit);
         glBindTexture(GL_TEXTURE_CUBE_MAP, depthMapPointFBO[i]->getCubeMapId());

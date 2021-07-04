@@ -1,7 +1,7 @@
 #include "Menu.h"
 #include "Helper.h"
 #include "JsonParser.h"
-#include "eventActions.h"
+#include "definitions/eventActions.h"
 
 #include <iostream>
 
@@ -56,9 +56,9 @@ void Menu::resetActiveScreen()
     activeScreen = nullptr;
 }
 
-void Menu::handleMouseButtonActionRegister(bool *mouseButtonActionRegister, Window *window)
+void Menu::handleMouseButtonActionMap(const MouseButtonActionMap &mouseButtonActionMap, Window *window)
 {
-    if (mouseButtonActionRegister[mouseButtonActions::leftClicked]) {
+    if (mouseButtonActionMap.at(MouseButtonAction::LeftClicked)) {
         auto widgets = activeScreen->getWidgets();
         for (auto it = widgets.begin(); it != widgets.end(); it++) {
             if ((*it)->isHovered(window)) {
@@ -72,10 +72,10 @@ void Menu::handleMouseButtonActionRegister(bool *mouseButtonActionRegister, Wind
     }
 }
 
-void Menu::writeWindowActions(bool *windowActionRegister)
+void Menu::writeWindowActions(WindowActionMap &windowActionMap)
 {
     if (shouldExit)
-        windowActionRegister[windowActions::windowShouldClose] = true;
+        windowActionMap[WindowAction::WindowShouldClose] = true;
 }
 
 void Menu::onPlayPressed()

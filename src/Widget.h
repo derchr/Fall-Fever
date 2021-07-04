@@ -4,7 +4,7 @@
 #include "Mesh.h"
 #include "Texture.h"
 #include "Window.h"
-#include "eventActions.h"
+#include "definitions/eventActions.h"
 
 class Menu;
 

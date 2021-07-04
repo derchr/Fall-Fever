@@ -3,8 +3,8 @@
 
 #include "Helper.h"
 #include "Window.h"
-#include "defines.h"
-#include "eventActions.h"
+#include "definitions/eventActions.h"
+#include "definitions/window.h"
 
 Window::Window()
 {
@@ -111,10 +111,10 @@ void Window::setCatchedCursor(bool value)
     }
 }
 
-void Window::handleWindowActionRegister(bool *windowActionRegister)
+void Window::handleWindowActionMap(WindowActionMap &windowActionMap)
 {
-    if (windowActionRegister[windowActions::wireFrameToggle]) {
-        windowActionRegister[windowActions::wireFrameToggle] = 0;
+    if (windowActionMap.at(WindowAction::WireFrameToggle)) {
+        windowActionMap[WindowAction::WireFrameToggle] = false;
         wireFrameMode = !wireFrameMode;
         if (wireFrameMode) {
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -123,13 +123,13 @@ void Window::handleWindowActionRegister(bool *windowActionRegister)
         }
     }
 
-    if (windowActionRegister[windowActions::mouseCatchToggle]) {
-        windowActionRegister[windowActions::mouseCatchToggle] = 0;
+    if (windowActionMap.at(WindowAction::MouseCatchToggle)) {
+        windowActionMap[WindowAction::MouseCatchToggle] = false;
         mouseCatched = !mouseCatched;
         setCatchedCursor(mouseCatched);
     }
 
-    if (windowActionRegister[windowActions::windowShouldClose]) {
+    if (windowActionMap.at(WindowAction::WindowShouldClose)) {
         glfwSetWindowShouldClose(window, true);
     }
 }

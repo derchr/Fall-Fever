@@ -2,7 +2,7 @@
 
 #include "ShaderProgram.h"
 
-#include "defines.h"
+#include "definitions/models.h"
 
 #include <cstdint>
 #include <glad/glad.h>
@@ -24,13 +24,13 @@ enum cubeMapFaces
 class Texture
 {
 public:
-    Texture(const std::string &texturePath, uint8_t textureType);
+    Texture(const std::string &texturePath, TextureType textureType);
     ~Texture();
 
     void bind(uint8_t textureUnit, ShaderProgram *shaderProgram, uint8_t textureTypeNum);
     void unbind();
 
-    uint8_t getTextureType();
+    TextureType getTextureType();
     std::string getPath();
     GLuint getTextureId();
 
@@ -43,7 +43,7 @@ private:
 
     GLuint textureId;
 
-    uint8_t textureType;
+    TextureType textureType;
 };
 
 class CubeMap

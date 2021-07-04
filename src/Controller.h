@@ -1,7 +1,5 @@
 #pragma once
 
-#include <GLFW/glfw3.h>
-
 #include "Camera.h"
 #include "Entity.h"
 #include "EventHandler.h"
@@ -11,7 +9,6 @@
 #include "ShaderProgram.h"
 #include "Window.h"
 #include "World.h"
-#include "defines.h"
 
 class Controller
 {

@@ -3,7 +3,7 @@
 #include <iostream>
 #include <stb/stb_image.h>
 
-Texture::Texture(const std::string &texturePath, uint8_t textureType)
+Texture::Texture(const std::string &texturePath, TextureType textureType)
     : texturePath(texturePath), textureType(textureType)
 {
     stbi_set_flip_vertically_on_load(1);
@@ -15,10 +15,10 @@ Texture::Texture(const std::string &texturePath, uint8_t textureType)
         internalFormat = GL_RED;
         dataFormat = GL_RED;
     } else if (numComponents == 3) {
-        internalFormat = (textureType == texture_diffuse) ? GL_SRGB8 : GL_RGB8;
+        internalFormat = (textureType == TextureType::Diffuse) ? GL_SRGB8 : GL_RGB8;
         dataFormat = GL_RGB;
     } else if (numComponents == 4) {
-        internalFormat = (textureType == texture_diffuse) ? GL_SRGB8_ALPHA8 : GL_RGBA8;
+        internalFormat = (textureType == TextureType::Diffuse) ? GL_SRGB8_ALPHA8 : GL_RGBA8;
         dataFormat = GL_RGBA;
     }
 
@@ -57,19 +57,19 @@ void Texture::bind(uint8_t textureUnit, ShaderProgram *shaderProgram, uint8_t te
 
     switch (textureType) {
 
-    case texture_diffuse:
+    case TextureType::Diffuse:
         uniformName += "diffuse" + std::to_string(textureTypeNum);
         break;
-    case texture_specular:
+    case TextureType::Specular:
         uniformName += "specular" + std::to_string(textureTypeNum);
         break;
-    case texture_normal:
+    case TextureType::Normal:
         uniformName += "normal" + std::to_string(textureTypeNum);
         break;
-    case texture_height:
+    case TextureType::Height:
         uniformName += "height" + std::to_string(textureTypeNum);
         break;
-    case texture_gloss:
+    case TextureType::Gloss:
         uniformName += "gloss" + std::to_string(textureTypeNum);
         break;
     }
@@ -87,7 +87,7 @@ void Texture::unbind()
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-uint8_t Texture::getTextureType()
+TextureType Texture::getTextureType()
 {
     return textureType;
 }

@@ -1,8 +1,15 @@
 #pragma once
 
 #include <GLFW/glfw3.h>
+#include <unordered_map>
 
-#include "eventActions.h"
+#include "definitions/enumHash.h"
+#include "definitions/eventActions.h"
+
+typedef std::unordered_map<CameraAction, bool, EnumClassHash> CameraActionMap;
+typedef std::unordered_map<CameraMouseAction, double, EnumClassHash> CameraMouseActionMap;
+typedef std::unordered_map<WindowAction, bool, EnumClassHash> WindowActionMap;
+typedef std::unordered_map<MouseButtonAction, bool, EnumClassHash> MouseButtonActionMap;
 
 class EventHandler
 {
@@ -12,10 +19,10 @@ public:
 
     void handleEvents();
 
-    bool *getCameraActionRegister();
-    bool *getWindowActionRegister();
-    bool *getMouseButtonActionRegister();
-    double *getCursorDelta();
+    WindowActionMap &getWindowActionMap() const;
+    const CameraActionMap &getCameraActionMap() const;
+    const MouseButtonActionMap &getMouseButtonActionMap() const;
+    const CameraMouseActionMap &getCameraMouseActionMap() const;
     void setFirstMouseInput(bool val);
 
 private:
@@ -26,10 +33,10 @@ private:
     static void mouse_callback(GLFWwindow *window, double xpos, double ypos);
 
 private:
-    static bool cameraActionRegister[CAMERA_ACTION_NUM_ITEMS];
-    static double cameraMouseActionRegister[CAMERA_MOUSE_ACTION_NUM_ITEMS];
-    static bool windowActionRegister[WINDOW_ACTION_NUM_ITEMS];
-    static bool mouseButtonActionRegister[MOUSE_BUTTON_ACTION_NUM_ITEMS];
+    static CameraActionMap cameraActionMap;
+    static CameraMouseActionMap cameraMouseActionMap;
+    static WindowActionMap windowActionMap;
+    static MouseButtonActionMap mouseButtonActionMap;
 
     GLFWwindow *window;
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "EventHandler.h"
 #include "ShaderProgram.h"
 #include <glm/glm.hpp>
 
@@ -11,8 +12,8 @@ public:
 
     void updateVPM();
     void updateAspectRatio(float aspectRatio);
-    void updatePositionFromKeyboardInput(bool *actionCameraRegister, float deltaTime);
-    void updateDirectionFromMouseInput(double *cameraMouseActionRegister);
+    void updatePositionFromKeyboardInput(const CameraActionMap &cameraActionMap, float deltaTime);
+    void updateDirectionFromMouseInput(const CameraMouseActionMap &cameraMouseActionMap);
 
     void translate(glm::vec3 translateVector);
 

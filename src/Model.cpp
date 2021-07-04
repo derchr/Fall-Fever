@@ -59,9 +59,9 @@ void Model::loadModel(const std::string &pathToModel)
     uint32_t numTextures;
     input.read((char *)&numTextures, sizeof(uint32_t));
 
-    std::vector<uint32_t> textureTypes;
+    std::vector<TextureType> textureTypes;
     for (unsigned int i = 0; i < numTextures; i++) {
-        uint32_t currentTextureType;
+        TextureType currentTextureType;
         input.read((char *)&currentTextureType, sizeof(uint32_t));
         textureTypes.push_back(currentTextureType);
     }
@@ -93,7 +93,7 @@ void Model::loadModel(const std::string &pathToModel)
     // When there is no normal map bound, please use fallback texture
     bool hasNormalMap = false;
     for (auto it = textureTypes.begin(); it != textureTypes.end(); it++) {
-        if (*it == textureType::texture_normal)
+        if (*it == TextureType::Normal)
             hasNormalMap = true;
     }
 
@@ -101,7 +101,7 @@ void Model::loadModel(const std::string &pathToModel)
         TexturePrototype texture_prototype;
 
         texture_prototype.texturePath = "data/res/models/tex/fallback_normal.png";
-        texture_prototype.textureType = textureType::texture_normal;
+        texture_prototype.textureType = TextureType::Normal;
 
         modelTexturePrototypes.push_back(texture_prototype);
     }
