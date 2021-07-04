@@ -35,15 +35,15 @@ public:
     GLuint getTextureId();
 
 private:
-    std::string texturePath;
+    std::string m_texturePath;
 
-    int32_t textureWidth;
-    int32_t textureHeight;
-    int32_t numComponents;
+    int32_t m_textureWidth;
+    int32_t m_textureHeight;
+    int32_t m_numComponents;
 
-    GLuint textureId;
+    GLuint m_textureId;
 
-    TextureType textureType;
+    TextureType m_textureType;
 };
 
 class CubeMap
@@ -62,11 +62,10 @@ public:
 private:
     void fillTexturePathVector(const char *texturePseudoPath);
 
-private:
-    std::vector<std::string> texturePaths;
+    std::vector<std::string> m_texturePaths;
 
-    GLuint textureId;
+    GLuint m_textureId;
 
-    int32_t textureWidth;
-    int32_t textureHeight;
+    int32_t m_textureWidth;
+    int32_t m_textureHeight;
 };

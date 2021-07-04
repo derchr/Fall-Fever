@@ -4,7 +4,7 @@
 
 #include "Camera.h"
 #include "Entity.h"
-#include "Framebuffer.h"
+#include "FrameBuffer.h"
 #include "Light.h"
 #include "ShaderProgram.h"
 
@@ -33,27 +33,27 @@ public:
     void calculateShadows(ShaderProgram *directionalShaderProgram, ShaderProgram *pointShaderProgram);
 
 private:
-    ShaderProgram *shaderProgram;
+    ShaderProgram *m_shaderProgram;
 
-    std::vector<Model *> models;
-    std::vector<Entity *> entities;
-    Skybox *skybox;
+    std::vector<Model *> m_models;
+    std::vector<Entity *> m_entities;
+    Skybox *m_skybox;
 
     // Lights
-    std::vector<Light *> lights;
+    std::vector<Light *> m_lights;
 
     // Shadows
     const int SHADOW_RES = 4096 / 4;
-    DepthMap depthMapDirectionalFBO;
-    std::vector<DepthMap *> depthMapPointFBO;
+    DepthMap m_depthMapDirectionalFBO;
+    std::vector<DepthMap *> m_depthMapPointFBO;
     // Shadow projection matrices
-    const float near_plane_directional = 1.0f;
-    const float far_plane_directional = 15.0f;
-    glm::mat4 directionalLightProjection =
-        glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane_directional, far_plane_directional);
-    const float aspect_ratio_point = 1.0f;
-    const float near_plane_point = 1.0f;
-    const float far_plane_point = 25.0f;
-    glm::mat4 pointLightProjection =
-        glm::perspective(glm::radians(90.0f), aspect_ratio_point, near_plane_point, far_plane_point);
+    const float m_nearPlaneDirectional = 1.0f;
+    const float m_farPlaneDirectional = 15.0f;
+    glm::mat4 m_directionalLightProjection =
+        glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, m_nearPlaneDirectional, m_farPlaneDirectional);
+    const float m_aspectRatioPoint = 1.0f;
+    const float m_nearPlanePoint = 1.0f;
+    const float m_farPlanePoint = 25.0f;
+    glm::mat4 m_pointLightProjection =
+        glm::perspective(glm::radians(90.0f), m_aspectRatioPoint, m_nearPlanePoint, m_farPlanePoint);
 };

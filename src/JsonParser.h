@@ -19,7 +19,7 @@ public:
     std::vector<Model *> getModels();
     std::vector<Entity *> getEntities(std::vector<Model *> &models, std::vector<ShaderProgram *> shaderPrograms);
     std::vector<Light *> getLights(ShaderProgram *shaderProgram);
-    std::vector<Screen *> getScreens(ShaderProgram *menuProgram, Framebuffer *framebuffer);
+    std::vector<Screen *> getScreens(ShaderProgram *menuProgram, FrameBuffer *framebuffer);
     Skybox *getSkybox(Model *cubeModel, ShaderProgram *skyboxProgram);
 
     std::vector<ShaderProgram *> getShaderPrograms();
@@ -27,7 +27,6 @@ public:
 private:
     std::vector<Widget *> getWidgetsFromScreen(const Json::Value &screenJson);
 
-private:
-    Json::Value root;
-    Json::CharReaderBuilder rbuilder;
+    Json::Value m_root;
+    Json::CharReaderBuilder m_rbuilder;
 };

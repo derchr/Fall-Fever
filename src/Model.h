@@ -30,23 +30,22 @@ public:
     void drawWithoutTextures();
 
     Mesh *getMesh(unsigned int index);
-    std::string getUniqueName();
+    const std::string &getUniqueName();
 
 private:
     void loadModel(const std::string &pathToModel);
 
-private:
-    std::vector<Mesh *> meshes;
-    std::vector<Texture *> loadedTextures;
+    std::vector<Mesh *> m_meshes;
+    std::vector<Texture *> m_loadedTextures;
 
-    std::vector<TexturePrototype> modelTexturePrototypes;
-    std::vector<MeshPrototype> modelMeshPrototypes;
+    std::vector<TexturePrototype> m_modelTexturePrototypes;
+    std::vector<MeshPrototype> m_modelMeshPrototypes;
 
-    std::string directory;
+    std::string m_workingPath;
 
-    bool model_prepared = false;
+    bool m_modelPrepared = false;
 
-    static uint32_t id_counter;
-    uint32_t id;
-    std::string unique_name;
+    static uint32_t s_idCounter;
+    uint32_t m_id;
+    std::string m_uniqueName;
 };

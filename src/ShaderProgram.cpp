@@ -8,22 +8,22 @@
 
 ShaderProgram::ShaderProgram(const std::string &name, const std::string &vertexShaderPath,
                              const std::string &fragmentShaderPath)
-    : unique_name(name)
+    : m_uniqueName(name)
 {
     std::string vertexShaderSource = parse(vertexShaderPath.c_str());
     std::string fragmentShaderSource = parse(fragmentShaderPath.c_str());
 
-    shaderProgramId = glCreateProgram();
+    m_shaderProgramId = glCreateProgram();
     GLuint vs = compile(vertexShaderSource, GL_VERTEX_SHADER);
     GLuint fs = compile(fragmentShaderSource, GL_FRAGMENT_SHADER);
 
-    glAttachShader(shaderProgramId, vs);
-    glAttachShader(shaderProgramId, fs);
+    glAttachShader(m_shaderProgramId, vs);
+    glAttachShader(m_shaderProgramId, fs);
 
-    glLinkProgram(shaderProgramId);
+    glLinkProgram(m_shaderProgramId);
 
     GLint isLinked = 0;
-    glGetProgramiv(shaderProgramId, GL_LINK_STATUS, &isLinked);
+    glGetProgramiv(m_shaderProgramId, GL_LINK_STATUS, &isLinked);
     if (!isLinked) {
         std::cout << "Failed to link shaderProgram: " << vertexShaderPath << ", " << fragmentShaderPath << std::endl;
     }
@@ -39,25 +39,25 @@ ShaderProgram::ShaderProgram(const std::string &name, const std::string &vertexS
 
 ShaderProgram::ShaderProgram(const std::string &name, const std::string &vertexShaderPath,
                              const std::string &geometryShaderPath, const std::string &fragmentShaderPath)
-    : unique_name(name)
+    : m_uniqueName(name)
 {
     std::string vertexShaderSource = parse(vertexShaderPath.c_str());
     std::string geometryShaderSource = parse(geometryShaderPath.c_str());
     std::string fragmentShaderSource = parse(fragmentShaderPath.c_str());
 
-    shaderProgramId = glCreateProgram();
+    m_shaderProgramId = glCreateProgram();
     GLuint vs = compile(vertexShaderSource, GL_VERTEX_SHADER);
     GLuint gs = compile(geometryShaderSource, GL_GEOMETRY_SHADER);
     GLuint fs = compile(fragmentShaderSource, GL_FRAGMENT_SHADER);
 
-    glAttachShader(shaderProgramId, vs);
-    glAttachShader(shaderProgramId, gs);
-    glAttachShader(shaderProgramId, fs);
+    glAttachShader(m_shaderProgramId, vs);
+    glAttachShader(m_shaderProgramId, gs);
+    glAttachShader(m_shaderProgramId, fs);
 
-    glLinkProgram(shaderProgramId);
+    glLinkProgram(m_shaderProgramId);
 
     GLint isLinked = 0;
-    glGetProgramiv(shaderProgramId, GL_LINK_STATUS, &isLinked);
+    glGetProgramiv(m_shaderProgramId, GL_LINK_STATUS, &isLinked);
     if (!isLinked) {
         std::cout << "Failed to link shaderProgram: " << vertexShaderPath << ", " << geometryShaderPath << ", "
                   << fragmentShaderPath << std::endl;
@@ -76,12 +76,12 @@ ShaderProgram::ShaderProgram(const std::string &name, const std::string &vertexS
 
 ShaderProgram::~ShaderProgram()
 {
-    glDeleteProgram(shaderProgramId);
+    glDeleteProgram(m_shaderProgramId);
 }
 
 void ShaderProgram::bind()
 {
-    glUseProgram(shaderProgramId);
+    glUseProgram(m_shaderProgramId);
 }
 
 void ShaderProgram::unbind()
@@ -127,11 +127,11 @@ GLuint ShaderProgram::compile(const std::string &shaderSource, GLenum type)
 
 GLint ShaderProgram::retrieveUniformLocation(const std::string &name) const
 {
-    if (uniformLocationCache.find(name) != uniformLocationCache.end())
-        return uniformLocationCache[name];
+    if (m_uniformLocationCache.find(name) != m_uniformLocationCache.end())
+        return m_uniformLocationCache[name];
 
-    GLint location = glGetUniformLocation(shaderProgramId, name.c_str());
-    uniformLocationCache[name] = location;
+    GLint location = glGetUniformLocation(m_shaderProgramId, name.c_str());
+    m_uniformLocationCache[name] = location;
 
     return location;
 }
@@ -174,10 +174,10 @@ void ShaderProgram::setUniform(const std::string &name, glm::mat4 matrix) const
 
 GLuint ShaderProgram::getShaderProgramId()
 {
-    return shaderProgramId;
+    return m_shaderProgramId;
 }
 
-std::string ShaderProgram::getUniqueName()
+const std::string &ShaderProgram::getUniqueName()
 {
-    return unique_name;
+    return m_uniqueName;
 }

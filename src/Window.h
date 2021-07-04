@@ -27,12 +27,11 @@ private:
     static void framebuffer_size_callback(GLFWwindow *window, int width, int height);
     void setCatchedCursor(bool value);
 
-private:
     GLFWwindow *window;
 
-    int posX, posY;
-    int width, height;
+    int m_posX, m_posY;
+    int m_width, m_height;
 
-    bool mouseCatched = true;
-    bool wireFrameMode = false;
+    bool m_mouseCatched = true;
+    bool m_wireFrameMode = false;
 };

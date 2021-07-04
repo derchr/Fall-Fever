@@ -3,43 +3,43 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-uint32_t Entity::id_counter = 0;
+uint32_t Entity::s_idCounter = 0;
 
-Entity::Entity(std::string name, Model *model, ShaderProgram *shaderProgram)
-    : unique_name(name), model(model), shaderProgram(shaderProgram)
+Entity::Entity(const std::string &name, Model *model, ShaderProgram *shaderProgram)
+    : m_uniqueName(name), m_model(model), m_shaderProgram(shaderProgram)
 {
-    id = id_counter++;
+    m_id = s_idCounter++;
 }
 
 void Entity::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition)
 {
-    shaderProgram->bind();
+    m_shaderProgram->bind();
 
-    glm::mat4 modelViewProj = viewProjMatrix * modelMatrix;
-    shaderProgram->setUniform("u_modelViewProjMatrix", modelViewProj);
-    shaderProgram->setUniform("u_modelMatrix", modelMatrix);
+    glm::mat4 modelViewProj = viewProjMatrix * m_modelMatrix;
+    m_shaderProgram->setUniform("u_modelViewProjMatrix", modelViewProj);
+    m_shaderProgram->setUniform("u_modelMatrix", m_modelMatrix);
 
-    glm::mat3 normalMatrix = glm::mat3(modelMatrix);
+    glm::mat3 normalMatrix = glm::mat3(m_modelMatrix);
     normalMatrix = glm::transpose(glm::inverse(normalMatrix));
-    shaderProgram->setUniform("u_normalMatrix", normalMatrix);
+    m_shaderProgram->setUniform("u_normalMatrix", normalMatrix);
 
-    shaderProgram->setUniform("u_viewPosition", viewPosition);
+    m_shaderProgram->setUniform("u_viewPosition", viewPosition);
 
     // Draw the model
-    model->draw(shaderProgram);
+    m_model->draw(m_shaderProgram);
 
-    shaderProgram->unbind();
+    m_shaderProgram->unbind();
 }
 
 void Entity::drawDirectionalShadows(glm::mat4 viewProjMatrix, ShaderProgram *p_shaderProgram)
 {
     p_shaderProgram->bind();
 
-    glm::mat4 modelViewProj = viewProjMatrix * modelMatrix;
+    glm::mat4 modelViewProj = viewProjMatrix * m_modelMatrix;
     p_shaderProgram->setUniform("u_modelViewProjMatrix", modelViewProj);
 
     // Draw the model
-    model->drawWithoutTextures();
+    m_model->drawWithoutTextures();
 
     p_shaderProgram->unbind();
 }
@@ -48,48 +48,48 @@ void Entity::drawPointShadows(ShaderProgram *p_shaderProgram)
 {
     p_shaderProgram->bind();
 
-    p_shaderProgram->setUniform("u_modelMatrix", modelMatrix);
+    p_shaderProgram->setUniform("u_modelMatrix", m_modelMatrix);
 
     // Draw the model
-    model->drawWithoutTextures();
+    m_model->drawWithoutTextures();
 
     p_shaderProgram->unbind();
 }
 
 void Entity::translate(glm::vec3 vector)
 {
-    position += vector;
+    m_position += vector;
     updateModelMatrix();
 }
 
 void Entity::rotate(glm::vec3 axis, float radians)
 {
     glm::quat rotation = glm::angleAxis(radians, axis);
-    quaternion = rotation * quaternion;
+    m_quaternion = rotation * m_quaternion;
     updateModelMatrix();
 }
 
 void Entity::setPosition(glm::vec3 position)
 {
-    this->position = position;
+    this->m_position = position;
     updateModelMatrix();
 }
 
 void Entity::setRotation(glm::vec3 eulerAngles)
 {
-    quaternion = glm::quat(eulerAngles);
+    m_quaternion = glm::quat(eulerAngles);
     updateModelMatrix();
 }
 
 void Entity::setRotation(glm::vec3 axis, float radians)
 {
-    quaternion = glm::angleAxis(radians, axis);
+    m_quaternion = glm::angleAxis(radians, axis);
     updateModelMatrix();
 }
 
 void Entity::setScale(float scaleFactor)
 {
-    modelScale = scaleFactor;
+    m_modelScale = scaleFactor;
     updateModelMatrix();
 }
 
@@ -99,55 +99,55 @@ void Entity::updateModelMatrix()
     // First scaling, then rotation, then translation
 
     // Translate
-    glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), position);
+    glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), m_position);
 
     // Rotate
-    glm::mat4 rotationMatrix = glm::toMat4(quaternion);
+    glm::mat4 rotationMatrix = glm::toMat4(m_quaternion);
 
     // Scale
-    glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(modelScale, modelScale, modelScale));
+    glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(m_modelScale, m_modelScale, m_modelScale));
 
-    modelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
+    m_modelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
 }
 
 void Entity::setIsLightSource(bool temp)
 {
-    isLightSource = temp;
+    m_isLightSource = temp;
 }
 
 void Entity::setId(uint32_t id)
 {
-    this->id = id;
+    this->m_id = id;
 }
 
 uint32_t Entity::getId()
 {
-    return id;
+    return m_id;
 }
 
 std::string Entity::getUniqueName()
 {
-    return unique_name;
+    return m_uniqueName;
 }
 
 glm::vec3 Entity::getPosition()
 {
-    return position;
+    return m_position;
 }
 
 glm::mat4 Entity::getModelMatrix()
 {
-    return modelMatrix;
+    return m_modelMatrix;
 }
 
 bool Entity::getIsLightSource()
 {
-    return isLightSource;
+    return m_isLightSource;
 }
 
 Skybox::Skybox(Model *cubeModel, ShaderProgram *shaderProgram, const char *texturePseudoPath)
-    : cubeModel(cubeModel), shaderProgram(shaderProgram), cubeMap(texturePseudoPath),
-      vertexArray(cubeModel->getMesh(0)->getVertexArray())
+    : m_cubeModel(cubeModel), m_shaderProgram(shaderProgram), m_cubeMap(texturePseudoPath),
+      m_vertexArray(cubeModel->getMesh(0)->getVertexArray())
 {
     // Empty
 }
@@ -160,18 +160,18 @@ void Skybox::draw(glm::mat4 viewMatrix, glm::mat4 projectionMatrix)
     glDisable(GL_CULL_FACE);
 
     glDepthMask(GL_FALSE);
-    shaderProgram->bind();
+    m_shaderProgram->bind();
 
     // Delete any translation from the skybox cube
     glm::mat4 viewProjectionMatrix = projectionMatrix * glm::mat4(glm::mat3(viewMatrix));
 
-    shaderProgram->setUniform("u_viewProjectionMatrix", viewProjectionMatrix);
+    m_shaderProgram->setUniform("u_viewProjectionMatrix", viewProjectionMatrix);
 
-    cubeMap.bind(shaderProgram);
-    cubeModel->getMesh(0)->drawWithoutTextures();
-    cubeMap.unbind();
+    m_cubeMap.bind(m_shaderProgram);
+    m_cubeModel->getMesh(0)->drawWithoutTextures();
+    m_cubeMap.unbind();
 
-    shaderProgram->unbind();
+    m_shaderProgram->unbind();
     glDepthMask(GL_TRUE);
 
     // Restore face culling

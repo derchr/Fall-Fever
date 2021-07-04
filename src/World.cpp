@@ -5,62 +5,62 @@
 #include <iostream>
 
 World::World(std::vector<ShaderProgram *> shaderPrograms)
-    : shaderProgram(Controller::getShaderProgramByName(shaderPrograms, "defaultProgram")),
-      depthMapDirectionalFBO(DEPTHMAP_NORMAL, SHADOW_RES)
+    : m_shaderProgram(Controller::getShaderProgramByName(shaderPrograms, "defaultProgram")),
+      m_depthMapDirectionalFBO(DepthMapType::Normal, SHADOW_RES)
 {
     // Create 4 depthMaps
     for (int i = 0; i < 4; i++) {
-        DepthMap *temp_depthMap = new DepthMap(DEPTHMAP_CUBEMAP, SHADOW_RES);
-        depthMapPointFBO.push_back(temp_depthMap);
+        DepthMap *temp_depthMap = new DepthMap(DepthMapType::CubeMap, SHADOW_RES);
+        m_depthMapPointFBO.push_back(temp_depthMap);
     }
 
     // This will be removed in future when gloss maps are implemented
-    shaderProgram->bind();
-    shaderProgram->setUniform("u_material.shininess", 100.0f);
-    shaderProgram->unbind();
+    m_shaderProgram->bind();
+    m_shaderProgram->setUniform("u_material.shininess", 100.0f);
+    m_shaderProgram->unbind();
 
     JsonParser modelParser("data/models.json");
-    models = modelParser.getModels();
+    m_models = modelParser.getModels();
 
-    for (const auto &it : models) {
+    for (const auto &it : m_models) {
         it->prepareModel();
     }
 
-    entities = modelParser.getEntities(models, shaderPrograms);
-    skybox = modelParser.getSkybox(getModelByName("cube"),
-                                   Controller::getShaderProgramByName(shaderPrograms, "skyboxProgram"));
+    m_entities = modelParser.getEntities(m_models, shaderPrograms);
+    m_skybox = modelParser.getSkybox(getModelByName("cube"),
+                                     Controller::getShaderProgramByName(shaderPrograms, "skyboxProgram"));
 
     JsonParser lightParser("data/lights.json");
-    lights = lightParser.getLights(shaderProgram);
+    m_lights = lightParser.getLights(m_shaderProgram);
 }
 
 World::~World()
 {
     // Iterate over depthMapPointFBO vector and delete all items
-    for (auto it = depthMapPointFBO.begin(); it != depthMapPointFBO.end(); it++) {
+    for (auto it = m_depthMapPointFBO.begin(); it != m_depthMapPointFBO.end(); it++) {
         delete (*it);
     }
     // Iterate over models and entities and delete all items
-    for (auto it = models.begin(); it != models.end(); it++) {
+    for (auto it = m_models.begin(); it != m_models.end(); it++) {
         delete (*it);
     }
-    for (auto it = entities.begin(); it != entities.end(); it++) {
+    for (auto it = m_entities.begin(); it != m_entities.end(); it++) {
         delete (*it);
     }
 
-    delete skybox;
+    delete m_skybox;
 }
 
 void World::addEntity(Entity *entity)
 {
-    entities.push_back(entity);
+    m_entities.push_back(entity);
 }
 
 void World::removeEntityByName(std::string name)
 {
-    for (auto it = entities.begin(); it != entities.end(); it++) {
+    for (auto it = m_entities.begin(); it != m_entities.end(); it++) {
         if ((*it)->getUniqueName() == name) {
-            entities.erase(it);
+            m_entities.erase(it);
             return;
         }
     }
@@ -70,8 +70,8 @@ void World::removeEntityByName(std::string name)
 
 void World::clearEntities()
 {
-    for (auto it = entities.begin(); it != entities.end(); it++) {
-        entities.erase(it);
+    for (auto it = m_entities.begin(); it != m_entities.end(); it++) {
+        m_entities.erase(it);
     }
 }
 
@@ -95,7 +95,7 @@ void World::updateDirectionalLight(bool active, glm::vec3 direction, glm::vec3 c
 void World::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition)
 {
     // Draw all entities
-    for (auto it = entities.begin(); it != entities.end(); it++) {
+    for (auto it = m_entities.begin(); it != m_entities.end(); it++) {
         (*it)->draw(viewProjMatrix, viewPosition);
     }
 
@@ -113,60 +113,66 @@ void World::calculateShadows(ShaderProgram *directionalShaderProgram, ShaderProg
     // Switch face culling (Peter panning)
     glCullFace(GL_BACK);
 
-    depthMapDirectionalFBO.bind();
+    m_depthMapDirectionalFBO.bind();
 
     glClear(GL_DEPTH_BUFFER_BIT);
 
     // --- Directional shadows ---
     glm::mat4 directionalLightView =
         glm::lookAt(-5.0f * glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat4 directionalLightViewProjectionMatrix = directionalLightProjection * directionalLightView;
+    glm::mat4 directionalLightViewProjectionMatrix = m_directionalLightProjection * directionalLightView;
 
     // Draw scene from light perspective
     // Draw all entities
-    for (auto it = entities.begin(); it != entities.end(); it++) {
+    for (auto it = m_entities.begin(); it != m_entities.end(); it++) {
         (*it)->drawDirectionalShadows(directionalLightViewProjectionMatrix, directionalShaderProgram);
     }
 
-    depthMapDirectionalFBO.unbind();
+    m_depthMapDirectionalFBO.unbind();
 
-    shaderProgram->bind();
+    m_shaderProgram->bind();
 
     // Send lightViewProjMatrix to basic shader
-    shaderProgram->setUniform("u_directionalLightViewProjMatrix", directionalLightViewProjectionMatrix);
+    m_shaderProgram->setUniform("u_directionalLightViewProjMatrix", directionalLightViewProjectionMatrix);
 
     // Send shadowMap to basic shader
     int textureUnit = static_cast<int>(TextureType::TEXTURE_TYPE_NUM_ITEMS) * 2;
-    shaderProgram->setUniform("u_texture_directionalShadowMap", (int)textureUnit);
+    m_shaderProgram->setUniform("u_texture_directionalShadowMap", (int)textureUnit);
     glActiveTexture(GL_TEXTURE0 + textureUnit);
-    glBindTexture(GL_TEXTURE_2D, depthMapDirectionalFBO.getDepthMap());
+    glBindTexture(GL_TEXTURE_2D, m_depthMapDirectionalFBO.getDepthMap());
 
-    shaderProgram->unbind();
+    m_shaderProgram->unbind();
 
     // --- Point shadows ---
     std::vector<PointLight *> pointLights = getPointLights();
 
     // 4 depthMaps for 4 point lights
     for (int i = 0; i < 1; i++) {
-        depthMapPointFBO[i]->bind();
+        m_depthMapPointFBO[i]->bind();
 
         glClear(GL_DEPTH_BUFFER_BIT);
 
         // Create 6 view matrices for every face of the cubeMap
         std::vector<glm::mat4> viewProjMatrices;
         glm::vec3 lightPos = pointLights[i]->getPosition();
-        viewProjMatrices.push_back(pointLightProjection * glm::lookAt(lightPos, lightPos + glm::vec3(1.0f, 0.0f, 0.0f),
-                                                                      glm::vec3(0.0f, -1.0f, 0.0f)));
-        viewProjMatrices.push_back(pointLightProjection * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0f, 0.0f, 0.0f),
-                                                                      glm::vec3(0.0f, -1.0f, 0.0f)));
-        viewProjMatrices.push_back(pointLightProjection * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 1.0f, 0.0f),
-                                                                      glm::vec3(0.0f, 0.0f, 1.0f)));
-        viewProjMatrices.push_back(pointLightProjection * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, -1.0f, 0.0f),
-                                                                      glm::vec3(0.0f, 0.0f, -1.0f)));
-        viewProjMatrices.push_back(pointLightProjection * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, 1.0f),
-                                                                      glm::vec3(0.0f, -1.0f, 0.0f)));
-        viewProjMatrices.push_back(pointLightProjection * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, -1.0f),
-                                                                      glm::vec3(0.0f, -1.0f, 0.0f)));
+        viewProjMatrices.push_back(m_pointLightProjection * glm::lookAt(lightPos,
+                                                                        lightPos + glm::vec3(1.0f, 0.0f, 0.0f),
+                                                                        glm::vec3(0.0f, -1.0f, 0.0f)));
+        viewProjMatrices.push_back(m_pointLightProjection * glm::lookAt(lightPos,
+                                                                        lightPos + glm::vec3(-1.0f, 0.0f, 0.0f),
+                                                                        glm::vec3(0.0f, -1.0f, 0.0f)));
+        viewProjMatrices.push_back(m_pointLightProjection * glm::lookAt(lightPos,
+                                                                        lightPos + glm::vec3(0.0f, 1.0f, 0.0f),
+                                                                        glm::vec3(0.0f, 0.0f, 1.0f)));
+        viewProjMatrices.push_back(m_pointLightProjection * glm::lookAt(lightPos,
+                                                                        lightPos + glm::vec3(0.0f, -1.0f, 0.0f),
+                                                                        glm::vec3(0.0f, 0.0f, -1.0f)));
+        viewProjMatrices.push_back(m_pointLightProjection * glm::lookAt(lightPos,
+                                                                        lightPos + glm::vec3(0.0f, 0.0f, 1.0f),
+                                                                        glm::vec3(0.0f, -1.0f, 0.0f)));
+        viewProjMatrices.push_back(m_pointLightProjection * glm::lookAt(lightPos,
+                                                                        lightPos + glm::vec3(0.0f, 0.0f, -1.0f),
+                                                                        glm::vec3(0.0f, -1.0f, 0.0f)));
 
         pointShaderProgram->bind();
 
@@ -175,27 +181,27 @@ void World::calculateShadows(ShaderProgram *directionalShaderProgram, ShaderProg
                                            viewProjMatrices[i]);
         }
 
-        pointShaderProgram->setUniform("pointShadowDepthMapFarPlane", far_plane_point);
+        pointShaderProgram->setUniform("pointShadowDepthMapFarPlane", m_farPlanePoint);
         pointShaderProgram->setUniform("v_lightPos", lightPos);
 
         // Draw scene from light perspective
         // Draw all entities
-        for (auto it = entities.begin(); it != entities.end(); it++) {
+        for (auto it = m_entities.begin(); it != m_entities.end(); it++) {
             (*it)->drawPointShadows(pointShaderProgram);
         }
 
-        depthMapPointFBO[i]->unbind();
+        m_depthMapPointFBO[i]->unbind();
 
-        shaderProgram->bind();
+        m_shaderProgram->bind();
 
-        shaderProgram->setUniform("pointShadowDepthMapFarPlane", far_plane_point);
+        m_shaderProgram->setUniform("pointShadowDepthMapFarPlane", m_farPlanePoint);
 
         textureUnit = static_cast<int>(TextureType::TEXTURE_TYPE_NUM_ITEMS) * 2 + i + 1;
-        shaderProgram->setUniform("u_texture_pointShadowMap0", (int)textureUnit);
+        m_shaderProgram->setUniform("u_texture_pointShadowMap0", (int)textureUnit);
         glActiveTexture(GL_TEXTURE0 + textureUnit);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, depthMapPointFBO[i]->getCubeMapId());
+        glBindTexture(GL_TEXTURE_CUBE_MAP, m_depthMapPointFBO[i]->getCubeMapId());
 
-        shaderProgram->unbind();
+        m_shaderProgram->unbind();
     }
 
     // Reset viewport size
@@ -205,7 +211,7 @@ void World::calculateShadows(ShaderProgram *directionalShaderProgram, ShaderProg
 
 Model *World::getModelByName(std::string name)
 {
-    for (auto it = models.begin(); it != models.end(); it++) {
+    for (auto it = m_models.begin(); it != m_models.end(); it++) {
         if ((*it)->getUniqueName() == name) {
             return *it;
         }
@@ -216,7 +222,7 @@ Model *World::getModelByName(std::string name)
 
 Entity *World::getEntityByName(std::string name)
 {
-    for (auto it = entities.begin(); it != entities.end(); it++) {
+    for (auto it = m_entities.begin(); it != m_entities.end(); it++) {
         if ((*it)->getUniqueName() == name) {
             return *it;
         }
@@ -227,7 +233,7 @@ Entity *World::getEntityByName(std::string name)
 
 Entity *World::getEntityById(uint32_t id)
 {
-    for (auto it = entities.begin(); it != entities.end(); it++) {
+    for (auto it = m_entities.begin(); it != m_entities.end(); it++) {
         if ((*it)->getId() == id) {
             return *it;
         }
@@ -240,7 +246,7 @@ std::vector<PointLight *> World::getPointLights()
 {
     std::vector<PointLight *> temp_pointLights;
 
-    for (auto it = lights.begin(); it != lights.end(); it++) {
+    for (auto it = m_lights.begin(); it != m_lights.end(); it++) {
         PointLight *temp_pointLight = dynamic_cast<PointLight *>(*it);
         if (temp_pointLight) {
             temp_pointLights.push_back(temp_pointLight);
@@ -254,7 +260,7 @@ DirectionalLight *World::getDirectionalLight()
 {
     DirectionalLight *temp_directionalLight = nullptr;
 
-    for (auto it = lights.begin(); it != lights.end(); it++) {
+    for (auto it = m_lights.begin(); it != m_lights.end(); it++) {
         temp_directionalLight = dynamic_cast<DirectionalLight *>(*it);
         if (temp_directionalLight)
             break;
@@ -265,10 +271,10 @@ DirectionalLight *World::getDirectionalLight()
 
 std::vector<Entity *> World::getEntities()
 {
-    return entities;
+    return m_entities;
 }
 
 Skybox *World::getSkybox()
 {
-    return skybox;
+    return m_skybox;
 }

@@ -4,27 +4,27 @@
 #include <stb/stb_image.h>
 
 Texture::Texture(const std::string &texturePath, TextureType textureType)
-    : texturePath(texturePath), textureType(textureType)
+    : m_texturePath(texturePath), m_textureType(textureType)
 {
     stbi_set_flip_vertically_on_load(1);
-    auto *textureBuffer = stbi_load(texturePath.c_str(), &textureWidth, &textureHeight, &numComponents, 0);
+    auto *textureBuffer = stbi_load(texturePath.c_str(), &m_textureWidth, &m_textureHeight, &m_numComponents, 0);
 
     GLenum internalFormat;
     GLenum dataFormat;
-    if (numComponents == 1) {
+    if (m_numComponents == 1) {
         internalFormat = GL_RED;
         dataFormat = GL_RED;
-    } else if (numComponents == 3) {
+    } else if (m_numComponents == 3) {
         internalFormat = (textureType == TextureType::Diffuse) ? GL_SRGB8 : GL_RGB8;
         dataFormat = GL_RGB;
-    } else if (numComponents == 4) {
+    } else if (m_numComponents == 4) {
         internalFormat = (textureType == TextureType::Diffuse) ? GL_SRGB8_ALPHA8 : GL_RGBA8;
         dataFormat = GL_RGBA;
     }
 
     // Push texture to grahics card
-    glGenTextures(1, &textureId);
-    glBindTexture(GL_TEXTURE_2D, textureId);
+    glGenTextures(1, &m_textureId);
+    glBindTexture(GL_TEXTURE_2D, m_textureId);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -38,7 +38,7 @@ Texture::Texture(const std::string &texturePath, TextureType textureType)
         return;
     }
 
-    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, textureWidth, textureHeight, 0, dataFormat, GL_UNSIGNED_BYTE,
+    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, m_textureWidth, m_textureHeight, 0, dataFormat, GL_UNSIGNED_BYTE,
                  textureBuffer);
     glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -48,14 +48,14 @@ Texture::Texture(const std::string &texturePath, TextureType textureType)
 
 Texture::~Texture()
 {
-    glDeleteTextures(1, &textureId);
+    glDeleteTextures(1, &m_textureId);
 }
 
 void Texture::bind(uint8_t textureUnit, ShaderProgram *shaderProgram, uint8_t textureTypeNum)
 {
     std::string uniformName = "texture_";
 
-    switch (textureType) {
+    switch (m_textureType) {
 
     case TextureType::Diffuse:
         uniformName += "diffuse" + std::to_string(textureTypeNum);
@@ -79,7 +79,7 @@ void Texture::bind(uint8_t textureUnit, ShaderProgram *shaderProgram, uint8_t te
 
     shaderProgram->setUniform(uniformName.c_str(), textureUnit);
     glActiveTexture(GL_TEXTURE0 + textureUnit);
-    glBindTexture(GL_TEXTURE_2D, textureId);
+    glBindTexture(GL_TEXTURE_2D, m_textureId);
 }
 
 void Texture::unbind()
@@ -89,29 +89,29 @@ void Texture::unbind()
 
 TextureType Texture::getTextureType()
 {
-    return textureType;
+    return m_textureType;
 }
 
 std::string Texture::getPath()
 {
-    return texturePath;
+    return m_texturePath;
 }
 
 GLuint Texture::getTextureId()
 {
-    return textureId;
+    return m_textureId;
 }
 
 CubeMap::CubeMap(const char *texturePseudoPath)
 {
     // Reserve space in vector so that elements can be accessed explicitly.
-    texturePaths.resize(CUBEMAP_FACES_NUM_ITEMS);
+    m_texturePaths.resize(CUBEMAP_FACES_NUM_ITEMS);
     fillTexturePathVector(texturePseudoPath);
 
     stbi_set_flip_vertically_on_load(0);
 
-    glGenTextures(1, &textureId);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
+    glGenTextures(1, &m_textureId);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_textureId);
 
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -122,7 +122,8 @@ CubeMap::CubeMap(const char *texturePseudoPath)
     for (unsigned int i = 0; i < CUBEMAP_FACES_NUM_ITEMS; i++) {
 
         int32_t numComponents;
-        auto *textureBuffer = stbi_load(texturePaths[i].c_str(), &textureWidth, &textureHeight, &numComponents, 0);
+        auto *textureBuffer =
+            stbi_load(m_texturePaths[i].c_str(), &m_textureWidth, &m_textureHeight, &numComponents, 0);
 
         GLenum internalFormat;
         GLenum dataFormat;
@@ -138,12 +139,12 @@ CubeMap::CubeMap(const char *texturePseudoPath)
         }
 
         if (!textureBuffer) {
-            std::cout << "[Warning] CubeMap Texture " << texturePaths[i].c_str() << " not found!" << std::endl;
+            std::cout << "[Warning] CubeMap Texture " << m_texturePaths[i].c_str() << " not found!" << std::endl;
             return;
         }
 
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, textureWidth, textureHeight, 0, dataFormat,
-                     GL_UNSIGNED_BYTE, textureBuffer);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, m_textureWidth, m_textureHeight, 0,
+                     dataFormat, GL_UNSIGNED_BYTE, textureBuffer);
 
         stbi_image_free(textureBuffer);
     }
@@ -151,11 +152,11 @@ CubeMap::CubeMap(const char *texturePseudoPath)
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
-CubeMap::CubeMap(int RESOLUTION) : textureWidth(RESOLUTION), textureHeight(RESOLUTION)
+CubeMap::CubeMap(int RESOLUTION) : m_textureWidth(RESOLUTION), m_textureHeight(RESOLUTION)
 {
 
-    glGenTextures(1, &textureId);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
+    glGenTextures(1, &m_textureId);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_textureId);
 
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -174,7 +175,7 @@ CubeMap::CubeMap(int RESOLUTION) : textureWidth(RESOLUTION), textureHeight(RESOL
 
 CubeMap::~CubeMap()
 {
-    glDeleteTextures(1, &textureId);
+    glDeleteTextures(1, &m_textureId);
 }
 
 void CubeMap::bind(ShaderProgram *shaderProgram)
@@ -183,7 +184,7 @@ void CubeMap::bind(ShaderProgram *shaderProgram)
 
     shaderProgram->setUniform(uniformName.c_str(), 0);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_textureId);
 }
 
 void CubeMap::unbind()
@@ -194,16 +195,16 @@ void CubeMap::unbind()
 void CubeMap::fillTexturePathVector(const char *texturePseudoPath)
 {
     for (unsigned int i = 0; i < CUBEMAP_FACES_NUM_ITEMS; i++) {
-        texturePaths[cm_front] = std::string(texturePseudoPath) + "front.png";
-        texturePaths[cm_back] = std::string(texturePseudoPath) + "back.png";
-        texturePaths[cm_top] = std::string(texturePseudoPath) + "top.png";
-        texturePaths[cm_bottom] = std::string(texturePseudoPath) + "bottom.png";
-        texturePaths[cm_left] = std::string(texturePseudoPath) + "left.png";
-        texturePaths[cm_right] = std::string(texturePseudoPath) + "right.png";
+        m_texturePaths[cm_front] = std::string(texturePseudoPath) + "front.png";
+        m_texturePaths[cm_back] = std::string(texturePseudoPath) + "back.png";
+        m_texturePaths[cm_top] = std::string(texturePseudoPath) + "top.png";
+        m_texturePaths[cm_bottom] = std::string(texturePseudoPath) + "bottom.png";
+        m_texturePaths[cm_left] = std::string(texturePseudoPath) + "left.png";
+        m_texturePaths[cm_right] = std::string(texturePseudoPath) + "right.png";
     }
 }
 
 GLuint CubeMap::getTextureId()
 {
-    return textureId;
+    return m_textureId;
 }

@@ -75,7 +75,7 @@ void Helper::gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum sev
         break;
 
     case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-        _type = "UDEFINED BEHAVIOR";
+        _type = "UNDEFINED BEHAVIOR";
         break;
 
     case GL_DEBUG_TYPE_PORTABILITY:
@@ -131,17 +131,17 @@ void Helper::gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum sev
                   << std::endl;
 }
 
-Helper::Timer::Timer(const std::string &name) : name(name)
+Helper::Timer::Timer(const std::string &name) : m_name(name)
 {
-    start = std::chrono::high_resolution_clock::now();
+    m_start = std::chrono::high_resolution_clock::now();
 }
 
 Helper::Timer::~Timer()
 {
-    end = std::chrono::high_resolution_clock::now();
+    m_end = std::chrono::high_resolution_clock::now();
 
-    duration = end - start;
-    float ms = duration.count() * 1000.0f;
+    m_duration = m_end - m_start;
+    float ms = m_duration.count() * 1000.0f;
 
-    std::cout << "Timer " << name << " took " << ms << "ms!" << std::endl;
+    std::cout << "Timer " << m_name << " took " << ms << "ms!" << std::endl;
 }

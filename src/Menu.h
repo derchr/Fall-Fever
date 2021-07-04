@@ -3,7 +3,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "Framebuffer.h"
+#include "FrameBuffer.h"
 #include "JsonParser.h"
 #include "Screen.h"
 #include "EventHandler.h"
@@ -11,7 +11,7 @@
 class Menu
 {
 public:
-    Menu(Framebuffer *p_framebuffer, ShaderProgram *p_shaderProgram);
+    Menu(FrameBuffer *p_framebuffer, ShaderProgram *p_shaderProgram);
     ~Menu();
 
     Screen *getScreenByName(const std::string &name) const;
@@ -28,17 +28,17 @@ public:
     void onExitPressed();
 
 private:
-    Framebuffer *framebuffer;
-    ShaderProgram *shaderProgram;
+    FrameBuffer *m_frameBuffer;
+    ShaderProgram *m_shaderProgram;
 
-    bool shouldExit = false;
+    bool m_shouldExit = false;
 
-    std::vector<Screen *> screens;
-    Screen *activeScreen;
+    std::vector<Screen *> m_screens;
+    Screen *m_activeScreen;
     /*Screen *loadingScreen;
     Screen *mainMenuScreen;
     Screen *optionMenuScreen;
     Screen *pauseMenuScreen;*/
 
-    mutable std::unordered_map<std::string, Screen *> m_screen_name_cache;
+    mutable std::unordered_map<std::string, Screen *> m_screenNameCache;
 };

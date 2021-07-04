@@ -16,7 +16,7 @@ public:
     static std::vector<Vertex> createVertices(double *vertices, uint32_t numVertices, float *textureCoordinates);
 
 private:
-    GLuint VAO;
-    GLuint VBO;
-    GLuint EBO;
+    GLuint m_VAO;
+    GLuint m_VBO;
+    GLuint m_EBO;
 };

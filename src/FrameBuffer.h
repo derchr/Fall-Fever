@@ -4,11 +4,11 @@
 #include "Texture.h"
 #include <glad/glad.h>
 
-class Framebuffer
+class FrameBuffer
 {
 public:
-    Framebuffer(uint32_t width, uint32_t height, ShaderProgram *shaderProgram);
-    ~Framebuffer();
+    FrameBuffer(uint32_t width, uint32_t height, ShaderProgram *shaderProgram);
+    ~FrameBuffer();
 
     void bind();
     void unbind();
@@ -23,26 +23,25 @@ public:
 private:
     void generateTextures(uint32_t width, uint32_t height);
 
-private:
-    GLuint FBO;
-    GLuint colorBuffer;
-    GLuint depthStencilBuffer;
+    GLuint m_FBO;
+    GLuint m_colorBuffer;
+    GLuint m_depthStencilBuffer;
 
-    ShaderProgram *shaderProgram;
+    ShaderProgram *m_shaderProgram;
 };
 
-enum depthMapType
+enum class DepthMapType
 {
-    DEPTHMAP_NORMAL,
-    DEPTHMAP_CUBEMAP
+    Normal,
+    CubeMap
 };
 
-// Framebuffer without color buffer. (Shadows)
+// FrameBuffer without color buffer. (Shadows)
 class DepthMap
 {
 public:
     // Normal depthMap with texture and point depthMap with cubeMap
-    DepthMap(int TYPE, int RESOLUTION);
+    DepthMap(DepthMapType type, int RESOLUTION);
     ~DepthMap();
 
     void bind();
@@ -53,10 +52,10 @@ public:
     GLuint getCubeMapId();
 
 private:
-    GLuint depthMapFBO;
+    GLuint m_depthMapFBO;
 
     // Either a normal depthMap is used (Directional shadows)
     // or a cubeMap is used (Point shadows)
-    GLuint depthMap;
-    CubeMap *cubeMap;
+    GLuint m_depthMap;
+    CubeMap *m_cubeMap;
 };

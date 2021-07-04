@@ -7,8 +7,7 @@ struct Texture {
 
     std::string pathToTexture;
     uint32_t textureType;
-    uint32_t textureId;
-
+    uint32_t m_textureId;
 };
 
 struct Mesh {
@@ -22,7 +21,6 @@ struct Mesh {
 struct Model {
 
     std::vector<Texture> textures;
-    std::vector<Mesh> meshes;
-    std::string directory;
-
+    std::vector<Mesh> m_meshes;
+    std::string m_workingPath;
 };

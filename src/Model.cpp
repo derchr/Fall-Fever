@@ -3,46 +3,46 @@
 #include <fstream>
 #include <iostream>
 
-uint32_t Model::id_counter = 0;
+uint32_t Model::s_idCounter = 0;
 
-Model::Model(const std::string &modelName, const std::string &modelPath) : unique_name(modelName)
+Model::Model(const std::string &modelName, const std::string &modelPath) : m_uniqueName(modelName)
 {
-    directory = modelPath.substr(0, modelPath.find_last_of('/'));
+    m_workingPath = modelPath.substr(0, modelPath.find_last_of('/'));
 
     loadModel(modelPath);
-    id = id_counter++;
+    m_id = s_idCounter++;
 }
 
 Model::~Model()
 {
     // Go through all loaded textures and delete them
-    for (auto it = loadedTextures.begin(); it != loadedTextures.end(); it++) {
+    for (auto it = m_loadedTextures.begin(); it != m_loadedTextures.end(); it++) {
         delete (*it);
     }
 }
 
 void Model::draw(ShaderProgram *shaderProgram)
 {
-    if (!model_prepared) {
+    if (!m_modelPrepared) {
         std::cout << "WARNING: Model not prepared! Unable to draw!" << std::endl;
         return;
     }
 
     // Iterate through every mesh and call the draw function
-    for (auto mesh : meshes) {
+    for (auto mesh : m_meshes) {
         mesh->draw(shaderProgram);
     }
 }
 
 void Model::drawWithoutTextures()
 {
-    if (!model_prepared) {
+    if (!m_modelPrepared) {
         std::cout << "WARNING: Model not prepared! Unable to draw!" << std::endl;
         return;
     }
 
     // Iterate through every mesh and call the draw function
-    for (auto mesh : meshes) {
+    for (auto mesh : m_meshes) {
         mesh->drawWithoutTextures();
     }
 }
@@ -82,12 +82,12 @@ void Model::loadModel(const std::string &pathToModel)
 
     for (unsigned int i = 0; i < numTextures; i++) {
         TexturePrototype texture_prototype;
-        std::string texturePath = directory + '/' + textureSources[i].c_str();
+        std::string texturePath = m_workingPath + '/' + textureSources[i].c_str();
 
         texture_prototype.texturePath = std::move(texturePath);
         texture_prototype.textureType = textureTypes[i];
 
-        modelTexturePrototypes.push_back(texture_prototype);
+        m_modelTexturePrototypes.push_back(texture_prototype);
     }
 
     // When there is no normal map bound, please use fallback texture
@@ -103,7 +103,7 @@ void Model::loadModel(const std::string &pathToModel)
         texture_prototype.texturePath = "data/res/models/tex/fallback_normal.png";
         texture_prototype.textureType = TextureType::Normal;
 
-        modelTexturePrototypes.push_back(texture_prototype);
+        m_modelTexturePrototypes.push_back(texture_prototype);
     }
 
     // Here starts the first mesh
@@ -146,7 +146,7 @@ void Model::loadModel(const std::string &pathToModel)
             mesh_prototype.textureIds.push_back(numTextures);
         }
 
-        modelMeshPrototypes.push_back(std::move(mesh_prototype));
+        m_modelMeshPrototypes.push_back(std::move(mesh_prototype));
     }
 
     input.close();
@@ -154,32 +154,32 @@ void Model::loadModel(const std::string &pathToModel)
 
 void Model::prepareModel()
 {
-    model_prepared = true;
+    m_modelPrepared = true;
 
     // Create textures on GPU
-    for (auto &it : modelTexturePrototypes) {
+    for (auto &it : m_modelTexturePrototypes) {
         Texture *newTex = new Texture(it.texturePath.c_str(), it.textureType);
-        loadedTextures.push_back(newTex);
+        m_loadedTextures.push_back(newTex);
     }
 
     // Create meshes on GPU
-    for (const auto &it : modelMeshPrototypes) {
+    for (const auto &it : m_modelMeshPrototypes) {
         std::vector<Texture *> meshTextures;
         for (const auto it2 : it.textureIds) {
-            meshTextures.push_back(loadedTextures[it2]);
+            meshTextures.push_back(m_loadedTextures[it2]);
         }
 
         Mesh *currentMesh = new Mesh(std::move(it.meshVertices), std::move(it.meshIndices), meshTextures);
-        meshes.push_back(currentMesh);
+        m_meshes.push_back(currentMesh);
     }
 }
 
 Mesh *Model::getMesh(unsigned int index)
 {
-    return meshes[index];
+    return m_meshes[index];
 }
 
-std::string Model::getUniqueName()
+const std::string &Model::getUniqueName()
 {
-    return unique_name;
+    return m_uniqueName;
 }

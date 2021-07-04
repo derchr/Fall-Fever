@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Framebuffer.h"
+#include "FrameBuffer.h"
 #include "Mesh.h"
 #include "Texture.h"
 #include "Window.h"
@@ -22,15 +22,15 @@ public:
     bool isHovered(Window *window);
 
 private:
-    double x, y, w, h;
+    double m_posX, m_posY, m_width, m_height;
 
-    std::string unique_name;
+    std::string m_uniqueName;
 
-    uint16_t callbackId;
+    uint16_t m_callbackId;
 
-    std::vector<Vertex> widgetVertices;
-    std::vector<uint32_t> widgetIndices;
-    std::vector<Texture *> widgetTextures;
+    std::vector<Vertex> m_widgetVertices;
+    std::vector<uint32_t> m_widgetIndices;
+    std::vector<Texture *> m_widgetTextures;
 
-    Mesh *widgetMesh;
+    Mesh *m_widgetMesh;
 };

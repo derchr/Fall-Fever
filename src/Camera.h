@@ -29,18 +29,18 @@ public:
     void setPosition(glm::vec3 position);
 
 private:
-    glm::mat4 viewMatrix;
-    glm::mat4 projectionMatrix;
-    glm::mat4 viewProjectionMatrix;
+    glm::mat4 m_viewMatrix;
+    glm::mat4 m_projectionMatrix;
+    glm::mat4 m_viewProjectionMatrix;
 
-    glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::vec3 frontVec = glm::vec3(0.0f, 0.0f, -1.0f);
-    glm::vec3 upVec = glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::vec3 m_position = glm::vec3(0.0f, 0.0f, 0.0f);
+    glm::vec3 m_frontVec = glm::vec3(0.0f, 0.0f, -1.0f);
+    glm::vec3 m_upVec = glm::vec3(0.0f, 1.0f, 0.0f);
 
-    float pitch = 0.0f;
-    float yaw = -90.0f;
+    float m_pitch = 0.0f;
+    float m_yaw = -90.0f;
 
-    float speed = 2.0f;
+    float m_speed = 2.0f;
 
-    float fov;
+    float m_fov;
 };

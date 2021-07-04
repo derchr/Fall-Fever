@@ -32,14 +32,13 @@ private:
     static void mouse_button_callback(GLFWwindow *window, int button, int action, int mods);
     static void mouse_callback(GLFWwindow *window, double xpos, double ypos);
 
-private:
-    static CameraActionMap cameraActionMap;
-    static CameraMouseActionMap cameraMouseActionMap;
-    static WindowActionMap windowActionMap;
-    static MouseButtonActionMap mouseButtonActionMap;
+    static CameraActionMap s_cameraActionMap;
+    static CameraMouseActionMap s_cameraMouseActionMap;
+    static WindowActionMap s_windowActionMap;
+    static MouseButtonActionMap s_mouseButtonActionMap;
 
-    GLFWwindow *window;
+    static float s_mouseSensitivity;
+    static bool s_firstMouseInput;
 
-    static float mouseSensitivity;
-    static bool firstMouseInput;
+    GLFWwindow *m_window;
 };

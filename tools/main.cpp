@@ -60,9 +60,9 @@ int main(int argc, char** argv) {
         Model currentModel;
         if(((*it).find('/')) < (*it).length()) {
             // source includes a /
-            currentModel.directory = (*it).substr(0, (*it).find_last_of('/'));
+            currentModel.m_workingPath = (*it).substr(0, (*it).find_last_of('/'));
         } else {
-            currentModel.directory = ".";
+            currentModel.m_workingPath = ".";
         }
 
         processNode(scene->mRootNode, scene, &currentModel);
@@ -96,9 +96,9 @@ int main(int argc, char** argv) {
         }
 
         // Write meshes
-        uint32_t numMeshes = currentModel.meshes.size();
+        uint32_t numMeshes = currentModel.m_meshes.size();
         output.write((char*) &numMeshes, sizeof(uint32_t));
-        for(auto it1 = currentModel.meshes.begin(); it1 != currentModel.meshes.end(); it1++) {
+        for (auto it1 = currentModel.m_meshes.begin(); it1 != currentModel.m_meshes.end(); it1++) {
             uint32_t numVertices = (*it1).vertices.size();
             uint32_t numIndices = (*it1).indices.size();
             uint32_t numTextureIds = (*it1).textureIds.size();
@@ -128,7 +128,7 @@ void processNode(aiNode *node, const aiScene *scene, Model* model) {
     // Push the node's meshes into the mesh vector
     for(uint32_t i = 0; i < node->mNumMeshes; i++) {
         aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-        model->meshes.push_back(processMesh(mesh, scene, model));
+        model->m_meshes.push_back(processMesh(mesh, scene, model));
     }
 
     // Process child nodes too
@@ -228,7 +228,7 @@ std::vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, u
         aiString filename;
         mat->GetTexture(type, i, &filename);
 
-        std::string currentPath = model->directory + '/' + filename.C_Str();
+        std::string currentPath = model->m_workingPath + '/' + filename.C_Str();
 
         bool skip = 0;
         for(uint32_t j = 0; j < model->textures.size(); j++) {
@@ -244,12 +244,12 @@ std::vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, u
             texture.pathToTexture = currentPath;
             texture.textureType = textureType;
             // textureIds start at 0, but vector elements start at 1.
-            texture.textureId = model->textures.size();
+            texture.m_textureId = model->textures.size();
 
             model->textures.push_back(texture);
 
             // Add newest texture id to mesh
-            mesh->textureIds.push_back(texture.textureId);
+            mesh->textureIds.push_back(texture.m_textureId);
         }
     }
 

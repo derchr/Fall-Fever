@@ -2,7 +2,7 @@
 
 #include <unordered_map>
 
-#include "Framebuffer.h"
+#include "FrameBuffer.h"
 #include "ShaderProgram.h"
 #include "Widget.h"
 
@@ -11,7 +11,7 @@ class Menu;
 class Screen
 {
 public:
-    Screen(const std::string &name, std::vector<Widget *> widgets, Framebuffer *framebuffer,
+    Screen(const std::string &name, std::vector<Widget *> widgets, FrameBuffer *framebuffer,
            ShaderProgram *shaderProgram);
     ~Screen();
 
@@ -23,15 +23,15 @@ public:
     Widget *getWidgetByName(const std::string &name) const;
 
 private:
-    uint32_t id;
-    static uint32_t id_counter;
-    std::string unique_name;
+    uint32_t m_id;
+    static uint32_t s_idCounter;
+    std::string m_uniqueName;
 
-    Framebuffer *framebuffer;
-    ShaderProgram *shaderProgram;
+    FrameBuffer *m_frameBuffer;
+    ShaderProgram *m_shaderProgram;
 
-    std::vector<Texture *> textures;
-    std::vector<Widget *> widgets;
+    std::vector<Texture *> m_textures;
+    std::vector<Widget *> m_widgets;
 
-    mutable std::unordered_map<std::string, Widget *> m_widget_name_cache;
+    mutable std::unordered_map<std::string, Widget *> m_widgetNameCache;
 };

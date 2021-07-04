@@ -6,15 +6,15 @@
 
 VertexArray::VertexArray(void *vertexData, void *indexData, uint32_t numVertices, uint32_t numIndices)
 {
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
+    glGenVertexArrays(1, &m_VAO);
+    glBindVertexArray(m_VAO);
 
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glGenBuffers(1, &m_VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
     glBufferData(GL_ARRAY_BUFFER, numVertices * sizeof(Vertex), vertexData, GL_STATIC_DRAW);
 
-    glGenBuffers(1, &EBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glGenBuffers(1, &m_EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices * sizeof(uint32_t), indexData, GL_STATIC_DRAW);
 
     // Position
@@ -43,12 +43,12 @@ VertexArray::VertexArray(void *vertexData, void *indexData, uint32_t numVertices
 
 VertexArray::~VertexArray()
 {
-    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &m_VBO);
 }
 
 void VertexArray::bind()
 {
-    glBindVertexArray(VAO);
+    glBindVertexArray(m_VAO);
 }
 
 void VertexArray::unbind()

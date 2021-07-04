@@ -10,7 +10,7 @@
 class Entity
 {
 public:
-    Entity(std::string name, Model *model, ShaderProgram *shaderProgram);
+    Entity(const std::string &name, Model *model, ShaderProgram *shaderProgram);
     ~Entity() = default;
 
     void draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition);
@@ -36,23 +36,22 @@ public:
 private:
     void updateModelMatrix();
 
-private:
-    uint32_t id;
-    static uint32_t id_counter;
-    std::string unique_name;
+    uint32_t m_id;
+    static uint32_t s_idCounter;
+    std::string m_uniqueName;
 
-    Model *model;
-    ShaderProgram *shaderProgram;
+    Model *m_model;
+    ShaderProgram *m_shaderProgram;
 
-    bool isLightSource = false;
+    bool m_isLightSource = false;
 
-    glm::mat4 modelMatrix = glm::mat4(1.0f);
+    glm::mat4 m_modelMatrix = glm::mat4(1.0f);
 
-    glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::quat quaternion;
-    glm::vec3 velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+    glm::vec3 m_position = glm::vec3(0.0f, 0.0f, 0.0f);
+    glm::vec3 m_velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+    glm::quat m_quaternion;
 
-    float modelScale = 1.0f;
+    float m_modelScale = 1.0f;
 };
 
 class Skybox
@@ -64,10 +63,10 @@ public:
     void draw(glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
 
 private:
-    Model *cubeModel;
-    ShaderProgram *shaderProgram;
+    Model *m_cubeModel;
+    ShaderProgram *m_shaderProgram;
 
-    CubeMap cubeMap;
+    CubeMap m_cubeMap;
 
-    VertexArray *vertexArray;
+    VertexArray *m_vertexArray;
 };

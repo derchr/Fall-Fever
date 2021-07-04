@@ -12,7 +12,7 @@ add_executable(Fall-Fever
     Entity.cpp
     Light.cpp
     World.cpp
-    Framebuffer.cpp
+    FrameBuffer.cpp
     Widget.cpp
     Screen.cpp
     Menu.cpp

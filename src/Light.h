@@ -24,19 +24,18 @@ public:
 protected:
     Light(glm::vec3 color, float intensity, ShaderProgram *shaderProgram);
 
-protected:
-    ShaderProgram *shaderProgram;
+    ShaderProgram *m_shaderProgram;
 
-    uint32_t id;
-    static uint32_t id_counter;
+    uint32_t m_id;
+    static uint32_t s_idCounter;
 
-    bool isActive;
-    bool shouldCastShadow = true;
+    bool m_isActive;
+    bool m_shouldCastShadow = true;
 
-    float intensity;
+    float m_intensity;
 
     // Color
-    glm::vec3 lightColor;
+    glm::vec3 m_lightColor;
 };
 
 class PointLight : public Light
@@ -53,8 +52,7 @@ private:
     void update() override;
     std::string getStructMemberName();
 
-private:
-    glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
+    glm::vec3 m_position = glm::vec3(0.0f, 0.0f, 0.0f);
 };
 
 class DirectionalLight : public Light
@@ -69,6 +67,5 @@ public:
 private:
     void update() override;
 
-private:
-    glm::vec3 direction;
+    glm::vec3 m_direction;
 };

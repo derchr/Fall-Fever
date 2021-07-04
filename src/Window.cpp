@@ -13,8 +13,8 @@ Window::Window()
         exit(-1);
     }
 
-    width = INIT_WINDOW_WIDTH;
-    height = INIT_WINDOW_HEIGHT;
+    m_width = INIT_WINDOW_WIDTH;
+    m_height = INIT_WINDOW_HEIGHT;
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -28,7 +28,7 @@ Window::Window()
     glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
 #endif
 
-    window = glfwCreateWindow(width, height, "OpenGL", NULL, NULL);
+    window = glfwCreateWindow(m_width, m_height, "OpenGL", NULL, NULL);
     if (!window) {
         std::cout << "Failed to create window" << std::endl;
     }
@@ -36,8 +36,8 @@ Window::Window()
     // Wait for window to maximize (in case)
     Helper::sleep(1000);
 
-    glfwGetWindowPos(window, &posX, &posY);
-    glfwGetWindowSize(window, &width, &height);
+    glfwGetWindowPos(window, &m_posX, &m_posY);
+    glfwGetWindowSize(window, &m_width, &m_height);
 
     // Create OpenGL context
     glfwMakeContextCurrent(window);
@@ -54,7 +54,7 @@ Window::Window()
     glDebugMessageCallback(Helper::gl_debug_callback, NULL);
 
     // Disable mouse cursor
-    mouseCatched = false;
+    m_mouseCatched = false;
 #endif
 
     // Enable z buffer
@@ -71,9 +71,9 @@ Window::Window()
     // Disable VSync since my sleep function handles this
     glfwSwapInterval(0);
 
-    setCatchedCursor(mouseCatched);
+    setCatchedCursor(m_mouseCatched);
 
-    glViewport(0, 0, width, height);
+    glViewport(0, 0, m_width, m_height);
 
     // Tell GLFW which function to call when window is resized
     // glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -91,15 +91,15 @@ bool Window::isWindowResized()
     glfwGetFramebufferSize(window, &new_width, &new_height);
     glfwGetWindowPos(window, &new_posx, &new_posy);
 
-    return !(new_width == width && new_height == height && new_posx == posX && new_posy == posY);
+    return !(new_width == m_width && new_height == m_height && new_posx == m_posX && new_posy == m_posY);
 }
 
 void Window::updateWindowDimensions()
 {
-    glfwGetFramebufferSize(window, &width, &height);
-    glfwGetWindowPos(window, &posX, &posY);
+    glfwGetFramebufferSize(window, &m_width, &m_height);
+    glfwGetWindowPos(window, &m_posX, &m_posY);
 
-    glViewport(0, 0, width, height);
+    glViewport(0, 0, m_width, m_height);
 }
 
 void Window::setCatchedCursor(bool value)
@@ -115,8 +115,8 @@ void Window::handleWindowActionMap(WindowActionMap &windowActionMap)
 {
     if (windowActionMap.at(WindowAction::WireFrameToggle)) {
         windowActionMap[WindowAction::WireFrameToggle] = false;
-        wireFrameMode = !wireFrameMode;
-        if (wireFrameMode) {
+        m_wireFrameMode = !m_wireFrameMode;
+        if (m_wireFrameMode) {
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         } else {
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -125,8 +125,8 @@ void Window::handleWindowActionMap(WindowActionMap &windowActionMap)
 
     if (windowActionMap.at(WindowAction::MouseCatchToggle)) {
         windowActionMap[WindowAction::MouseCatchToggle] = false;
-        mouseCatched = !mouseCatched;
-        setCatchedCursor(mouseCatched);
+        m_mouseCatched = !m_mouseCatched;
+        setCatchedCursor(m_mouseCatched);
     }
 
     if (windowActionMap.at(WindowAction::WindowShouldClose)) {
@@ -154,20 +154,20 @@ GLFWwindow *Window::getGLFWwindow()
 
 int Window::getWindowWidth()
 {
-    return width;
+    return m_width;
 }
 
 int Window::getWindowHeight()
 {
-    return height;
+    return m_height;
 }
 
 float Window::getWindowAspectRatio()
 {
-    return (float)width / (float)height;
+    return (float)m_width / (float)m_height;
 }
 
 bool Window::getMouseIsCatched()
 {
-    return mouseCatched;
+    return m_mouseCatched;
 }

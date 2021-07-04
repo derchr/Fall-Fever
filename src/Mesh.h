@@ -21,9 +21,8 @@ public:
 private:
     void setupMesh();
 
-private:
-    uint32_t numElements;
-    std::vector<Texture *> textures;
+    uint32_t m_numElements;
+    std::vector<Texture *> m_textures;
 
-    VertexArray vertexArray;
+    VertexArray m_vertexArray;
 };

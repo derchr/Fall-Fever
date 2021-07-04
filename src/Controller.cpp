@@ -25,28 +25,28 @@
 
 Controller::Controller()
 {
-    gameWindow = new Window();
-    gameEventHandler = new EventHandler(gameWindow->getGLFWwindow());
+    m_gameWindow = new Window();
+    m_gameEventHandler = new EventHandler(m_gameWindow->getGLFWwindow());
 
-    camera = new Camera(90.0f, gameWindow->getWindowAspectRatio());
+    m_camera = new Camera(90.0f, m_gameWindow->getWindowAspectRatio());
 
     JsonParser shaderParser("data/shaderPrograms.json");
-    shaderPrograms = shaderParser.getShaderPrograms();
+    m_shaderPrograms = shaderParser.getShaderPrograms();
 
-    pp_framebuffer = new Framebuffer(gameWindow->getWindowWidth(), gameWindow->getWindowHeight(),
-                                     getShaderProgramByName("postProcessingProgram"));
+    m_postProcessFrameBuffer = new FrameBuffer(m_gameWindow->getWindowWidth(), m_gameWindow->getWindowHeight(),
+                                               getShaderProgramByName("postProcessingProgram"));
 
-    menu = new Menu(pp_framebuffer, getShaderProgramByName("menuProgram"));
+    m_menu = new Menu(m_postProcessFrameBuffer, getShaderProgramByName("menuProgram"));
 
     // Show loading screen...
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    menu->showScreenByName("loadingScreen");
-    glfwSwapBuffers(gameWindow->getGLFWwindow());
+    m_menu->showScreenByName("loadingScreen");
+    glfwSwapBuffers(m_gameWindow->getGLFWwindow());
 
     // Show main menu when loading is finished...
-    menu->showScreenByName("mainMenuScreen");
+    m_menu->showScreenByName("mainMenuScreen");
 
-    world = new World(shaderPrograms);
+    m_world = new World(m_shaderPrograms);
 
 #ifdef _DEBUG
     // Setup Dear ImGui context
@@ -55,7 +55,7 @@ Controller::Controller()
     ImGuiIO &io = ImGui::GetIO();
     (void)io;
     // Setup Platform/Renderer bindings
-    ImGui_ImplGlfw_InitForOpenGL(gameWindow->getGLFWwindow(), true);
+    ImGui_ImplGlfw_InitForOpenGL(m_gameWindow->getGLFWwindow(), true);
     ImGui_ImplOpenGL3_Init("#version 150");
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
@@ -70,32 +70,32 @@ Controller::~Controller()
     ImGui::DestroyContext();
 #endif
 
-    for (auto it = shaderPrograms.begin(); it != shaderPrograms.end(); it++) {
+    for (auto it = m_shaderPrograms.begin(); it != m_shaderPrograms.end(); it++) {
         delete *it;
     }
 
-    delete world;
-    delete camera;
-    delete menu;
-    delete pp_framebuffer;
-    delete gameEventHandler;
-    delete gameWindow;
+    delete m_world;
+    delete m_camera;
+    delete m_menu;
+    delete m_postProcessFrameBuffer;
+    delete m_gameEventHandler;
+    delete m_gameWindow;
 }
 
 void Controller::run()
 {
     updateExposure(getShaderProgramByName("postProcessingProgram"));
 
-    Entity *lightSource = world->getEntityByName("light");
+    Entity *lightSource = m_world->getEntityByName("light");
     lightSource->setScale(0.1f);
     lightSource->setRotation(glm::vec3(0.f));
     lightSource->setPosition(glm::vec3(-2.f, 1.5f, 2.f));
     lightSource->setIsLightSource(true);
 
-    camera->translate(glm::vec3(0.0f, 1.5f, 5.0f));
+    m_camera->translate(glm::vec3(0.0f, 1.5f, 5.0f));
 
     // This is the game loop
-    while (!glfwWindowShouldClose(gameWindow->getGLFWwindow())) {
+    while (!glfwWindowShouldClose(m_gameWindow->getGLFWwindow())) {
 
         // --- Timing ---
         limit_framerate();
@@ -106,15 +106,15 @@ void Controller::run()
         if (rotateLightSource) {
             float radius = 4.0;
             glm::vec3 newPos = glm::vec3(-cos(glfwGetTime() * 0.5), 0.5f, sin(glfwGetTime() * 0.5)) * radius;
-            world->getEntityByName("light")->setPosition(newPos);
+            m_world->getEntityByName("light")->setPosition(newPos);
         }
         if (rotateEntity) {
-            world->getEntityById(0)->rotate(glm::vec3(0.0f, 1.0f, 0.0f), -0.2f * deltaTime);
+            m_world->getEntityById(0)->rotate(glm::vec3(0.0f, 1.0f, 0.0f), -0.2f * m_deltaTime);
         }
         static glm::vec3 lightColor = glm::vec3(1.f);
         static float intensity = 7.5f;
-        world->updatePointLight(0, true, world->getEntityByName("light")->getPosition(), lightColor, intensity);
-        world->updateDirectionalLight(true, world->getDirectionalLight()->getDirection(), lightColor);
+        m_world->updatePointLight(0, true, m_world->getEntityByName("light")->getPosition(), lightColor, intensity);
+        m_world->updateDirectionalLight(true, m_world->getDirectionalLight()->getDirection(), lightColor);
         getShaderProgramByName("lightProgram")->bind();
         getShaderProgramByName("lightProgram")->setUniform("v_lightColor", lightColor * 100.0f);
         getShaderProgramByName("lightProgram")->unbind();
@@ -129,55 +129,55 @@ void Controller::run()
         getShaderProgramByName("defaultProgram")->unbind();
         if (drawShadows || firstRun) {
             firstRun = false;
-            world->calculateShadows(getShaderProgramByName("directionalShadowDepthProgram"),
-                                    getShaderProgramByName("pointShadowDepthProgram"));
+            m_world->calculateShadows(getShaderProgramByName("directionalShadowDepthProgram"),
+                                      getShaderProgramByName("pointShadowDepthProgram"));
         }
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        auto activeScreen = menu->getActiveScreen();
+        auto activeScreen = m_menu->getActiveScreen();
         if (activeScreen) {
             activeScreen->draw();
         } else {
-            pp_framebuffer->bind();
+            m_postProcessFrameBuffer->bind();
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            camera->lookForward();
-            camera->updateVPM();
+            m_camera->lookForward();
+            m_camera->updateVPM();
 
-            world->getSkybox()->draw(camera->getView(), camera->getProj());
-            world->draw(camera->getViewProj(), camera->getPosition());
+            m_world->getSkybox()->draw(m_camera->getView(), m_camera->getProj());
+            m_world->draw(m_camera->getViewProj(), m_camera->getPosition());
 
-            pp_framebuffer->unbind();
-            pp_framebuffer->render();
+            m_postProcessFrameBuffer->unbind();
+            m_postProcessFrameBuffer->render();
 
 #ifdef _DEBUG
-            renderImGui(world, &lightColor, &rotateEntity, &rotateLightSource,
+            renderImGui(m_world, &lightColor, &rotateEntity, &rotateLightSource,
                         getShaderProgramByName("postProcessingProgram"), &intensity, &drawShadows);
 #endif
         }
-        glfwSwapBuffers(gameWindow->getGLFWwindow());
+        glfwSwapBuffers(m_gameWindow->getGLFWwindow());
 
         // Update window size
-        if (gameWindow->isWindowResized()) {
-            gameWindow->updateWindowDimensions();
+        if (m_gameWindow->isWindowResized()) {
+            m_gameWindow->updateWindowDimensions();
             updateWindowDimensions();
         }
 
         // --- Check events, handle input ---
-        gameEventHandler->handleEvents();
+        m_gameEventHandler->handleEvents();
 
-        camera->updatePositionFromKeyboardInput(gameEventHandler->getCameraActionMap(), deltaTime);
-        if (gameWindow->getMouseIsCatched()) {
-            camera->updateDirectionFromMouseInput(gameEventHandler->getCameraMouseActionMap());
+        m_camera->updatePositionFromKeyboardInput(m_gameEventHandler->getCameraActionMap(), m_deltaTime);
+        if (m_gameWindow->getMouseIsCatched()) {
+            m_camera->updateDirectionFromMouseInput(m_gameEventHandler->getCameraMouseActionMap());
         }
 
-        menu->writeWindowActions(gameEventHandler->getWindowActionMap());
-        gameWindow->handleWindowActionMap(gameEventHandler->getWindowActionMap());
+        m_menu->writeWindowActions(m_gameEventHandler->getWindowActionMap());
+        m_gameWindow->handleWindowActionMap(m_gameEventHandler->getWindowActionMap());
 
         // Handle widget pressed event only when a screen is currently active
-        if (menu->getActiveScreen())
-            menu->handleMouseButtonActionMap(gameEventHandler->getMouseButtonActionMap(), gameWindow);
+        if (m_menu->getActiveScreen())
+            m_menu->handleMouseButtonActionMap(m_gameEventHandler->getMouseButtonActionMap(), m_gameWindow);
     }
 }
 
@@ -188,34 +188,34 @@ void Controller::limit_framerate()
 
     lastTime = glfwGetTime() - startingTime;
 
-    double frameTime = 1 / (double)MAX_FPS;
+    double frameTime = 1 / (double)m_MAX_FPS;
     if (frameTime > lastTime) {
         Helper::sleep((frameTime - lastTime) * 1000000);
     }
 
-    deltaTime = glfwGetTime() - startingTime;
+    m_deltaTime = glfwGetTime() - startingTime;
 
     startingTime = glfwGetTime();
 }
 
 void Controller::updateWindowDimensions()
 {
-    camera->updateAspectRatio(gameWindow->getWindowAspectRatio());
-    gameEventHandler->setFirstMouseInput(1);
+    m_camera->updateAspectRatio(m_gameWindow->getWindowAspectRatio());
+    m_gameEventHandler->setFirstMouseInput(1);
 
-    pp_framebuffer->changeDimensions(gameWindow->getWindowWidth(), gameWindow->getWindowHeight());
+    m_postProcessFrameBuffer->changeDimensions(m_gameWindow->getWindowWidth(), m_gameWindow->getWindowHeight());
 }
 
 void Controller::updateExposure(ShaderProgram *shaderProgram)
 {
     shaderProgram->bind();
-    shaderProgram->setUniform("u_exposure", exposure);
+    shaderProgram->setUniform("u_exposure", m_exposure);
     shaderProgram->unbind();
 }
 
 ShaderProgram *Controller::getShaderProgramByName(const std::string &name)
 {
-    for (auto it = shaderPrograms.begin(); it != shaderPrograms.end(); it++) {
+    for (auto it = m_shaderPrograms.begin(); it != m_shaderPrograms.end(); it++) {
         if ((*it)->getUniqueName() == name) {
             return *it;
         }
@@ -237,7 +237,7 @@ ShaderProgram *Controller::getShaderProgramByName(std::vector<ShaderProgram *> s
 
 void Controller::setMaxFps(uint16_t fps)
 {
-    MAX_FPS = fps;
+    m_MAX_FPS = fps;
 }
 
 #ifdef _DEBUG
@@ -281,7 +281,7 @@ void Controller::renderImGui(World *world, glm::vec3 *lightColor, bool *rotateEn
     lightColor->z = color[2];
 
     ImGui::Text("\nMiscellaneous");
-    ImGui::SliderFloat("Exposure", &exposure, 0, 5.0f);
+    ImGui::SliderFloat("Exposure", &m_exposure, 0, 5.0f);
 
     ImGui::Checkbox("Draw Shadows", drawShadows);
     ImGui::Checkbox("Rotate Lightsource", rotateLightSource);

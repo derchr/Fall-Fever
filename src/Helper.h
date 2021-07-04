@@ -18,9 +18,11 @@ public:
     ~Timer();
 
 private:
-    std::string name;
-    std::chrono::high_resolution_clock::time_point start, end;
-    std::chrono::duration<float> duration;
+    std::string m_name;
+
+    std::chrono::high_resolution_clock::time_point m_start;
+    std::chrono::high_resolution_clock::time_point m_end;
+    std::chrono::duration<float> m_duration;
 };
 
 } // namespace Helper

@@ -25,16 +25,14 @@ public:
     void setUniform(const std::string &name, glm::mat3 matrix) const;
     void setUniform(const std::string &name, glm::mat4 matrix) const;
 
-public:
     GLuint getShaderProgramId();
-    std::string getUniqueName();
+    const std::string &getUniqueName();
 
 private:
     std::string parse(const std::string &filename);
     GLuint compile(const std::string &shaderSource, GLenum type);
 
-private:
-    GLuint shaderProgramId;
-    std::string unique_name;
-    mutable std::unordered_map<std::string, GLint> uniformLocationCache;
+    GLuint m_shaderProgramId;
+    std::string m_uniqueName;
+    mutable std::unordered_map<std::string, GLint> m_uniformLocationCache;
 };

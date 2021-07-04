@@ -14,8 +14,8 @@ JsonParser::JsonParser(const std::string &path)
     }
 
     std::string errs;
-    rbuilder["collectComments"] = false;
-    bool parsingSuccessful = Json::parseFromStream(rbuilder, file, &root, &errs);
+    m_rbuilder["collectComments"] = false;
+    bool parsingSuccessful = Json::parseFromStream(m_rbuilder, file, &m_root, &errs);
     file.close();
     if (!parsingSuccessful) {
         std::cout << "Failed to parse file\n" << errs << std::endl;
@@ -30,7 +30,7 @@ std::vector<Model *> JsonParser::getModels()
 {
     std::vector<Model *> temp_models;
 
-    const Json::Value modelsJson = root["models"];
+    const Json::Value modelsJson = m_root["models"];
 
     struct ModelSkeleton
     {
@@ -72,7 +72,7 @@ std::vector<Entity *> JsonParser::getEntities(std::vector<Model *> &models, std:
 {
     std::vector<Entity *> temp_entities;
 
-    const Json::Value entitiesJson = root["entities"];
+    const Json::Value entitiesJson = m_root["entities"];
 
     for (unsigned int index = 0; index < entitiesJson.size(); index++) {
         std::string entity_name = entitiesJson[index]["unique_name"].asString();
@@ -135,7 +135,7 @@ std::vector<ShaderProgram *> JsonParser::getShaderPrograms()
 {
     std::vector<ShaderProgram *> temp_shaderPrograms;
 
-    const Json::Value shaderProgramsJson = root["shaderPrograms"];
+    const Json::Value shaderProgramsJson = m_root["shaderPrograms"];
 
     for (unsigned int index = 0; index < shaderProgramsJson.size(); index++) {
         std::string shaderProgram_name = shaderProgramsJson[index]["unique_name"].asString();
@@ -166,7 +166,7 @@ std::vector<Light *> JsonParser::getLights(ShaderProgram *shaderProgram)
     glm::vec3 light_color = {1.0f, 1.0f, 1.0f};
     float light_intensity = 10.0f;
 
-    const Json::Value directionalLightsJson = root["directionalLight"];
+    const Json::Value directionalLightsJson = m_root["directionalLight"];
 
     const Json::Value directionJson = directionalLightsJson["direction"];
     Json::Value colorJson = directionalLightsJson["color"];
@@ -192,7 +192,7 @@ std::vector<Light *> JsonParser::getLights(ShaderProgram *shaderProgram)
     temp_lights.push_back(current_directionalLight);
 
     // Pointlights
-    const Json::Value pointLightsJson = root["pointLights"];
+    const Json::Value pointLightsJson = m_root["pointLights"];
 
     int index = 0;
     for (; index < (int)pointLightsJson.size(); index++) {
@@ -235,12 +235,12 @@ std::vector<Light *> JsonParser::getLights(ShaderProgram *shaderProgram)
     return temp_lights;
 }
 
-std::vector<Screen *> JsonParser::getScreens(ShaderProgram *menuProgram, Framebuffer *framebuffer)
+std::vector<Screen *> JsonParser::getScreens(ShaderProgram *menuProgram, FrameBuffer *framebuffer)
 {
     std::vector<Screen *> temp_screens;
 
-    const Json::Value loadingScreenJson = root["loadingScreen"];
-    const Json::Value mainMenuScreenJson = root["mainMenuScreen"];
+    const Json::Value loadingScreenJson = m_root["loadingScreen"];
+    const Json::Value mainMenuScreenJson = m_root["mainMenuScreen"];
 
     std::string name;
     Screen *screen;
@@ -282,7 +282,7 @@ Skybox *JsonParser::getSkybox(Model *cubeModel, ShaderProgram *skyboxProgram)
 {
     Skybox *temp_skybox;
 
-    const Json::Value shaderProgramsJson = root["skybox"];
+    const Json::Value shaderProgramsJson = m_root["skybox"];
 
     std::string skybox_texturePath = shaderProgramsJson["texturePath"].asString();
     temp_skybox = new Skybox(cubeModel, skyboxProgram, skybox_texturePath.c_str());
