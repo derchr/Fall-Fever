@@ -1,10 +1,10 @@
-#include <iostream>
 #include <glad/glad.h>
+#include <iostream>
 
-#include "Window.h"
-#include "eventActions.h"
-#include "defines.h"
 #include "Helper.h"
+#include "Window.h"
+#include "defines.h"
+#include "eventActions.h"
 
 Window::Window()
 {
@@ -76,7 +76,7 @@ Window::Window()
     glViewport(0, 0, width, height);
 
     // Tell GLFW which function to call when window is resized
-    //glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    // glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 }
 
 Window::~Window()
@@ -101,7 +101,6 @@ void Window::updateWindowDimensions()
 
     glViewport(0, 0, width, height);
 }
-
 
 void Window::setCatchedCursor(bool value)
 {
@@ -148,7 +147,7 @@ void Window::framebuffer_size_callback(GLFWwindow *window, int width, int height
     glViewport(0, 0, width, height);
 }
 
-GLFWwindow* Window::getGLFWwindow()
+GLFWwindow *Window::getGLFWwindow()
 {
     return window;
 }
@@ -165,7 +164,7 @@ int Window::getWindowHeight()
 
 float Window::getWindowAspectRatio()
 {
-    return (float) width / (float) height;
+    return (float)width / (float)height;
 }
 
 bool Window::getMouseIsCatched()

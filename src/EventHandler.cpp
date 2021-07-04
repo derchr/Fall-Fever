@@ -10,9 +10,7 @@ bool EventHandler::windowActionRegister[WINDOW_ACTION_NUM_ITEMS] = {0};
 bool EventHandler::firstMouseInput = 1;
 float EventHandler::mouseSensitivity = 0.15f;
 
-
-EventHandler::EventHandler(GLFWwindow *p_window) :
-    window(p_window)
+EventHandler::EventHandler(GLFWwindow *p_window) : window(p_window)
 {
     glfwSetKeyCallback(window, key_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
@@ -27,7 +25,7 @@ void EventHandler::handleEvents()
 
 void EventHandler::clearActionRegisters()
 {
-    //std::fill_n(cameraActionRegister, CAMERA_ACTION_NUM_ITEMS, 0);
+    // std::fill_n(cameraActionRegister, CAMERA_ACTION_NUM_ITEMS, 0);
     std::fill_n(cameraMouseActionRegister, CAMERA_MOUSE_ACTION_NUM_ITEMS, 0.0);
     std::fill_n(windowActionRegister, WINDOW_ACTION_NUM_ITEMS, 0);
     std::fill_n(mouseButtonActionRegister, MOUSE_BUTTON_ACTION_NUM_ITEMS, 0);
@@ -120,9 +118,10 @@ void EventHandler::mouse_callback(GLFWwindow *window, double xpos, double ypos)
     cameraMouseActionRegister[cameraMouseActions::cameraMouseDeltaY] += deltaCursorPosY;
 }
 
-void EventHandler::mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+void EventHandler::mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 {
-    (void) window; (void) mods;
+    (void)window;
+    (void)mods;
 
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
         mouseButtonActionRegister[mouseButtonActions::leftClicked] = true;
@@ -132,22 +131,22 @@ void EventHandler::mouse_button_callback(GLFWwindow* window, int button, int act
         mouseButtonActionRegister[mouseButtonActions::middleClicked] = true;
 }
 
-bool * EventHandler::getCameraActionRegister()
+bool *EventHandler::getCameraActionRegister()
 {
     return cameraActionRegister;
 }
 
-bool * EventHandler::getWindowActionRegister()
+bool *EventHandler::getWindowActionRegister()
 {
     return windowActionRegister;
 }
 
-bool * EventHandler::getMouseButtonActionRegister()
+bool *EventHandler::getMouseButtonActionRegister()
 {
     return mouseButtonActionRegister;
 }
 
-double * EventHandler::getCursorDelta()
+double *EventHandler::getCursorDelta()
 {
     return cameraMouseActionRegister;
 }

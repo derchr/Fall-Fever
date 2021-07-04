@@ -1,12 +1,12 @@
 #include "World.h"
-#include "JsonParser.h"
 #include "Controller.h"
+#include "JsonParser.h"
 
 #include <iostream>
 
-World::World(std::vector<ShaderProgram*> shaderPrograms) :
-    shaderProgram(Controller::getShaderProgramByName(shaderPrograms, "defaultProgram")),
-    depthMapDirectionalFBO(DEPTHMAP_NORMAL, SHADOW_RES)
+World::World(std::vector<ShaderProgram *> shaderPrograms)
+    : shaderProgram(Controller::getShaderProgramByName(shaderPrograms, "defaultProgram")),
+      depthMapDirectionalFBO(DEPTHMAP_NORMAL, SHADOW_RES)
 {
     // Create 4 depthMaps
     for (int i = 0; i < 4; i++) {
@@ -22,12 +22,13 @@ World::World(std::vector<ShaderProgram*> shaderPrograms) :
     JsonParser modelParser("data/models.json");
     models = modelParser.getModels();
 
-    for (const auto& it : models) {
+    for (const auto &it : models) {
         it->prepareModel();
     }
 
     entities = modelParser.getEntities(models, shaderPrograms);
-    skybox = modelParser.getSkybox(getModelByName("cube"), Controller::getShaderProgramByName(shaderPrograms, "skyboxProgram"));
+    skybox = modelParser.getSkybox(getModelByName("cube"),
+                                   Controller::getShaderProgramByName(shaderPrograms, "skyboxProgram"));
 
     JsonParser lightParser("data/lights.json");
     lights = lightParser.getLights(shaderProgram);
@@ -76,7 +77,7 @@ void World::clearEntities()
 
 void World::updatePointLight(unsigned int lightId, bool active, glm::vec3 position, glm::vec3 color, float intensity)
 {
-    std::vector<PointLight*> pointLights = getPointLights();
+    std::vector<PointLight *> pointLights = getPointLights();
     pointLights[lightId]->setActive(active);
     pointLights[lightId]->setPosition(position);
     pointLights[lightId]->setIntensity(intensity);
@@ -117,7 +118,8 @@ void World::calculateShadows(ShaderProgram *directionalShaderProgram, ShaderProg
     glClear(GL_DEPTH_BUFFER_BIT);
 
     // --- Directional shadows ---
-    glm::mat4 directionalLightView = glm::lookAt(-5.0f * glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.0f, 0.0f,  0.0f), glm::vec3(0.0f, 1.0f,  0.0f));
+    glm::mat4 directionalLightView =
+        glm::lookAt(-5.0f * glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     glm::mat4 directionalLightViewProjectionMatrix = directionalLightProjection * directionalLightView;
 
     // Draw scene from light perspective
@@ -142,7 +144,7 @@ void World::calculateShadows(ShaderProgram *directionalShaderProgram, ShaderProg
     shaderProgram->unbind();
 
     // --- Point shadows ---
-    std::vector<PointLight*> pointLights = getPointLights();
+    std::vector<PointLight *> pointLights = getPointLights();
 
     // 4 depthMaps for 4 point lights
     for (int i = 0; i < 1; i++) {
@@ -153,17 +155,24 @@ void World::calculateShadows(ShaderProgram *directionalShaderProgram, ShaderProg
         // Create 6 view matrices for every face of the cubeMap
         std::vector<glm::mat4> viewProjMatrices;
         glm::vec3 lightPos = pointLights[i]->getPosition();
-        viewProjMatrices.push_back(pointLightProjection * glm::lookAt(lightPos, lightPos + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-        viewProjMatrices.push_back(pointLightProjection * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-        viewProjMatrices.push_back(pointLightProjection * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
-        viewProjMatrices.push_back(pointLightProjection * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
-        viewProjMatrices.push_back(pointLightProjection * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-        viewProjMatrices.push_back(pointLightProjection * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+        viewProjMatrices.push_back(pointLightProjection * glm::lookAt(lightPos, lightPos + glm::vec3(1.0f, 0.0f, 0.0f),
+                                                                      glm::vec3(0.0f, -1.0f, 0.0f)));
+        viewProjMatrices.push_back(pointLightProjection * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0f, 0.0f, 0.0f),
+                                                                      glm::vec3(0.0f, -1.0f, 0.0f)));
+        viewProjMatrices.push_back(pointLightProjection * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 1.0f, 0.0f),
+                                                                      glm::vec3(0.0f, 0.0f, 1.0f)));
+        viewProjMatrices.push_back(pointLightProjection * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, -1.0f, 0.0f),
+                                                                      glm::vec3(0.0f, 0.0f, -1.0f)));
+        viewProjMatrices.push_back(pointLightProjection * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, 1.0f),
+                                                                      glm::vec3(0.0f, -1.0f, 0.0f)));
+        viewProjMatrices.push_back(pointLightProjection * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, -1.0f),
+                                                                      glm::vec3(0.0f, -1.0f, 0.0f)));
 
         pointShaderProgram->bind();
 
         for (int i = 0; i < 6; i++) {
-            pointShaderProgram->setUniform(("u_shadowMatrices[" + std::to_string(i) + "]").c_str(), viewProjMatrices[i]);
+            pointShaderProgram->setUniform(("u_shadowMatrices[" + std::to_string(i) + "]").c_str(),
+                                           viewProjMatrices[i]);
         }
 
         pointShaderProgram->setUniform("pointShadowDepthMapFarPlane", far_plane_point);
@@ -194,10 +203,10 @@ void World::calculateShadows(ShaderProgram *directionalShaderProgram, ShaderProg
     glCullFace(GL_FRONT);
 }
 
-Model* World::getModelByName(std::string name)
+Model *World::getModelByName(std::string name)
 {
     for (auto it = models.begin(); it != models.end(); it++) {
-        if((*it)->getUniqueName() == name) {
+        if ((*it)->getUniqueName() == name) {
             return *it;
         }
     }
@@ -205,10 +214,10 @@ Model* World::getModelByName(std::string name)
     return nullptr;
 }
 
-Entity* World::getEntityByName(std::string name)
+Entity *World::getEntityByName(std::string name)
 {
     for (auto it = entities.begin(); it != entities.end(); it++) {
-        if((*it)->getUniqueName() == name) {
+        if ((*it)->getUniqueName() == name) {
             return *it;
         }
     }
@@ -216,10 +225,10 @@ Entity* World::getEntityByName(std::string name)
     return nullptr;
 }
 
-Entity* World::getEntityById(uint32_t id)
+Entity *World::getEntityById(uint32_t id)
 {
     for (auto it = entities.begin(); it != entities.end(); it++) {
-        if((*it)->getId() == id) {
+        if ((*it)->getId() == id) {
             return *it;
         }
     }
@@ -227,12 +236,12 @@ Entity* World::getEntityById(uint32_t id)
     return nullptr;
 }
 
-std::vector<PointLight*> World::getPointLights()
+std::vector<PointLight *> World::getPointLights()
 {
-    std::vector<PointLight*> temp_pointLights;
+    std::vector<PointLight *> temp_pointLights;
 
     for (auto it = lights.begin(); it != lights.end(); it++) {
-        PointLight *temp_pointLight = dynamic_cast<PointLight*>(*it);
+        PointLight *temp_pointLight = dynamic_cast<PointLight *>(*it);
         if (temp_pointLight) {
             temp_pointLights.push_back(temp_pointLight);
         }
@@ -241,25 +250,25 @@ std::vector<PointLight*> World::getPointLights()
     return temp_pointLights;
 }
 
-DirectionalLight * World::getDirectionalLight()
+DirectionalLight *World::getDirectionalLight()
 {
     DirectionalLight *temp_directionalLight = nullptr;
 
     for (auto it = lights.begin(); it != lights.end(); it++) {
-        temp_directionalLight = dynamic_cast<DirectionalLight*>(*it);
-        if(temp_directionalLight)
+        temp_directionalLight = dynamic_cast<DirectionalLight *>(*it);
+        if (temp_directionalLight)
             break;
     }
 
     return temp_directionalLight;
 }
 
-std::vector<Entity*> World::getEntities()
+std::vector<Entity *> World::getEntities()
 {
     return entities;
 }
 
-Skybox* World::getSkybox()
+Skybox *World::getSkybox()
 {
     return skybox;
 }

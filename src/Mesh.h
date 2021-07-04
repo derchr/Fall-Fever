@@ -3,8 +3,8 @@
 #include <vector>
 
 #include "ShaderProgram.h"
-#include "VertexArray.h"
 #include "Texture.h"
+#include "VertexArray.h"
 #include "defines.h"
 
 class Mesh

@@ -5,7 +5,8 @@
 #define INIT_WINDOW_WIDTH 1280
 #define INIT_WINDOW_HEIGHT 720
 
-enum textureType {
+enum textureType
+{
     texture_diffuse,
     texture_specular,
     texture_normal,

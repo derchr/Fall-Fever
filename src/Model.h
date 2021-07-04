@@ -5,12 +5,14 @@
 
 #include "Mesh.h"
 
-struct TexturePrototype {
+struct TexturePrototype
+{
     uint32_t textureType;
     std::string texturePath;
 };
 
-struct MeshPrototype {
+struct MeshPrototype
+{
     std::vector<uint32_t> textureIds;
     std::vector<Vertex> meshVertices;
     std::vector<uint32_t> meshIndices;
@@ -19,7 +21,7 @@ struct MeshPrototype {
 class Model
 {
 public:
-    Model(const std::string& modelName, const std::string& pathToModel);
+    Model(const std::string &modelName, const std::string &pathToModel);
     ~Model();
 
     void prepareModel();
@@ -47,5 +49,4 @@ private:
     static uint32_t id_counter;
     uint32_t id;
     std::string unique_name;
-
 };

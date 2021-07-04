@@ -2,17 +2,16 @@
 
 #include <GLFW/glfw3.h>
 
-#include "Window.h"
-#include "EventHandler.h"
 #include "Camera.h"
-#include "ShaderProgram.h"
 #include "Entity.h"
-#include "defines.h"
-#include "Light.h"
+#include "EventHandler.h"
 #include "Framebuffer.h"
+#include "Light.h"
 #include "Menu.h"
+#include "ShaderProgram.h"
+#include "Window.h"
 #include "World.h"
-
+#include "defines.h"
 
 class Controller
 {
@@ -24,7 +23,7 @@ public:
 
     void setMaxFps(uint16_t fps);
 
-    static ShaderProgram* getShaderProgramByName(std::vector<ShaderProgram*> shaderPrograms, const std::string& name);
+    static ShaderProgram *getShaderProgramByName(std::vector<ShaderProgram *> shaderPrograms, const std::string &name);
 
 private:
     void limit_framerate();
@@ -32,9 +31,10 @@ private:
     void updateWindowDimensions();
     void updateExposure(ShaderProgram *shaderProgram);
 
-    ShaderProgram* getShaderProgramByName(const std::string& name);
+    ShaderProgram *getShaderProgramByName(const std::string &name);
 
-    void renderImGui(World *world, glm::vec3 *lightColor, bool *rotateEntity, bool *rotateLightSource, ShaderProgram *postProcessingProgram, float *intensity, bool *drawShadows);
+    void renderImGui(World *world, glm::vec3 *lightColor, bool *rotateEntity, bool *rotateLightSource,
+                     ShaderProgram *postProcessingProgram, float *intensity, bool *drawShadows);
 
 private:
     Window *gameWindow;
@@ -45,10 +45,9 @@ private:
     Camera *camera;
     Menu *menu;
 
-    std::vector<ShaderProgram*> shaderPrograms;
+    std::vector<ShaderProgram *> shaderPrograms;
 
     Framebuffer *pp_framebuffer;
-
 
     uint16_t MAX_FPS = 60;
     double deltaTime;

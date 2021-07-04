@@ -1,10 +1,10 @@
 #include "Texture.h"
 
-#include <stb/stb_image.h>
 #include <iostream>
+#include <stb/stb_image.h>
 
-Texture::Texture(const std::string& texturePath, uint8_t textureType) :
-    texturePath(texturePath), textureType(textureType)
+Texture::Texture(const std::string &texturePath, uint8_t textureType)
+    : texturePath(texturePath), textureType(textureType)
 {
     stbi_set_flip_vertically_on_load(1);
     auto *textureBuffer = stbi_load(texturePath.c_str(), &textureWidth, &textureHeight, &numComponents, 0);
@@ -33,13 +33,13 @@ Texture::Texture(const std::string& texturePath, uint8_t textureType) :
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-
     if (!textureBuffer) {
         std::cout << "[Warning] Texture " << texturePath << " not found!" << std::endl;
         return;
     }
 
-    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, textureWidth, textureHeight, 0, dataFormat, GL_UNSIGNED_BYTE, textureBuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, textureWidth, textureHeight, 0, dataFormat, GL_UNSIGNED_BYTE,
+                 textureBuffer);
     glGenerateMipmap(GL_TEXTURE_2D);
 
     stbi_image_free(textureBuffer);
@@ -124,36 +124,34 @@ CubeMap::CubeMap(const char *texturePseudoPath)
         int32_t numComponents;
         auto *textureBuffer = stbi_load(texturePaths[i].c_str(), &textureWidth, &textureHeight, &numComponents, 0);
 
-            GLenum internalFormat;
-            GLenum dataFormat;
-            if (numComponents == 1) {
-                internalFormat = GL_RED;
-                dataFormat = GL_RED;
-            } else if (numComponents == 3) {
-                internalFormat = GL_SRGB8;
-                dataFormat = GL_RGB;
-            } else if (numComponents == 4) {
-                internalFormat = GL_SRGB8_ALPHA8;
-                dataFormat = GL_RGBA;
-            }
+        GLenum internalFormat;
+        GLenum dataFormat;
+        if (numComponents == 1) {
+            internalFormat = GL_RED;
+            dataFormat = GL_RED;
+        } else if (numComponents == 3) {
+            internalFormat = GL_SRGB8;
+            dataFormat = GL_RGB;
+        } else if (numComponents == 4) {
+            internalFormat = GL_SRGB8_ALPHA8;
+            dataFormat = GL_RGBA;
+        }
 
         if (!textureBuffer) {
             std::cout << "[Warning] CubeMap Texture " << texturePaths[i].c_str() << " not found!" << std::endl;
             return;
         }
 
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, textureWidth, textureHeight, 0, dataFormat, GL_UNSIGNED_BYTE, textureBuffer);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, textureWidth, textureHeight, 0, dataFormat,
+                     GL_UNSIGNED_BYTE, textureBuffer);
 
         stbi_image_free(textureBuffer);
-
     }
 
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
-CubeMap::CubeMap(int RESOLUTION) :
-    textureWidth(RESOLUTION),
-    textureHeight(RESOLUTION)
+CubeMap::CubeMap(int RESOLUTION) : textureWidth(RESOLUTION), textureHeight(RESOLUTION)
 {
 
     glGenTextures(1, &textureId);
@@ -167,7 +165,8 @@ CubeMap::CubeMap(int RESOLUTION) :
 
     const unsigned int CUBEMAP_NUM_FACES = 6;
     for (unsigned int i = 0; i < CUBEMAP_NUM_FACES; i++) {
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT24, RESOLUTION, RESOLUTION, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT24, RESOLUTION, RESOLUTION, 0,
+                     GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     }
 
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
@@ -195,12 +194,12 @@ void CubeMap::unbind()
 void CubeMap::fillTexturePathVector(const char *texturePseudoPath)
 {
     for (unsigned int i = 0; i < CUBEMAP_FACES_NUM_ITEMS; i++) {
-        texturePaths[cm_front]  = std::string(texturePseudoPath) + "front.png";
-        texturePaths[cm_back]   = std::string(texturePseudoPath) + "back.png";
-        texturePaths[cm_top]    = std::string(texturePseudoPath) + "top.png";
+        texturePaths[cm_front] = std::string(texturePseudoPath) + "front.png";
+        texturePaths[cm_back] = std::string(texturePseudoPath) + "back.png";
+        texturePaths[cm_top] = std::string(texturePseudoPath) + "top.png";
         texturePaths[cm_bottom] = std::string(texturePseudoPath) + "bottom.png";
-        texturePaths[cm_left]   = std::string(texturePseudoPath) + "left.png";
-        texturePaths[cm_right]  = std::string(texturePseudoPath) + "right.png";
+        texturePaths[cm_left] = std::string(texturePseudoPath) + "left.png";
+        texturePaths[cm_right] = std::string(texturePseudoPath) + "right.png";
     }
 }
 

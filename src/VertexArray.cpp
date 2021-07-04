@@ -19,23 +19,23 @@ VertexArray::VertexArray(void *vertexData, void *indexData, uint32_t numVertices
 
     // Position
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *) offsetof(struct Vertex, position));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(struct Vertex, position));
 
     // UV Texture Mapping
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *) offsetof(struct Vertex, textureCoords));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(struct Vertex, textureCoords));
 
     // Normal vectors
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *) offsetof(struct Vertex, normalVec));
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(struct Vertex, normalVec));
 
     // Tangent vectors
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *) offsetof(struct Vertex, tangentVec));
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(struct Vertex, tangentVec));
 
     // Bitangent vectors
     glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *) offsetof(struct Vertex, bitangentVec));
+    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(struct Vertex, bitangentVec));
 
     // This will also unbind the vertex buffer and index buffer
     glBindVertexArray(0);
@@ -56,18 +56,19 @@ void VertexArray::unbind()
     glBindVertexArray(0);
 }
 
-std::vector<Vertex> VertexArray::createVertices(double *vertices, uint32_t numVertices, float *textureCoordinates) {
+std::vector<Vertex> VertexArray::createVertices(double *vertices, uint32_t numVertices, float *textureCoordinates)
+{
     std::vector<Vertex> vertexVec;
     uint32_t i = 0;
     uint32_t k = 0;
-    for(; i < numVertices; i+=3) {
+    for (; i < numVertices; i += 3) {
         Vertex currentVertex = {};
         currentVertex.position.x = vertices[i];
-        currentVertex.position.y = vertices[i+1];
-        currentVertex.position.z = vertices[i+2];
+        currentVertex.position.y = vertices[i + 1];
+        currentVertex.position.z = vertices[i + 2];
         currentVertex.textureCoords.x = textureCoordinates[k];
-        currentVertex.textureCoords.y = textureCoordinates[k+1];
-        k+=2;
+        currentVertex.textureCoords.y = textureCoordinates[k + 1];
+        k += 2;
         vertexVec.push_back(currentVertex);
     }
     return vertexVec;

@@ -1,12 +1,11 @@
 #include "Model.h"
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 
 uint32_t Model::id_counter = 0;
 
-Model::Model(const std::string &modelName, const std::string &modelPath) :
-    unique_name(modelName)
+Model::Model(const std::string &modelName, const std::string &modelPath) : unique_name(modelName)
 {
     directory = modelPath.substr(0, modelPath.find_last_of('/'));
 
@@ -58,12 +57,12 @@ void Model::loadModel(const std::string &pathToModel)
     }
 
     uint32_t numTextures;
-    input.read((char *) &numTextures, sizeof(uint32_t));
+    input.read((char *)&numTextures, sizeof(uint32_t));
 
     std::vector<uint32_t> textureTypes;
     for (unsigned int i = 0; i < numTextures; i++) {
         uint32_t currentTextureType;
-        input.read((char *) &currentTextureType, sizeof(uint32_t));
+        input.read((char *)&currentTextureType, sizeof(uint32_t));
         textureTypes.push_back(currentTextureType);
     }
 
@@ -72,7 +71,7 @@ void Model::loadModel(const std::string &pathToModel)
         std::string currentTextureSource;
         for (unsigned int i = 0; i < 128; i++) {
             uint8_t currentChar;
-            input.read((char *) &currentChar, sizeof(uint8_t));
+            input.read((char *)&currentChar, sizeof(uint8_t));
 
             if (currentChar) {
                 currentTextureSource.push_back(currentChar);
@@ -80,7 +79,6 @@ void Model::loadModel(const std::string &pathToModel)
         }
         textureSources.push_back(currentTextureSource);
     }
-
 
     for (unsigned int i = 0; i < numTextures; i++) {
         TexturePrototype texture_prototype;
@@ -110,7 +108,7 @@ void Model::loadModel(const std::string &pathToModel)
 
     // Here starts the first mesh
     uint32_t numMeshes;
-    input.read((char *) &numMeshes, sizeof(uint32_t));
+    input.read((char *)&numMeshes, sizeof(uint32_t));
 
     for (unsigned int j = 0; j < numMeshes; j++) {
 
@@ -118,9 +116,9 @@ void Model::loadModel(const std::string &pathToModel)
 
         uint32_t numMeshVertices, numMeshIndices, numMeshTextureIds;
 
-        input.read((char *) &numMeshVertices, sizeof(uint32_t));
-        input.read((char *) &numMeshIndices, sizeof(uint32_t));
-        input.read((char *) &numMeshTextureIds, sizeof(uint32_t));
+        input.read((char *)&numMeshVertices, sizeof(uint32_t));
+        input.read((char *)&numMeshIndices, sizeof(uint32_t));
+        input.read((char *)&numMeshTextureIds, sizeof(uint32_t));
 
         uint32_t vertexBlockSize = numMeshVertices * sizeof(Vertex);
         uint32_t indexBlockSize = numMeshIndices * sizeof(uint32_t);
@@ -129,17 +127,17 @@ void Model::loadModel(const std::string &pathToModel)
 
         std::vector<Vertex> meshVertices;
         meshVertices.resize(numMeshVertices);
-        input.read((char *) meshVertices.data(), vertexBlockSize);
+        input.read((char *)meshVertices.data(), vertexBlockSize);
         mesh_prototype.meshVertices = std::move(meshVertices);
 
         std::vector<uint32_t> meshIndices;
         meshIndices.resize(numMeshIndices);
-        input.read((char *) meshIndices.data(), indexBlockSize);
+        input.read((char *)meshIndices.data(), indexBlockSize);
         mesh_prototype.meshIndices = std::move(meshIndices);
 
         for (unsigned int i = 0; i < numMeshTextureIds; i++) {
             uint32_t currentTextureId;
-            input.read((char *) &currentTextureId, sizeof(uint32_t));
+            input.read((char *)&currentTextureId, sizeof(uint32_t));
             mesh_prototype.textureIds.push_back(currentTextureId);
         }
 
@@ -159,13 +157,13 @@ void Model::prepareModel()
     model_prepared = true;
 
     // Create textures on GPU
-    for (auto& it : modelTexturePrototypes) {
+    for (auto &it : modelTexturePrototypes) {
         Texture *newTex = new Texture(it.texturePath.c_str(), it.textureType);
         loadedTextures.push_back(newTex);
     }
 
     // Create meshes on GPU
-    for (const auto& it : modelMeshPrototypes) {
+    for (const auto &it : modelMeshPrototypes) {
         std::vector<Texture *> meshTextures;
         for (const auto it2 : it.textureIds) {
             meshTextures.push_back(loadedTextures[it2]);
@@ -176,8 +174,7 @@ void Model::prepareModel()
     }
 }
 
-
-Mesh* Model::getMesh(unsigned int index)
+Mesh *Model::getMesh(unsigned int index)
 {
     return meshes[index];
 }

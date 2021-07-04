@@ -1,6 +1,7 @@
 #pragma once
 
-enum cameraActions {
+enum cameraActions
+{
     cameraUp,
     cameraDown,
     cameraForward,
@@ -10,20 +11,23 @@ enum cameraActions {
     CAMERA_ACTION_NUM_ITEMS
 };
 
-enum cameraMouseActions {
+enum cameraMouseActions
+{
     cameraMouseDeltaX,
     cameraMouseDeltaY,
     CAMERA_MOUSE_ACTION_NUM_ITEMS
 };
 
-enum windowActions {
+enum windowActions
+{
     wireFrameToggle,
     mouseCatchToggle,
     windowShouldClose,
     WINDOW_ACTION_NUM_ITEMS
 };
 
-enum mouseButtonActions {
+enum mouseButtonActions
+{
     leftClicked,
     rightClicked,
     middleClicked,

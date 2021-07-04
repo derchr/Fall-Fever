@@ -1,14 +1,12 @@
 #include "Entity.h"
 
-#include <glm/gtc/matrix_transform.hpp>
 #include <glm/ext/matrix_transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 uint32_t Entity::id_counter = 0;
 
-Entity::Entity(std::string name, Model *model, ShaderProgram *shaderProgram) :
-    unique_name(name),
-    model(model),
-    shaderProgram(shaderProgram)
+Entity::Entity(std::string name, Model *model, ShaderProgram *shaderProgram)
+    : unique_name(name), model(model), shaderProgram(shaderProgram)
 {
     id = id_counter++;
 }
@@ -147,11 +145,9 @@ bool Entity::getIsLightSource()
     return isLightSource;
 }
 
-Skybox::Skybox(Model *cubeModel, ShaderProgram *shaderProgram, const char *texturePseudoPath) :
-    cubeModel(cubeModel),
-    shaderProgram(shaderProgram),
-    cubeMap(texturePseudoPath),
-    vertexArray(cubeModel->getMesh(0)->getVertexArray())
+Skybox::Skybox(Model *cubeModel, ShaderProgram *shaderProgram, const char *texturePseudoPath)
+    : cubeModel(cubeModel), shaderProgram(shaderProgram), cubeMap(texturePseudoPath),
+      vertexArray(cubeModel->getMesh(0)->getVertexArray())
 {
     // Empty
 }

@@ -12,16 +12,16 @@
 #include <imgui_impl_opengl3.h>
 #endif
 
-#include "Helper.h"
 #include "Controller.h"
-#include "VertexArray.h"
-#include "Texture.h"
-#include "Model.h"
 #include "Entity.h"
-#include "World.h"
-#include "Widget.h"
-#include "Screen.h"
+#include "Helper.h"
 #include "JsonParser.h"
+#include "Model.h"
+#include "Screen.h"
+#include "Texture.h"
+#include "VertexArray.h"
+#include "Widget.h"
+#include "World.h"
 
 Controller::Controller()
 {
@@ -33,7 +33,8 @@ Controller::Controller()
     JsonParser shaderParser("data/shaderPrograms.json");
     shaderPrograms = shaderParser.getShaderPrograms();
 
-    pp_framebuffer = new Framebuffer(gameWindow->getWindowWidth(), gameWindow->getWindowHeight(), getShaderProgramByName("postProcessingProgram"));
+    pp_framebuffer = new Framebuffer(gameWindow->getWindowWidth(), gameWindow->getWindowHeight(),
+                                     getShaderProgramByName("postProcessingProgram"));
 
     menu = new Menu(pp_framebuffer, getShaderProgramByName("menuProgram"));
 
@@ -119,7 +120,7 @@ void Controller::run()
         getShaderProgramByName("lightProgram")->unbind();
 
         // --- Render and buffer swap ---
-        
+
         // Calc shadows
         static bool drawShadows = false;
         static bool firstRun = true;
@@ -128,13 +129,14 @@ void Controller::run()
         getShaderProgramByName("defaultProgram")->unbind();
         if (drawShadows || firstRun) {
             firstRun = false;
-            world->calculateShadows(getShaderProgramByName("directionalShadowDepthProgram"), getShaderProgramByName("pointShadowDepthProgram"));
+            world->calculateShadows(getShaderProgramByName("directionalShadowDepthProgram"),
+                                    getShaderProgramByName("pointShadowDepthProgram"));
         }
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         auto activeScreen = menu->getActiveScreen();
-        if(activeScreen) {
+        if (activeScreen) {
             activeScreen->draw();
         } else {
             pp_framebuffer->bind();
@@ -150,7 +152,8 @@ void Controller::run()
             pp_framebuffer->render();
 
 #ifdef _DEBUG
-            renderImGui(world, &lightColor, &rotateEntity, &rotateLightSource, getShaderProgramByName("postProcessingProgram"), &intensity, &drawShadows);
+            renderImGui(world, &lightColor, &rotateEntity, &rotateLightSource,
+                        getShaderProgramByName("postProcessingProgram"), &intensity, &drawShadows);
 #endif
         }
         glfwSwapBuffers(gameWindow->getGLFWwindow());
@@ -168,7 +171,7 @@ void Controller::run()
         if (gameWindow->getMouseIsCatched()) {
             camera->updateDirectionFromMouseInput(gameEventHandler->getCursorDelta());
         }
-        
+
         menu->writeWindowActions(gameEventHandler->getWindowActionRegister());
         gameWindow->handleWindowActionRegister(gameEventHandler->getWindowActionRegister());
 
@@ -210,10 +213,10 @@ void Controller::updateExposure(ShaderProgram *shaderProgram)
     shaderProgram->unbind();
 }
 
-ShaderProgram* Controller::getShaderProgramByName(const std::string& name)
+ShaderProgram *Controller::getShaderProgramByName(const std::string &name)
 {
     for (auto it = shaderPrograms.begin(); it != shaderPrograms.end(); it++) {
-        if((*it)->getUniqueName() == name) {
+        if ((*it)->getUniqueName() == name) {
             return *it;
         }
     }
@@ -221,10 +224,10 @@ ShaderProgram* Controller::getShaderProgramByName(const std::string& name)
     return nullptr;
 }
 
-ShaderProgram* Controller::getShaderProgramByName(std::vector<ShaderProgram*> shaderPrograms, const std::string& name)
+ShaderProgram *Controller::getShaderProgramByName(std::vector<ShaderProgram *> shaderPrograms, const std::string &name)
 {
     for (auto it = shaderPrograms.begin(); it != shaderPrograms.end(); it++) {
-        if((*it)->getUniqueName() == name) {
+        if ((*it)->getUniqueName() == name) {
             return *it;
         }
     }
@@ -238,12 +241,12 @@ void Controller::setMaxFps(uint16_t fps)
 }
 
 #ifdef _DEBUG
-void Controller::renderImGui(World *world, glm::vec3 *lightColor, bool *rotateEntity, bool *rotateLightSource, ShaderProgram *postProcessingProgram, float *intensity, bool *drawShadows)
+void Controller::renderImGui(World *world, glm::vec3 *lightColor, bool *rotateEntity, bool *rotateLightSource,
+                             ShaderProgram *postProcessingProgram, float *intensity, bool *drawShadows)
 {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-
 
     // render your GUI
     ImGui::Begin("Debug Utils");
@@ -283,8 +286,8 @@ void Controller::renderImGui(World *world, glm::vec3 *lightColor, bool *rotateEn
     ImGui::Checkbox("Draw Shadows", drawShadows);
     ImGui::Checkbox("Rotate Lightsource", rotateLightSource);
 
-    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
-                1000.0 / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0 / ImGui::GetIO().Framerate,
+                ImGui::GetIO().Framerate);
 
     ImGui::End();
 

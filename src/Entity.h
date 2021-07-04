@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Model.h"
-#include "Texture.h"
 #include "ShaderProgram.h"
+#include "Texture.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>

@@ -10,12 +10,21 @@
 #include <vector>
 
 // Order is important!
-enum cubeMapFaces {cm_right, cm_left, cm_top, cm_bottom, cm_back, cm_front, CUBEMAP_FACES_NUM_ITEMS};
+enum cubeMapFaces
+{
+    cm_right,
+    cm_left,
+    cm_top,
+    cm_bottom,
+    cm_back,
+    cm_front,
+    CUBEMAP_FACES_NUM_ITEMS
+};
 
 class Texture
 {
 public:
-    Texture(const std::string& texturePath, uint8_t textureType);
+    Texture(const std::string &texturePath, uint8_t textureType);
     ~Texture();
 
     void bind(uint8_t textureUnit, ShaderProgram *shaderProgram, uint8_t textureTypeNum);

@@ -1,12 +1,12 @@
 #include "Menu.h"
+#include "Helper.h"
 #include "JsonParser.h"
 #include "eventActions.h"
-#include "Helper.h"
 
 #include <iostream>
 
-Menu::Menu(Framebuffer *p_framebuffer, ShaderProgram *p_shaderProgram) :
-    framebuffer(p_framebuffer), shaderProgram(p_shaderProgram)
+Menu::Menu(Framebuffer *p_framebuffer, ShaderProgram *p_shaderProgram)
+    : framebuffer(p_framebuffer), shaderProgram(p_shaderProgram)
 {
     JsonParser screenParser("data/screens.json");
     screens = screenParser.getScreens(shaderProgram, framebuffer);
@@ -20,13 +20,13 @@ Menu::~Menu()
     }
 }
 
-Screen *Menu::getScreenByName(const std::string& name) const
+Screen *Menu::getScreenByName(const std::string &name) const
 {
     if (m_screen_name_cache.find(name) != m_screen_name_cache.end())
         return m_screen_name_cache[name];
 
     for (auto it : screens) {
-        if(it->getUniqueName() == name) {
+        if (it->getUniqueName() == name) {
             m_screen_name_cache[name] = it;
             return it;
         }
@@ -40,11 +40,12 @@ Screen *Menu::getActiveScreen() const
     return activeScreen;
 }
 
-void Menu::showScreenByName(const std::string& name)
+void Menu::showScreenByName(const std::string &name)
 {
-    Screen* screen = getScreenByName(name);
+    Screen *screen = getScreenByName(name);
 
-    if (!screen) return;
+    if (!screen)
+        return;
 
     screen->draw();
     activeScreen = screen;
@@ -55,16 +56,16 @@ void Menu::resetActiveScreen()
     activeScreen = nullptr;
 }
 
-void Menu::handleMouseButtonActionRegister(bool *mouseButtonActionRegister, Window* window)
+void Menu::handleMouseButtonActionRegister(bool *mouseButtonActionRegister, Window *window)
 {
     if (mouseButtonActionRegister[mouseButtonActions::leftClicked]) {
         auto widgets = activeScreen->getWidgets();
         for (auto it = widgets.begin(); it != widgets.end(); it++) {
             if ((*it)->isHovered(window)) {
                 // std::cout << (*it)->getUniqueName() << " clicked!" << std::endl;
-                if((*it)->getCallbackId() == 1)
+                if ((*it)->getCallbackId() == 1)
                     resetActiveScreen();
-                if((*it)->getCallbackId() == 2)
+                if ((*it)->getCallbackId() == 2)
                     shouldExit = true;
             }
         }
@@ -78,11 +79,7 @@ void Menu::writeWindowActions(bool *windowActionRegister)
 }
 
 void Menu::onPlayPressed()
-{
-
-}
+{}
 
 void Menu::onExitPressed()
-{
-
-}
+{}

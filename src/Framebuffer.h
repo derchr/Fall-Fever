@@ -1,13 +1,13 @@
 #pragma once
 
-#include <glad/glad.h>
 #include "ShaderProgram.h"
 #include "Texture.h"
+#include <glad/glad.h>
 
 class Framebuffer
 {
 public:
-    Framebuffer(uint32_t width, uint32_t height, ShaderProgram* shaderProgram);
+    Framebuffer(uint32_t width, uint32_t height, ShaderProgram *shaderProgram);
     ~Framebuffer();
 
     void bind();
@@ -31,7 +31,11 @@ private:
     ShaderProgram *shaderProgram;
 };
 
-enum depthMapType {DEPTHMAP_NORMAL, DEPTHMAP_CUBEMAP};
+enum depthMapType
+{
+    DEPTHMAP_NORMAL,
+    DEPTHMAP_CUBEMAP
+};
 
 // Framebuffer without color buffer. (Shadows)
 class DepthMap

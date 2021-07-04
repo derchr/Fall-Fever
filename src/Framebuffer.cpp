@@ -3,8 +3,7 @@
 #include <cstddef>
 #include <iostream>
 
-Framebuffer::Framebuffer(uint32_t width, uint32_t height, ShaderProgram *shaderProgram) :
-    shaderProgram(shaderProgram)
+Framebuffer::Framebuffer(uint32_t width, uint32_t height, ShaderProgram *shaderProgram) : shaderProgram(shaderProgram)
 {
     glGenFramebuffers(1, &FBO);
 
@@ -90,7 +89,6 @@ void Framebuffer::generateTextures(uint32_t width, uint32_t height)
     unbind();
 }
 
-
 void Framebuffer::setExposureCorrection(bool exposureCorrection)
 {
     shaderProgram->bind();
@@ -112,7 +110,8 @@ DepthMap::DepthMap(int TYPE, int RESOLUTION)
 
         glGenTextures(1, &depthMap);
         glBindTexture(GL_TEXTURE_2D, depthMap);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, RESOLUTION, RESOLUTION, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, RESOLUTION, RESOLUTION, 0, GL_DEPTH_COMPONENT, GL_FLOAT,
+                     NULL);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -140,10 +139,9 @@ DepthMap::DepthMap(int TYPE, int RESOLUTION)
 
 DepthMap::~DepthMap()
 {
-    if(cubeMap)
+    if (cubeMap)
         delete cubeMap;
 }
-
 
 void DepthMap::bind()
 {

@@ -1,19 +1,20 @@
 #pragma once
 
+#include <GLFW/glfw3.h>
+#include <chrono>
 #include <stdint.h>
 #include <string>
-#include <chrono>
-#include <GLFW/glfw3.h>
 
-namespace Helper
-{
+namespace Helper {
 void sleep(uint32_t us);
 
-void gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam);
+void gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message,
+                       const void *userParam);
 
-class Timer {
+class Timer
+{
 public:
-    Timer(const std::string& name);
+    Timer(const std::string &name);
     ~Timer();
 
 private:
@@ -22,4 +23,4 @@ private:
     std::chrono::duration<float> duration;
 };
 
-}
+} // namespace Helper

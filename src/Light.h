@@ -9,7 +9,8 @@
 class Light
 {
 public:
-    virtual ~Light() {}
+    virtual ~Light()
+    {}
 
     virtual void update() = 0;
 

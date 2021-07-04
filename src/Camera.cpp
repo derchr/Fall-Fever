@@ -1,8 +1,8 @@
 #include "Camera.h"
 #include "eventActions.h"
 
-#include <glm/gtc/matrix_transform.hpp>
 #include <glm/ext/matrix_transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 Camera::Camera(float fov, float aspectRatio)
 {
@@ -19,7 +19,7 @@ void Camera::updateVPM()
 
 void Camera::updateAspectRatio(float aspectRatio)
 {
-    //projectionMatrix = glm::ortho(-2.0f, 2.0f, -2.0f, 2.0f, -10.f, 100.0f);
+    // projectionMatrix = glm::ortho(-2.0f, 2.0f, -2.0f, 2.0f, -10.f, 100.0f);
     projectionMatrix = glm::perspective(fov / 2.0f, aspectRatio, 0.1f, 1000.0f);
     updateVPM();
 }
@@ -79,7 +79,7 @@ void Camera::updateDirectionFromMouseInput(double *cameraMouseActionRegister)
     pitch += cameraMouseActionRegister[cameraMouseDeltaY];
 
     if (pitch > 89.0f) {
-        pitch =  89.0f;
+        pitch = 89.0f;
     }
     if (pitch < -89.0f) {
         pitch = -89.0f;

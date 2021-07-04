@@ -1,7 +1,7 @@
 #pragma once
 
-#include <glm/glm.hpp>
 #include "ShaderProgram.h"
+#include <glm/glm.hpp>
 
 class Camera
 {
@@ -34,7 +34,7 @@ private:
 
     glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::vec3 frontVec = glm::vec3(0.0f, 0.0f, -1.0f);
-    glm::vec3 upVec = glm::vec3(0.0f, 1.0f,  0.0f);
+    glm::vec3 upVec = glm::vec3(0.0f, 1.0f, 0.0f);
 
     float pitch = 0.0f;
     float yaw = -90.0f;
@@ -43,5 +43,3 @@ private:
 
     float fov;
 };
-
-
