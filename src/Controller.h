@@ -19,23 +19,25 @@ class Handler;
 class Controller
 {
 public:
-    Controller();
     ~Controller();
+
+    static Controller &instance();
 
     void run();
 
     void setMaxFps(uint16_t fps);
 
-    static ShaderProgram *getShaderProgramByName(std::vector<ShaderProgram *> shaderPrograms, const std::string &name);
+    ShaderProgram *getShaderProgramByName(const std::string &name);
+    static ShaderProgram *getShaderProgramByName(const std::string &name, std::vector<ShaderProgram *> shaderPrograms);
 
     void updateExposure(ShaderProgram *shaderProgram);
 
 private:
+    Controller();
+
     void limit_framerate();
 
     void updateWindowDimensions();
-
-    ShaderProgram *getShaderProgramByName(const std::string &name);
 
     void renderImGui(World *world, glm::vec3 *lightColor, bool *rotateEntity, bool *rotateLightSource,
                      ShaderProgram *postProcessingProgram, float *intensity, bool *drawShadows);

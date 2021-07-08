@@ -8,11 +8,16 @@
 
 uint32_t Screen::s_idCounter = 0;
 
-Screen::Screen(const std::string &name, std::vector<Widget *> widgets, FrameBuffer *framebuffer,
-               ShaderProgram *shaderProgram)
-    : m_uniqueName(name), m_frameBuffer(framebuffer), m_shaderProgram(shaderProgram), m_widgets(widgets)
+Screen::Screen(Prototype prototype, FrameBuffer *framebuffer, ShaderProgram *shaderProgram)
+    : m_uniqueName(prototype.name), m_frameBuffer(framebuffer), m_shaderProgram(shaderProgram), m_id(s_idCounter++)
 {
-    m_id = s_idCounter++;
+    for (auto &prototype : prototype.widgetPrototypes) {
+        Texture *currentTexture = new Texture(prototype.texturePrototype);
+        currentTexture->initializeOnGPU();
+
+        Widget *currentWidget = new Widget(prototype, currentTexture);
+        m_widgets.push_back(currentWidget);
+    }
 }
 
 Screen::~Screen()

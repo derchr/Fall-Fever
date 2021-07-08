@@ -13,17 +13,16 @@ int main(int argc, char **argv)
 #endif
 
     // Create controller
-    Controller *mainController = new Controller();
+    Controller &controller = Controller::instance();
 
     const char *fps_env = std::getenv("MAXFPS");
     if (fps_env) {
         uint16_t maxfps = std::stoul(fps_env);
-        mainController->setMaxFps(maxfps);
+        controller.setMaxFps(maxfps);
         std::cout << "[Warning] Default max FPS overridden with " << maxfps << " by environment." << std::endl;
     }
 
-    mainController->run();
+    controller.run();
 
-    delete mainController;
     return 0;
 }

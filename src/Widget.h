@@ -1,7 +1,9 @@
 #pragma once
 
+#include "Texture.h"
 #include "definitions/models.h"
 
+#include <glm/glm.hpp>
 #include <string>
 #include <vector>
 
@@ -14,7 +16,16 @@ class Mesh;
 class Widget
 {
 public:
-    Widget(std::string &name, Texture *texture, float x, float y, float w, float h, uint16_t callbackId);
+    struct Prototype
+    {
+        std::string name;
+        glm::vec2 position;
+        glm::vec2 dimensions;
+        Texture::Prototype texturePrototype;
+        uint16_t callBackId; // TODO: will be removed...
+    };
+
+    Widget(Prototype prototype, Texture *texture);
     ~Widget();
 
     void draw(ShaderProgram *shaderProgram);
@@ -25,7 +36,8 @@ public:
     bool isHovered(Window *window);
 
 private:
-    double m_posX, m_posY, m_width, m_height;
+    glm::vec2 m_position;
+    glm::vec2 m_dimensions;
 
     std::string m_uniqueName;
 

@@ -9,9 +9,13 @@
 
 uint32_t Entity::s_idCounter = 0;
 
-Entity::Entity(const std::string &name, Model *model, ShaderProgram *shaderProgram)
-    : m_uniqueName(name), m_model(model), m_shaderProgram(shaderProgram), m_id(s_idCounter++)
-{}
+Entity::Entity(Prototype prototype, Model *model, ShaderProgram *shaderProgram)
+    : m_uniqueName(prototype.name), m_model(model), m_shaderProgram(shaderProgram), m_id(s_idCounter++)
+{
+    setPosition(prototype.position);
+    setRotation(prototype.rotation);
+    setScale(prototype.scale);
+}
 
 void Entity::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition)
 {

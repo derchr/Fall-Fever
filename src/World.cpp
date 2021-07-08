@@ -13,8 +13,8 @@
 #include <thread>
 
 World::World(std::vector<ShaderProgram *> shaderPrograms)
-    : m_shaderProgram(Controller::getShaderProgramByName(shaderPrograms, "defaultProgram")),
-      m_depthMapDirectionalFBO(DepthMapType::Normal, SHADOW_RES)
+    : m_depthMapDirectionalFBO(DepthMapType::Normal, SHADOW_RES),
+      m_shaderProgram(Controller::getShaderProgramByName("defaultProgram", shaderPrograms))
 {
     // Create 4 depthMaps
     for (int i = 0; i < 4; i++) {
@@ -37,13 +37,13 @@ World::World(std::vector<ShaderProgram *> shaderPrograms)
         for (auto &prototype : modelPrototypes) {
 
             auto loadModel = [=, &mutex]() {
-                Model *current_model = new Model(prototype);
+                Model *currentModel = new Model(prototype);
 
                 std::cout << "Loaded Model \"" << prototype.modelName << "\" from \"" << prototype.modelPath << "\""
                           << std::endl;
 
                 std::lock_guard<std::mutex> lock(mutex);
-                m_models.push_back(current_model);
+                m_models.push_back(currentModel);
             };
 
             futures.push_back(std::async(std::launch::async, loadModel));
@@ -53,9 +53,41 @@ World::World(std::vector<ShaderProgram *> shaderPrograms)
     for (auto &model : m_models)
         model->initializeOnGPU();
 
-    m_entities = modelParser.getEntities(m_models, shaderPrograms);
+    std::vector<Entity::Prototype> entityPrototypes = modelParser.getEntityPrototypes();
+
+    std::vector<Entity *> entities;
+    {
+        for (auto &prototype : entityPrototypes) {
+            // Get model
+            Model *currentModel = getModelByName(prototype.modelName);
+
+            if (!currentModel) {
+                // Apply fallback model (first model in vector)
+                currentModel = m_models[0];
+                std::cout << "[Warning] Model could not be found by name \"" << prototype.modelName << "\""
+                          << std::endl;
+            }
+
+            // Get shaderprogram
+            ShaderProgram *currentProgram =
+                Controller::getShaderProgramByName(prototype.shaderProgramName, shaderPrograms);
+
+            if (!currentProgram) {
+                currentProgram = Controller::getShaderProgramByName("basic", shaderPrograms);
+            }
+
+            Entity *currentEntity = new Entity(prototype, currentModel, currentProgram);
+
+            std::cout << "Loaded Entity \"" << prototype.name << "\" with model \"" << prototype.modelName << "\""
+                      << std::endl;
+
+            entities.push_back(currentEntity);
+        }
+    }
+
+    m_entities = entities;
     m_skybox = modelParser.getSkybox(getModelByName("cube"),
-                                     Controller::getShaderProgramByName(shaderPrograms, "skyboxProgram"));
+                                     Controller::getShaderProgramByName("skyboxProgram", shaderPrograms));
 
     JsonParser lightParser("data/lights.json");
     m_lights = lightParser.getLights(m_shaderProgram);

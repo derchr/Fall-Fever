@@ -4,8 +4,9 @@
 #include <unordered_map>
 #include <vector>
 
+#include "Widget.h"
+
 class Menu;
-class Widget;
 class FrameBuffer;
 class ShaderProgram;
 class Texture;
@@ -13,8 +14,13 @@ class Texture;
 class Screen
 {
 public:
-    Screen(const std::string &name, std::vector<Widget *> widgets, FrameBuffer *framebuffer,
-           ShaderProgram *shaderProgram);
+    struct Prototype
+    {
+        std::string name;
+        std::vector<Widget::Prototype> widgetPrototypes;
+    };
+
+    Screen(Prototype prototype, FrameBuffer *framebuffer, ShaderProgram *shaderProgram);
     ~Screen();
 
     void addWidget(Widget *widget);

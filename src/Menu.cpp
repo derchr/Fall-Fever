@@ -14,7 +14,12 @@ Menu::Menu(FrameBuffer *p_framebuffer, ShaderProgram *p_shaderProgram)
     : m_frameBuffer(p_framebuffer), m_shaderProgram(p_shaderProgram)
 {
     JsonParser screenParser("data/screens.json");
-    m_screens = screenParser.getScreens(m_shaderProgram, m_frameBuffer);
+    std::vector<Screen::Prototype> screenPrototypes = screenParser.getScreenPrototypes();
+
+    for (auto &prototype : screenPrototypes) {
+        auto currentScreen = new Screen(prototype, p_framebuffer, p_shaderProgram);
+        m_screens.push_back(currentScreen);
+    }
 }
 
 Menu::~Menu()

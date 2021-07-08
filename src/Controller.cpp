@@ -61,8 +61,8 @@ Controller::Controller() : m_gameWindow(std::unique_ptr<Window>(new Window))
 
 Controller::~Controller()
 {
-    for (auto it = m_shaderPrograms.begin(); it != m_shaderPrograms.end(); it++) {
-        delete *it;
+    for (auto program : m_shaderPrograms) {
+        delete program;
     }
 
     delete m_world;
@@ -70,6 +70,12 @@ Controller::~Controller()
     delete m_menu;
     delete m_postProcessFrameBuffer;
     delete m_gameEventHandler;
+}
+
+Controller &Controller::instance()
+{
+    static Controller s_instance;
+    return s_instance;
 }
 
 void Controller::run()
@@ -212,22 +218,17 @@ void Controller::updateExposure(ShaderProgram *shaderProgram)
 
 ShaderProgram *Controller::getShaderProgramByName(const std::string &name)
 {
-    for (auto it = m_shaderPrograms.begin(); it != m_shaderPrograms.end(); it++) {
-        if ((*it)->getUniqueName() == name) {
-            return *it;
-        }
-    }
-    std::cout << "[Warning] ShaderProgram could not be found by name \"" << name << "\"" << std::endl;
-    return nullptr;
+    return getShaderProgramByName(name, m_shaderPrograms);
 }
 
-ShaderProgram *Controller::getShaderProgramByName(std::vector<ShaderProgram *> shaderPrograms, const std::string &name)
+ShaderProgram *Controller::getShaderProgramByName(const std::string &name, std::vector<ShaderProgram *> shaderPrograms)
 {
-    for (auto it = shaderPrograms.begin(); it != shaderPrograms.end(); it++) {
-        if ((*it)->getUniqueName() == name) {
-            return *it;
+    for (auto program : shaderPrograms) {
+        if (program->getUniqueName() == name) {
+            return program;
         }
     }
+
     std::cout << "[Warning] ShaderProgram could not be found by name \"" << name << "\"" << std::endl;
     return nullptr;
 }

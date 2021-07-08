@@ -48,67 +48,43 @@ std::vector<Model::Prototype> JsonParser::getModelPrototypes() const
     return modelPrototypes;
 }
 
-std::vector<Entity *> JsonParser::getEntities(std::vector<Model *> &models, std::vector<ShaderProgram *> shaderPrograms)
+std::vector<Entity::Prototype> JsonParser::getEntityPrototypes() const
 {
-    std::vector<Entity *> temp_entities;
+    std::vector<Entity::Prototype> entityPrototypes;
 
     const Json::Value entitiesJson = m_root["entities"];
 
     for (unsigned int index = 0; index < entitiesJson.size(); index++) {
-        std::string entity_name = entitiesJson[index]["unique_name"].asString();
-        std::string entity_model = entitiesJson[index]["model"].asString();
-        std::string entity_shaderProgram = entitiesJson[index]["shaderProgram"].asString();
-        glm::vec3 entitiy_position = {}, entity_rotation = {};
-        float entity_scale = 1.0f;
-
-        ShaderProgram *shaderProgram = nullptr;
-        for (auto it = shaderPrograms.begin(); it != shaderPrograms.end(); it++) {
-            if ((*it)->getUniqueName() == entity_shaderProgram) {
-                shaderProgram = *it;
-            }
-        }
-        if (!shaderProgram)
-            std::cout << "[Warning] ShaderProgram could not be found by name \"" << entity_shaderProgram << "\""
-                      << std::endl;
-
-        Model *current_model = nullptr;
-        for (auto it = models.begin(); it != models.end(); it++) {
-            if ((*it)->getUniqueName() == entity_model) {
-                current_model = *it;
-            }
-        }
-        if (!current_model) {
-            // Apply fallback model (first model in vector)
-            current_model = models[0];
-            std::cout << "[Warning] Model could not be found by unique name \"" << entity_model << "\"" << std::endl;
-        }
+        std::string entityName = entitiesJson[index]["unique_name"].asString();
+        std::string entityModel = entitiesJson[index]["model"].asString();
+        std::string entityShaderProgram = entitiesJson[index]["shaderProgram"].asString();
+        glm::vec3 entitiyPosition = {}, entityRotation = {};
+        float entityScale = 1.0f;
 
         const Json::Value positionJson = entitiesJson[index]["position"];
         const Json::Value rotationJson = entitiesJson[index]["rotation"];
         const Json::Value scaleJson = entitiesJson[index]["scale"];
         if (!positionJson.empty()) {
-            entitiy_position.x = positionJson[0].asFloat();
-            entitiy_position.y = positionJson[1].asFloat();
-            entitiy_position.z = positionJson[2].asFloat();
+            entitiyPosition.x = positionJson[0].asFloat();
+            entitiyPosition.y = positionJson[1].asFloat();
+            entitiyPosition.z = positionJson[2].asFloat();
         }
         if (!rotationJson.empty()) {
-            entity_rotation.s = rotationJson[0].asFloat();
-            entity_rotation.t = rotationJson[1].asFloat();
-            entity_rotation.p = rotationJson[2].asFloat();
+            entityRotation.s = rotationJson[0].asFloat();
+            entityRotation.t = rotationJson[1].asFloat();
+            entityRotation.p = rotationJson[2].asFloat();
         }
         if (!scaleJson.empty()) {
-            entity_scale = scaleJson.asFloat();
+            entityScale = scaleJson.asFloat();
         }
 
-        Entity *current_entity = new Entity(entity_name, current_model, shaderProgram);
-        current_entity->setPosition(entitiy_position);
-        current_entity->setRotation(entity_rotation);
-        current_entity->setScale(entity_scale);
-        temp_entities.push_back(current_entity);
-        std::cout << "Loaded Entity \"" << entity_name << "\" with model \"" << entity_model << "\"" << std::endl;
+        Entity::Prototype prototype{entityName,      entityModel,    entityShaderProgram,
+                                    entitiyPosition, entityRotation, entityScale};
+
+        entityPrototypes.push_back(prototype);
     }
 
-    return temp_entities;
+    return entityPrototypes;
 }
 
 std::vector<ShaderProgram *> JsonParser::getShaderPrograms()
@@ -215,49 +191,47 @@ std::vector<Light *> JsonParser::getLights(ShaderProgram *shaderProgram)
     return temp_lights;
 }
 
-std::vector<Screen *> JsonParser::getScreens(ShaderProgram *menuProgram, FrameBuffer *framebuffer)
+std::vector<Screen::Prototype> JsonParser::getScreenPrototypes() const
 {
-    std::vector<Screen *> temp_screens;
+    std::vector<Screen::Prototype> screenPrototypes;
 
     const Json::Value loadingScreenJson = m_root["loadingScreen"];
     const Json::Value mainMenuScreenJson = m_root["mainMenuScreen"];
 
     std::string name;
-    Screen *screen;
 
     name = "loadingScreen";
-    screen = new Screen(name, getWidgetsFromScreen(loadingScreenJson), framebuffer, menuProgram);
-    temp_screens.push_back(screen);
+    Screen::Prototype loadingScreen = Screen::Prototype{name, getWidgetPrototypesFromScreen(loadingScreenJson)};
+    screenPrototypes.push_back(loadingScreen);
 
     name = "mainMenuScreen";
-    screen = new Screen(name, getWidgetsFromScreen(mainMenuScreenJson), framebuffer, menuProgram);
-    temp_screens.push_back(screen);
+    Screen::Prototype mainMenuScreen = Screen::Prototype{name, getWidgetPrototypesFromScreen(mainMenuScreenJson)};
+    screenPrototypes.push_back(mainMenuScreen);
 
-    return temp_screens;
+    return screenPrototypes;
 }
 
-std::vector<Widget *> JsonParser::getWidgetsFromScreen(const Json::Value &screenJson)
+std::vector<Widget::Prototype> JsonParser::getWidgetPrototypesFromScreen(const Json::Value &screenJson) const
 {
-    std::vector<Widget *> temp_widgets;
+    std::vector<Widget::Prototype> widgetPrototypes;
 
     // Iterate over widgets
-    unsigned int index = 0;
-    for (; index < screenJson.size(); index++) {
+    for (unsigned int index = 0; index < screenJson.size(); index++) {
         const Json::Value currentWidgetJson = screenJson[index];
         const Json::Value currentWidgetTextureJson = currentWidgetJson["texture"];
         const Json::Value currentWidgetPosition = currentWidgetJson["position"];
         const Json::Value currentWidgetDimensions = currentWidgetJson["dimensions"];
         std::string name = currentWidgetJson["unique_name"].asString();
+        glm::vec2 position(currentWidgetPosition[0].asFloat(), currentWidgetPosition[1].asFloat());
+        glm::vec2 dimensions(currentWidgetDimensions[0].asFloat(), currentWidgetDimensions[1].asFloat());
+        uint16_t callBackId = currentWidgetJson["callbackId"].asUInt();
         Texture::Prototype texturePrototype{currentWidgetTextureJson.asString(), TextureType::Diffuse};
-        Texture *currentWidgetTexture = new Texture(texturePrototype);
-        currentWidgetTexture->initializeOnGPU();
-        Widget *currentWidget =
-            new Widget(name, currentWidgetTexture, currentWidgetPosition[0].asFloat(),
-                       currentWidgetPosition[1].asFloat(), currentWidgetDimensions[0].asFloat(),
-                       currentWidgetDimensions[1].asFloat(), currentWidgetJson["callbackId"].asUInt());
-        temp_widgets.push_back(currentWidget);
+
+        Widget::Prototype widgetPrototype{name, position, dimensions, texturePrototype, callBackId};
+
+        widgetPrototypes.push_back(widgetPrototype);
     }
-    return temp_widgets;
+    return widgetPrototypes;
 }
 
 Skybox *JsonParser::getSkybox(Model *cubeModel, ShaderProgram *skyboxProgram)

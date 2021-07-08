@@ -9,13 +9,6 @@ class ShaderProgram;
 class Mesh;
 class Texture;
 
-struct MeshPrototype
-{
-    std::vector<uint32_t> textureIds;
-    std::vector<Vertex> meshVertices;
-    std::vector<uint32_t> meshIndices;
-};
-
 class Model
 {
 public:

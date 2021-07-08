@@ -7,23 +7,24 @@
 
 #include <GLFW/glfw3.h>
 
-Widget::Widget(std::string &name, Texture *texture, float p_x, float p_y, float p_w, float p_h, uint16_t callbackId)
-    : m_posX(p_x), m_posY(p_y), m_width(p_w), m_height(p_h), m_uniqueName(name), m_callbackId(callbackId)
+Widget::Widget(Prototype prototype, Texture *texture)
+    : m_position(prototype.position), m_dimensions(prototype.dimensions), m_uniqueName(prototype.name),
+      m_callbackId(prototype.callBackId)
 {
     m_widgetTextures.push_back(texture);
 
     double widgetVerticesData[12] = {
-        2 * (m_posX + m_width) - 1.0f,
-        2 * (m_posY)-1.0f,
+        2 * (m_position.x + m_dimensions.x) - 1.0f,
+        2 * (m_position.y) - 1.0f,
         0.0f, // Bottom right
-        2 * (m_posX)-1.0f,
-        2 * (m_posY + m_height) - 1.0f,
+        2 * (m_position.x) - 1.0f,
+        2 * (m_position.y + m_dimensions.y) - 1.0f,
         0.0f, // Top left
-        2 * (m_posX)-1.0f,
-        2 * (m_posY)-1.0f,
+        2 * (m_position.x) - 1.0f,
+        2 * (m_position.y) - 1.0f,
         0.0f, // Bottom left
-        2 * (m_posX + m_width) - 1.0f,
-        2 * (m_posY + m_height) - 1.0f,
+        2 * (m_position.x + m_dimensions.x) - 1.0f,
+        2 * (m_position.y + m_dimensions.y) - 1.0f,
         0.0f // Top right
     };
 
@@ -70,7 +71,8 @@ bool Widget::isHovered(Window *window)
     double yrel = -ypos / height + 1;
 
     bool isHovered = false;
-    if (xrel >= m_posX && xrel <= m_posX + m_width && yrel >= m_posY && yrel <= m_posY + m_height)
+    if (xrel >= m_position.x && xrel <= m_position.x + m_dimensions.x && yrel >= m_position.y &&
+        yrel <= m_position.y + m_dimensions.x)
         isHovered = true;
 
     return isHovered;

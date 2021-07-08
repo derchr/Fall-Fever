@@ -12,7 +12,17 @@ class Model;
 class Entity
 {
 public:
-    Entity(const std::string &name, Model *model, ShaderProgram *shaderProgram);
+    struct Prototype
+    {
+        std::string name;
+        std::string modelName;
+        std::string shaderProgramName;
+        glm::vec3 position;
+        glm::vec3 rotation;
+        float scale;
+    };
+
+    Entity(Prototype prototype, Model *model, ShaderProgram *shaderProgram);
     ~Entity() = default;
 
     void draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition);

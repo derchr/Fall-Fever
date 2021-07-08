@@ -1,7 +1,5 @@
 #include "GLBucket.h"
 
-#include <iostream>
-
 std::unique_ptr<GLBucket> GLBucket::s_instance = std::unique_ptr<GLBucket>(new GLBucket);
 
 GLBucket &GLBucket::instance()
