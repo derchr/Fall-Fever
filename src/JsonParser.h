@@ -1,10 +1,11 @@
 #pragma once
 
+#include "Model.h"
+
 #include <jsoncpp/json/json.h>
 #include <string>
 #include <vector>
 
-class Model;
 class Entity;
 class Light;
 class Screen;
@@ -19,7 +20,7 @@ public:
     JsonParser(const std::string &path);
     ~JsonParser();
 
-    std::vector<Model *> getModels();
+    std::vector<Model::Prototype> getModelPrototypes() const;
     std::vector<Entity *> getEntities(std::vector<Model *> &models, std::vector<ShaderProgram *> shaderPrograms);
     std::vector<Light *> getLights(ShaderProgram *shaderProgram);
     std::vector<Screen *> getScreens(ShaderProgram *menuProgram, FrameBuffer *framebuffer);

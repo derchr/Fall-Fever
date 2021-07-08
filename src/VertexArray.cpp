@@ -1,4 +1,5 @@
 #include "VertexArray.h"
+#include "GLBucket.h"
 #include "definitions/models.h"
 
 #include <cstddef>

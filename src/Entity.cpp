@@ -1,8 +1,8 @@
 #include "Entity.h"
-#include "VertexArray.h"
 #include "Mesh.h"
-#include "ShaderProgram.h"
 #include "Model.h"
+#include "ShaderProgram.h"
+#include "VertexArray.h"
 
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -11,8 +11,7 @@ uint32_t Entity::s_idCounter = 0;
 
 Entity::Entity(const std::string &name, Model *model, ShaderProgram *shaderProgram)
     : m_uniqueName(name), m_model(model), m_shaderProgram(shaderProgram), m_id(s_idCounter++)
-{
-}
+{}
 
 void Entity::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition)
 {

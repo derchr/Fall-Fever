@@ -1,11 +1,11 @@
 #include "Menu.h"
+#include "FrameBuffer.h"
 #include "Helper.h"
 #include "JsonParser.h"
-#include "ShaderProgram.h"
-#include "FrameBuffer.h"
 #include "Screen.h"
-#include "Window.h"
+#include "ShaderProgram.h"
 #include "Widget.h"
+#include "Window.h"
 #include "definitions/eventActions.h"
 
 #include <iostream>

@@ -2,6 +2,8 @@
 
 #include "definitions/eventActions.h"
 
+#include <memory>
+
 class GLFWwindow;
 
 class Window

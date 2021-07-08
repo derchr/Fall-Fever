@@ -9,32 +9,29 @@
 #include <GLFW/glfw3.h>
 
 #ifdef _DEBUG
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
+#include "imgui/GeneralInfoWindow.h"
+#include "imgui/Handler.h"
 #endif
 
+#include "Camera.h"
 #include "Controller.h"
 #include "Entity.h"
+#include "EventHandler.h"
 #include "Helper.h"
 #include "JsonParser.h"
+#include "Light.h"
+#include "Menu.h"
 #include "Model.h"
 #include "Screen.h"
+#include "ShaderProgram.h"
 #include "Texture.h"
 #include "VertexArray.h"
 #include "Widget.h"
-#include "World.h"
-#include "Menu.h"
-#include "Camera.h"
-#include "Light.h"
 #include "Window.h"
-#include "Texture.h"
-#include "ShaderProgram.h"
-#include "EventHandler.h"
+#include "World.h"
 
-Controller::Controller()
+Controller::Controller() : m_gameWindow(std::unique_ptr<Window>(new Window))
 {
-    m_gameWindow = new Window();
     m_gameEventHandler = new EventHandler(m_gameWindow->getGLFWwindow());
 
     m_camera = new Camera(90.0f, m_gameWindow->getWindowAspectRatio());
@@ -58,27 +55,12 @@ Controller::Controller()
     m_world = new World(m_shaderPrograms);
 
 #ifdef _DEBUG
-    // Setup Dear ImGui context
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO &io = ImGui::GetIO();
-    (void)io;
-    // Setup Platform/Renderer bindings
-    ImGui_ImplGlfw_InitForOpenGL(m_gameWindow->getGLFWwindow(), true);
-    ImGui_ImplOpenGL3_Init("#version 150");
-    // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
+    m_imguiHandler = std::unique_ptr<Imgui::Handler>(new Imgui::Handler(m_gameWindow->getGLFWwindow()));
 #endif
 }
 
 Controller::~Controller()
 {
-#ifdef _DEBUG
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
-#endif
-
     for (auto it = m_shaderPrograms.begin(); it != m_shaderPrograms.end(); it++) {
         delete *it;
     }
@@ -88,7 +70,6 @@ Controller::~Controller()
     delete m_menu;
     delete m_postProcessFrameBuffer;
     delete m_gameEventHandler;
-    delete m_gameWindow;
 }
 
 void Controller::run()
@@ -103,6 +84,17 @@ void Controller::run()
 
     m_camera->translate(glm::vec3(0.0f, 1.5f, 5.0f));
 
+    // imgui stuff
+    bool rotateLightSource = false, rotateEntity = false, drawShadows = false;
+    glm::vec3 lightColor = glm::vec3(1.f);
+    float intensity = 7.5f;
+#ifdef _DEBUG
+    std::shared_ptr<Imgui::Window> imguiWindow = std::make_shared<Imgui::GeneralInfoWindow>(
+        this, m_world, getShaderProgramByName("postProcessingProgram"), &rotateEntity, &drawShadows, &rotateLightSource,
+        &lightColor, &m_exposure, &intensity);
+    m_imguiHandler->addImguiWindow(imguiWindow);
+#endif
+
     // This is the game loop
     while (!glfwWindowShouldClose(m_gameWindow->getGLFWwindow())) {
 
@@ -111,7 +103,6 @@ void Controller::run()
 
         // --- Update game ---
 
-        static bool rotateLightSource = false, rotateEntity = false;
         if (rotateLightSource) {
             float radius = 4.0;
             glm::vec3 newPos = glm::vec3(-cos(glfwGetTime() * 0.5), 0.5f, sin(glfwGetTime() * 0.5)) * radius;
@@ -120,8 +111,7 @@ void Controller::run()
         if (rotateEntity) {
             m_world->getEntityById(0)->rotate(glm::vec3(0.0f, 1.0f, 0.0f), -0.2f * m_deltaTime);
         }
-        static glm::vec3 lightColor = glm::vec3(1.f);
-        static float intensity = 7.5f;
+
         m_world->updatePointLight(0, true, m_world->getEntityByName("light")->getPosition(), lightColor, intensity);
         m_world->updateDirectionalLight(true, m_world->getDirectionalLight()->getDirection(), lightColor);
         getShaderProgramByName("lightProgram")->bind();
@@ -131,7 +121,6 @@ void Controller::run()
         // --- Render and buffer swap ---
 
         // Calc shadows
-        static bool drawShadows = false;
         static bool firstRun = true;
         getShaderProgramByName("defaultProgram")->bind();
         getShaderProgramByName("defaultProgram")->setUniform("b_drawShadows", (int)drawShadows);
@@ -161,8 +150,7 @@ void Controller::run()
             m_postProcessFrameBuffer->render();
 
 #ifdef _DEBUG
-            renderImGui(m_world, &lightColor, &rotateEntity, &rotateLightSource,
-                        getShaderProgramByName("postProcessingProgram"), &intensity, &drawShadows);
+            m_imguiHandler->renderWindows();
 #endif
         }
         glfwSwapBuffers(m_gameWindow->getGLFWwindow());
@@ -186,7 +174,7 @@ void Controller::run()
 
         // Handle widget pressed event only when a screen is currently active
         if (m_menu->getActiveScreen())
-            m_menu->handleMouseButtonActionMap(m_gameEventHandler->getMouseButtonActionMap(), m_gameWindow);
+            m_menu->handleMouseButtonActionMap(m_gameEventHandler->getMouseButtonActionMap(), m_gameWindow.get());
     }
 }
 
@@ -248,59 +236,3 @@ void Controller::setMaxFps(uint16_t fps)
 {
     m_MAX_FPS = fps;
 }
-
-#ifdef _DEBUG
-void Controller::renderImGui(World *world, glm::vec3 *lightColor, bool *rotateEntity, bool *rotateLightSource,
-                             ShaderProgram *postProcessingProgram, float *intensity, bool *drawShadows)
-{
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-
-    // render your GUI
-    ImGui::Begin("Debug Utils");
-    ImGui::Text("Object");
-    static float rotation = 0.0;
-    ImGui::SliderFloat("Rotation", &rotation, 0, 2 * M_PI);
-    static float translation[] = {0.0f, 1.0f, 0.0f};
-    ImGui::SliderFloat3("Position", translation, -4.0, 4.0);
-    static float scale = 0.6f;
-    ImGui::SliderFloat("Scale", &scale, 0.02, 2.0);
-    ImGui::Checkbox("Rotate Object", rotateEntity);
-
-    Entity *mainObject = world->getEntityById(0);
-    mainObject->setPosition(glm::vec3(translation[0], translation[1], translation[2]));
-    if (!*rotateEntity) {
-        mainObject->setRotation(glm::vec3(0.f, 1.0f, 0.f), rotation);
-    }
-    mainObject->setScale(scale);
-
-    // color picker
-    ImGui::Text("\nLight Source");
-
-    updateExposure(postProcessingProgram);
-
-    static float color[4] = {1.0f, 1.0f, 1.0f, 1.0f};
-
-    ImGui::SliderFloat("Intensity", intensity, 0, 250.f);
-
-    ImGui::ColorEdit3("Color", color);
-    lightColor->x = color[0];
-    lightColor->y = color[1];
-    lightColor->z = color[2];
-
-    ImGui::Text("\nMiscellaneous");
-    ImGui::SliderFloat("Exposure", &m_exposure, 0, 5.0f);
-
-    ImGui::Checkbox("Draw Shadows", drawShadows);
-    ImGui::Checkbox("Rotate Lightsource", rotateLightSource);
-
-    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0 / ImGui::GetIO().Framerate,
-                ImGui::GetIO().Framerate);
-
-    ImGui::End();
-
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-}
-#endif

@@ -43,7 +43,7 @@ class PointLight : public Light
 {
 public:
     PointLight(glm::vec3 position, glm::vec3 color, float intensity, ShaderProgram *shaderProgram);
-    ~PointLight() = default;
+    ~PointLight() override = default;
 
     void setPosition(glm::vec3 position);
 

@@ -3,7 +3,6 @@
 #include "ShaderProgram.h"
 #include "definitions/window.h"
 
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
 

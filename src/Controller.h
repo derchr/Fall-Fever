@@ -1,8 +1,8 @@
 #pragma once
 
+#include <glm/glm.hpp>
 #include <memory>
 #include <vector>
-#include <glm/glm.hpp>
 
 class ShaderProgram;
 class Window;
@@ -11,6 +11,10 @@ class World;
 class Camera;
 class Menu;
 class FrameBuffer;
+
+namespace Imgui {
+class Handler;
+}
 
 class Controller
 {
@@ -24,18 +28,19 @@ public:
 
     static ShaderProgram *getShaderProgramByName(std::vector<ShaderProgram *> shaderPrograms, const std::string &name);
 
+    void updateExposure(ShaderProgram *shaderProgram);
+
 private:
     void limit_framerate();
 
     void updateWindowDimensions();
-    void updateExposure(ShaderProgram *shaderProgram);
 
     ShaderProgram *getShaderProgramByName(const std::string &name);
 
     void renderImGui(World *world, glm::vec3 *lightColor, bool *rotateEntity, bool *rotateLightSource,
                      ShaderProgram *postProcessingProgram, float *intensity, bool *drawShadows);
 
-    Window *m_gameWindow;
+    std::unique_ptr<Window> m_gameWindow;
     EventHandler *m_gameEventHandler;
 
     World *m_world;
@@ -44,6 +49,10 @@ private:
     Menu *m_menu;
 
     std::vector<ShaderProgram *> m_shaderPrograms;
+
+#ifdef _DEBUG
+    std::unique_ptr<Imgui::Handler> m_imguiHandler;
+#endif
 
     FrameBuffer *m_postProcessFrameBuffer;
 

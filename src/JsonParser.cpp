@@ -8,7 +8,6 @@
 #include "Widget.h"
 
 #include <fstream>
-#include <future>
 #include <iostream>
 
 JsonParser::JsonParser(const std::string &path)
@@ -33,46 +32,20 @@ JsonParser::JsonParser(const std::string &path)
 JsonParser::~JsonParser()
 {}
 
-std::vector<Model *> JsonParser::getModels()
+std::vector<Model::Prototype> JsonParser::getModelPrototypes() const
 {
-    std::vector<Model *> temp_models;
-
     const Json::Value modelsJson = m_root["models"];
 
-    struct ModelSkeleton
-    {
-        std::string model_name;
-        std::string model_path;
-    };
-
-    std::vector<ModelSkeleton> model_skeletons;
+    std::vector<Model::Prototype> modelPrototypes;
 
     for (unsigned int index = 0; index < modelsJson.size(); index++) {
-        std::string model_name = modelsJson[index]["unique_name"].asString();
-        std::string model_path = modelsJson[index]["path"].asString();
-        ModelSkeleton model_skeleton = {model_name, model_path};
-        model_skeletons.push_back(model_skeleton);
+        std::string modelName = modelsJson[index]["unique_name"].asString();
+        std::string modelPath = modelsJson[index]["path"].asString();
+        Model::Prototype prototype{modelName, modelPath};
+        modelPrototypes.push_back(prototype);
     }
 
-    std::vector<std::future<void>> futures;
-    std::mutex mutex;
-
-    auto *temp_models_ptr = &temp_models;
-    for (const auto &model_skeleton : model_skeletons) {
-        auto loadModel = [&]() {
-            Model *current_model = new Model(model_skeleton.model_name, model_skeleton.model_path);
-            if (current_model) {
-                std::lock_guard<std::mutex> lock(mutex);
-                temp_models_ptr->push_back(current_model);
-                std::cout << "Loaded Model \"" << model_skeleton.model_name << "\" from \"" << model_skeleton.model_path
-                          << "\"" << std::endl;
-            }
-        };
-
-        futures.push_back(std::async(std::launch::async, loadModel));
-    }
-
-    return temp_models;
+    return modelPrototypes;
 }
 
 std::vector<Entity *> JsonParser::getEntities(std::vector<Model *> &models, std::vector<ShaderProgram *> shaderPrograms)
@@ -275,7 +248,9 @@ std::vector<Widget *> JsonParser::getWidgetsFromScreen(const Json::Value &screen
         const Json::Value currentWidgetPosition = currentWidgetJson["position"];
         const Json::Value currentWidgetDimensions = currentWidgetJson["dimensions"];
         std::string name = currentWidgetJson["unique_name"].asString();
-        Texture *currentWidgetTexture = new Texture(currentWidgetTextureJson.asString().c_str(), TextureType::Diffuse);
+        Texture::Prototype texturePrototype{currentWidgetTextureJson.asString(), TextureType::Diffuse};
+        Texture *currentWidgetTexture = new Texture(texturePrototype);
+        currentWidgetTexture->initializeOnGPU();
         Widget *currentWidget =
             new Widget(name, currentWidgetTexture, currentWidgetPosition[0].asFloat(),
                        currentWidgetPosition[1].asFloat(), currentWidgetDimensions[0].asFloat(),

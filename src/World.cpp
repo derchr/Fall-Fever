@@ -1,14 +1,16 @@
 #include "World.h"
-#include "Entity.h"
-#include "Controller.h"
-#include "Model.h"
-#include "Light.h"
-#include "JsonParser.h"
 #include "Camera.h"
-#include "Texture.h"
+#include "Controller.h"
+#include "Entity.h"
+#include "JsonParser.h"
+#include "Light.h"
+#include "Model.h"
 #include "ShaderProgram.h"
+#include "Texture.h"
 
+#include <future>
 #include <iostream>
+#include <thread>
 
 World::World(std::vector<ShaderProgram *> shaderPrograms)
     : m_shaderProgram(Controller::getShaderProgramByName(shaderPrograms, "defaultProgram")),
@@ -26,11 +28,30 @@ World::World(std::vector<ShaderProgram *> shaderPrograms)
     m_shaderProgram->unbind();
 
     JsonParser modelParser("data/models.json");
-    m_models = modelParser.getModels();
+    std::vector<Model::Prototype> modelPrototypes = modelParser.getModelPrototypes();
 
-    for (const auto &it : m_models) {
-        it->prepareModel();
+    {
+        std::vector<std::future<void>> futures;
+        std::mutex mutex;
+
+        for (auto &prototype : modelPrototypes) {
+
+            auto loadModel = [=, &mutex]() {
+                Model *current_model = new Model(prototype);
+
+                std::cout << "Loaded Model \"" << prototype.modelName << "\" from \"" << prototype.modelPath << "\""
+                          << std::endl;
+
+                std::lock_guard<std::mutex> lock(mutex);
+                m_models.push_back(current_model);
+            };
+
+            futures.push_back(std::async(std::launch::async, loadModel));
+        }
     }
+
+    for (auto &model : m_models)
+        model->initializeOnGPU();
 
     m_entities = modelParser.getEntities(m_models, shaderPrograms);
     m_skybox = modelParser.getSkybox(getModelByName("cube"),

@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <glad/glad.h>
+#include <stb/stb_image.h>
 #include <string>
 #include <vector>
 
@@ -24,8 +25,16 @@ enum cubeMapFaces
 class Texture
 {
 public:
-    Texture(const std::string &texturePath, TextureType textureType);
+    struct Prototype
+    {
+        std::string texturePath;
+        TextureType textureType;
+    };
+
+    Texture(const Prototype &prototype);
     ~Texture();
+
+    void initializeOnGPU();
 
     void bind(uint8_t textureUnit, ShaderProgram *shaderProgram, uint8_t textureTypeNum);
     void unbind();
@@ -35,7 +44,11 @@ public:
     GLuint getTextureId();
 
 private:
+    bool m_isInitialized = false;
+
     std::string m_texturePath;
+
+    stbi_uc *m_textureBuffer;
 
     int32_t m_textureWidth;
     int32_t m_textureHeight;

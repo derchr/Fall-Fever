@@ -9,12 +9,6 @@ class ShaderProgram;
 class Mesh;
 class Texture;
 
-struct TexturePrototype
-{
-    TextureType textureType;
-    std::string texturePath;
-};
-
 struct MeshPrototype
 {
     std::vector<uint32_t> textureIds;
@@ -25,10 +19,16 @@ struct MeshPrototype
 class Model
 {
 public:
-    Model(const std::string &modelName, const std::string &pathToModel);
+    struct Prototype
+    {
+        std::string modelName;
+        std::string modelPath;
+    };
+
+    Model(const Prototype &prototype);
     ~Model();
 
-    void prepareModel();
+    void initializeOnGPU();
 
     void draw(ShaderProgram *shaderProgram);
     void drawWithoutTextures();
@@ -39,15 +39,12 @@ public:
 private:
     void loadModel(const std::string &pathToModel);
 
-    std::vector<Mesh *> m_meshes;
-    std::vector<Texture *> m_loadedTextures;
+    bool m_isInitialized = false;
 
-    std::vector<TexturePrototype> m_modelTexturePrototypes;
-    std::vector<MeshPrototype> m_modelMeshPrototypes;
+    std::vector<Mesh *> m_meshes;
+    std::vector<Texture *> m_textures;
 
     std::string m_workingPath;
-
-    bool m_modelPrepared = false;
 
     static uint32_t s_idCounter;
     uint32_t m_id;

@@ -1,12 +1,24 @@
 #include "Mesh.h"
-#include "Texture.h"
 #include "ShaderProgram.h"
+#include "Texture.h"
+#include "VertexArray.h"
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, std::vector<Texture *> textures)
-    : m_numElements(indices.size()), m_textures(textures),
-      m_vertexArray(static_cast<void *>(vertices.data()), static_cast<void *>(indices.data()), vertices.size(),
-                    indices.size())
+    : m_numElements(indices.size()), m_textures(textures), m_preInitializationVertexData{vertices, indices}
 {}
+
+void Mesh::initializeOnGPU()
+{
+    m_vertexArray =
+        new VertexArray(static_cast<void *>(m_preInitializationVertexData.vertices.data()),
+                        static_cast<void *>(m_preInitializationVertexData.indices.data()),
+                        m_preInitializationVertexData.vertices.size(), m_preInitializationVertexData.indices.size());
+}
+
+Mesh::~Mesh()
+{
+    delete m_vertexArray;
+}
 
 void Mesh::draw(ShaderProgram *shaderProgram)
 {
@@ -24,9 +36,9 @@ void Mesh::draw(ShaderProgram *shaderProgram)
     }
 
     // Draw elements
-    m_vertexArray.bind();
+    m_vertexArray->bind();
     glDrawElements(GL_TRIANGLES, m_numElements, GL_UNSIGNED_INT, 0);
-    m_vertexArray.unbind();
+    m_vertexArray->unbind();
 
     // Unbind all textures
     for (auto it = m_textures.begin(); it != m_textures.end(); it++) {
@@ -36,12 +48,12 @@ void Mesh::draw(ShaderProgram *shaderProgram)
 
 void Mesh::drawWithoutTextures()
 {
-    m_vertexArray.bind();
+    m_vertexArray->bind();
     glDrawElements(GL_TRIANGLES, m_numElements, GL_UNSIGNED_INT, 0);
-    m_vertexArray.unbind();
+    m_vertexArray->unbind();
 }
 
 VertexArray *Mesh::getVertexArray()
 {
-    return &m_vertexArray;
+    return m_vertexArray;
 }

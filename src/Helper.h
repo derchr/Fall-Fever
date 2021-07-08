@@ -1,7 +1,7 @@
 #pragma once
 
-#include <glad/glad.h>
 #include <chrono>
+#include <glad/glad.h>
 #include <stdint.h>
 #include <string>
 

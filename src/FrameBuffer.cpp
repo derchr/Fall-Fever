@@ -142,8 +142,8 @@ DepthMap::DepthMap(DepthMapType type, int RESOLUTION)
 
 DepthMap::~DepthMap()
 {
-    if (m_cubeMap)
-        delete m_cubeMap;
+    // if (m_cubeMap)
+    //    delete m_cubeMap;
 }
 
 void DepthMap::bind()

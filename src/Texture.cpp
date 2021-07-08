@@ -2,13 +2,29 @@
 #include "ShaderProgram.h"
 
 #include <iostream>
-#include <stb/stb_image.h>
 
-Texture::Texture(const std::string &texturePath, TextureType textureType)
-    : m_texturePath(texturePath), m_textureType(textureType)
+Texture::Texture(const Prototype &prototype)
+    : m_texturePath(prototype.texturePath), m_textureType(prototype.textureType)
 {
     stbi_set_flip_vertically_on_load(1);
-    auto *textureBuffer = stbi_load(texturePath.c_str(), &m_textureWidth, &m_textureHeight, &m_numComponents, 0);
+    m_textureBuffer = stbi_load(m_texturePath.c_str(), &m_textureWidth, &m_textureHeight, &m_numComponents, 0);
+    if (!m_textureBuffer) {
+        std::cout << "[Warning] Texture " << m_texturePath << " not found!" << std::endl;
+        return;
+    }
+}
+
+Texture::~Texture()
+{
+    glDeleteTextures(1, &m_textureId);
+}
+
+void Texture::initializeOnGPU()
+{
+    if (m_isInitialized)
+        return;
+
+    m_isInitialized = true;
 
     GLenum internalFormat;
     GLenum dataFormat;
@@ -16,10 +32,10 @@ Texture::Texture(const std::string &texturePath, TextureType textureType)
         internalFormat = GL_RED;
         dataFormat = GL_RED;
     } else if (m_numComponents == 3) {
-        internalFormat = (textureType == TextureType::Diffuse) ? GL_SRGB8 : GL_RGB8;
+        internalFormat = (m_textureType == TextureType::Diffuse) ? GL_SRGB8 : GL_RGB8;
         dataFormat = GL_RGB;
     } else if (m_numComponents == 4) {
-        internalFormat = (textureType == TextureType::Diffuse) ? GL_SRGB8_ALPHA8 : GL_RGBA8;
+        internalFormat = (m_textureType == TextureType::Diffuse) ? GL_SRGB8_ALPHA8 : GL_RGBA8;
         dataFormat = GL_RGBA;
     }
 
@@ -34,22 +50,13 @@ Texture::Texture(const std::string &texturePath, TextureType textureType)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    if (!textureBuffer) {
-        std::cout << "[Warning] Texture " << texturePath << " not found!" << std::endl;
-        return;
-    }
-
     glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, m_textureWidth, m_textureHeight, 0, dataFormat, GL_UNSIGNED_BYTE,
-                 textureBuffer);
+                 m_textureBuffer);
     glGenerateMipmap(GL_TEXTURE_2D);
 
-    stbi_image_free(textureBuffer);
     glBindTexture(GL_TEXTURE_2D, 0);
-}
 
-Texture::~Texture()
-{
-    glDeleteTextures(1, &m_textureId);
+    stbi_image_free(m_textureBuffer);
 }
 
 void Texture::bind(uint8_t textureUnit, ShaderProgram *shaderProgram, uint8_t textureTypeNum)
@@ -176,7 +183,7 @@ CubeMap::CubeMap(int RESOLUTION) : m_textureWidth(RESOLUTION), m_textureHeight(R
 
 CubeMap::~CubeMap()
 {
-    glDeleteTextures(1, &m_textureId);
+    // glDeleteTextures(1, &m_textureId);
 }
 
 void CubeMap::bind(ShaderProgram *shaderProgram)

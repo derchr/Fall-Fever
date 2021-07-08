@@ -26,16 +26,32 @@
             "unique_name": "backpack",
             "model": "backpack",
             "shaderProgram": "defaultProgram",
-            "position": [0.0, 1.0, 0.0],
-            "rotation": [0.0, 0.0, 0.0],
+            "position": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
             "scale": 0.6
         },
         {
             "unique_name": "container",
             "model": "container",
             "shaderProgram": "defaultProgram",
-            "position": [10.0, 1.0, 0.0],
-            "rotation": [45.0, 45.0, 45.0]
+            "position": [
+                10.0,
+                1.0,
+                0.0
+            ],
+            "rotation": [
+                45.0,
+                45.0,
+                45.0
+            ]
         },
         {
             "unique_name": "ground",
@@ -48,7 +64,7 @@
             "shaderProgram": "lightProgram"
         }
     ],
-    "textures" : [
+    "textures": [
         {
             "unique_name": "fallback_normal",
             "path": "data/res/models/tex/fallback_normal.png"

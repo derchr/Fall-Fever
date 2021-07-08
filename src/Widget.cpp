@@ -2,8 +2,8 @@
 #include "Menu.h"
 #include "Mesh.h"
 #include "ShaderProgram.h"
-#include "Window.h"
 #include "VertexArray.h"
+#include "Window.h"
 
 #include <GLFW/glfw3.h>
 
@@ -34,6 +34,7 @@ Widget::Widget(std::string &name, Texture *texture, float p_x, float p_y, float 
     m_widgetVertices = VertexArray::createVertices(widgetVerticesData, 12, widgetTextureCoordinates);
     m_widgetIndices.assign(widgetIndicesData, widgetIndicesData + 6);
     m_widgetMesh = new Mesh(m_widgetVertices, m_widgetIndices, m_widgetTextures);
+    m_widgetMesh->initializeOnGPU();
 }
 
 Widget::~Widget()

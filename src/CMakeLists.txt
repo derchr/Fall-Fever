@@ -18,6 +18,11 @@ add_executable(Fall-Fever
     Menu.cpp
     JsonParser.cpp
     Helper.cpp
+    GLBucket.cpp
+    imgui/EntityWindow.cpp
+    imgui/GeneralInfoWindow.cpp
+    imgui/Handler.cpp
+    imgui/Window.cpp
 )
 
 target_link_libraries(

@@ -4,7 +4,8 @@ layout(location = 0) out vec4 f_color;
 
 in vec2 v_texCoord;
 
-struct Material {
+struct Material
+{
     sampler2D texture_diffuse0;
 };
 uniform Material u_material;

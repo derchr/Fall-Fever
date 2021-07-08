@@ -1,36 +1,46 @@
 #include "Model.h"
+#include "GLBucket.h"
 #include "Mesh.h"
 #include "ShaderProgram.h"
 #include "Texture.h"
 
 #include <fstream>
+#include <future>
 #include <iostream>
 
 uint32_t Model::s_idCounter = 0;
 
-Model::Model(const std::string &modelName, const std::string &modelPath) : m_uniqueName(modelName)
+Model::Model(const Prototype &prototype) : m_uniqueName(prototype.modelName), m_id(s_idCounter++)
 {
-    m_workingPath = modelPath.substr(0, modelPath.find_last_of('/'));
+    m_workingPath = prototype.modelPath.substr(0, prototype.modelPath.find_last_of('/'));
 
-    loadModel(modelPath);
-    m_id = s_idCounter++;
+    loadModel(prototype.modelPath);
+}
+
+void Model::initializeOnGPU()
+{
+    if (m_isInitialized)
+        return;
+
+    m_isInitialized = true;
+
+    for (auto texture : m_textures)
+        texture->initializeOnGPU();
+
+    for (auto mesh : m_meshes)
+        mesh->initializeOnGPU();
 }
 
 Model::~Model()
 {
     // Go through all loaded textures and delete them
-    for (auto it = m_loadedTextures.begin(); it != m_loadedTextures.end(); it++) {
+    for (auto it = m_textures.begin(); it != m_textures.end(); it++) {
         delete (*it);
     }
 }
 
 void Model::draw(ShaderProgram *shaderProgram)
 {
-    if (!m_modelPrepared) {
-        std::cout << "WARNING: Model not prepared! Unable to draw!" << std::endl;
-        return;
-    }
-
     // Iterate through every mesh and call the draw function
     for (auto mesh : m_meshes) {
         mesh->draw(shaderProgram);
@@ -39,11 +49,6 @@ void Model::draw(ShaderProgram *shaderProgram)
 
 void Model::drawWithoutTextures()
 {
-    if (!m_modelPrepared) {
-        std::cout << "WARNING: Model not prepared! Unable to draw!" << std::endl;
-        return;
-    }
-
     // Iterate through every mesh and call the draw function
     for (auto mesh : m_meshes) {
         mesh->drawWithoutTextures();
@@ -83,14 +88,23 @@ void Model::loadModel(const std::string &pathToModel)
         textureSources.push_back(currentTextureSource);
     }
 
-    for (unsigned int i = 0; i < numTextures; i++) {
-        TexturePrototype texture_prototype;
-        std::string texturePath = m_workingPath + '/' + textureSources[i].c_str();
+    // Maybe write a texture loader class in future, that handles all this.
+    {
+        std::vector<std::future<void>> futures;
+        std::mutex mutex;
 
-        texture_prototype.texturePath = std::move(texturePath);
-        texture_prototype.textureType = textureTypes[i];
+        for (unsigned int i = 0; i < numTextures; i++) {
+            std::string texturePath = m_workingPath + '/' + textureSources[i].c_str();
+            Texture::Prototype texturePrototype{texturePath, textureTypes[i]};
+            auto loadModel = [=, &mutex]() {
+                Texture *currentTex = new Texture(texturePrototype);
 
-        m_modelTexturePrototypes.push_back(texture_prototype);
+                std::lock_guard<std::mutex> lock(mutex);
+                m_textures.push_back(currentTex);
+            };
+
+            futures.push_back(std::async(std::launch::async, loadModel));
+        }
     }
 
     // When there is no normal map bound, please use fallback texture
@@ -101,12 +115,10 @@ void Model::loadModel(const std::string &pathToModel)
     }
 
     if (!hasNormalMap) {
-        TexturePrototype texture_prototype;
+        Texture::Prototype texturePrototype{"data/res/models/tex/fallback_normal.png", TextureType::Normal};
+        Texture *currentTex = new Texture(texturePrototype);
 
-        texture_prototype.texturePath = "data/res/models/tex/fallback_normal.png";
-        texture_prototype.textureType = TextureType::Normal;
-
-        m_modelTexturePrototypes.push_back(texture_prototype);
+        m_textures.push_back(currentTex);
     }
 
     // Here starts the first mesh
@@ -114,9 +126,6 @@ void Model::loadModel(const std::string &pathToModel)
     input.read((char *)&numMeshes, sizeof(uint32_t));
 
     for (unsigned int j = 0; j < numMeshes; j++) {
-
-        MeshPrototype mesh_prototype;
-
         uint32_t numMeshVertices, numMeshIndices, numMeshTextureIds;
 
         input.read((char *)&numMeshVertices, sizeof(uint32_t));
@@ -131,50 +140,33 @@ void Model::loadModel(const std::string &pathToModel)
         std::vector<Vertex> meshVertices;
         meshVertices.resize(numMeshVertices);
         input.read((char *)meshVertices.data(), vertexBlockSize);
-        mesh_prototype.meshVertices = std::move(meshVertices);
 
         std::vector<uint32_t> meshIndices;
         meshIndices.resize(numMeshIndices);
         input.read((char *)meshIndices.data(), indexBlockSize);
-        mesh_prototype.meshIndices = std::move(meshIndices);
+
+        std::vector<uint32_t> meshTextureIds;
+        std::vector<Texture *> meshTextures;
 
         for (unsigned int i = 0; i < numMeshTextureIds; i++) {
             uint32_t currentTextureId;
             input.read((char *)&currentTextureId, sizeof(uint32_t));
-            mesh_prototype.textureIds.push_back(currentTextureId);
+            meshTextureIds.push_back(currentTextureId);
         }
 
         if (!hasNormalMap) {
             // This will be the last texture
-            mesh_prototype.textureIds.push_back(numTextures);
+            meshTextureIds.push_back(numTextures);
         }
 
-        m_modelMeshPrototypes.push_back(std::move(mesh_prototype));
+        for (auto textureId : meshTextureIds) {
+            meshTextures.push_back(m_textures[textureId]);
+        }
+
+        m_meshes.push_back(new Mesh(std::move(meshVertices), std::move(meshIndices), std::move(meshTextures)));
     }
 
     input.close();
-}
-
-void Model::prepareModel()
-{
-    m_modelPrepared = true;
-
-    // Create textures on GPU
-    for (auto &it : m_modelTexturePrototypes) {
-        Texture *newTex = new Texture(it.texturePath.c_str(), it.textureType);
-        m_loadedTextures.push_back(newTex);
-    }
-
-    // Create meshes on GPU
-    for (const auto &it : m_modelMeshPrototypes) {
-        std::vector<Texture *> meshTextures;
-        for (const auto it2 : it.textureIds) {
-            meshTextures.push_back(m_loadedTextures[it2]);
-        }
-
-        Mesh *currentMesh = new Mesh(std::move(it.meshVertices), std::move(it.meshIndices), meshTextures);
-        m_meshes.push_back(currentMesh);
-    }
 }
 
 Mesh *Model::getMesh(unsigned int index)
