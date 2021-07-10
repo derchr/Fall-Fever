@@ -68,16 +68,25 @@ private:
 class Skybox
 {
 public:
-    Skybox(Model *cubeModel, ShaderProgram *shaderProgram, const char *texturePseudoPath);
-    ~Skybox() = default;
+    struct Prototype
+    {
+        std::string texturePath;
+    };
+
+    Skybox(Prototype prototype, Model *cubeModel, ShaderProgram *shaderProgram);
+    ~Skybox();
+
+    void initializeOnGPU();
 
     void draw(glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
 
 private:
+    bool m_isInitialized = false;
+
     Model *m_cubeModel;
     ShaderProgram *m_shaderProgram;
 
-    CubeMap m_cubeMap;
+    CubeMap *m_cubeMap;
 
     VertexArray *m_vertexArray;
 };

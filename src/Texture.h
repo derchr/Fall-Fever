@@ -65,6 +65,8 @@ public:
     CubeMap(const char *texturePseudoPath);
     CubeMap(int RESOLUTION);
 
+    void initializeOnGPU();
+
     ~CubeMap();
 
     void bind(ShaderProgram *shaderProgram);
@@ -75,7 +77,11 @@ public:
 private:
     void fillTexturePathVector(const char *texturePseudoPath);
 
+    bool m_isInitialized = false;
+
     std::vector<std::string> m_texturePaths;
+    std::vector<stbi_uc *> m_textureBuffers;
+    std::vector<int> m_numComponents;
 
     GLuint m_textureId;
 

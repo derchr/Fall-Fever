@@ -10,8 +10,13 @@ class ShaderProgram;
 class Light
 {
 public:
-    virtual ~Light()
-    {}
+    struct Prototype
+    {
+        virtual ~Prototype() = default;
+    };
+
+    Light(glm::vec3 color, float intensity, ShaderProgram *shaderProgram);
+    virtual ~Light() = 0;
 
     virtual void update() = 0;
 
@@ -23,8 +28,6 @@ public:
     glm::vec3 getColor();
 
 protected:
-    Light(glm::vec3 color, float intensity, ShaderProgram *shaderProgram);
-
     ShaderProgram *m_shaderProgram;
 
     uint32_t m_id;
@@ -42,7 +45,17 @@ protected:
 class PointLight : public Light
 {
 public:
-    PointLight(glm::vec3 position, glm::vec3 color, float intensity, ShaderProgram *shaderProgram);
+    struct Prototype : public Light::Prototype
+    {
+        Prototype(glm::vec3 position, glm::vec3 color, float intensity)
+            : position(position), color(color), intensity(intensity)
+        {}
+        glm::vec3 position;
+        glm::vec3 color;
+        float intensity;
+    };
+
+    PointLight(Prototype prototype, ShaderProgram *shaderProgram);
     ~PointLight() override = default;
 
     void setPosition(glm::vec3 position);
@@ -59,7 +72,18 @@ private:
 class DirectionalLight : public Light
 {
 public:
-    DirectionalLight(glm::vec3 direction, glm::vec3 color, float intensity, ShaderProgram *shaderProgram);
+    struct Prototype : public Light::Prototype
+    {
+        Prototype(glm::vec3 direction, glm::vec3 color, float intensity)
+            : direction(direction), color(color), intensity(intensity)
+        {}
+        glm::vec3 direction;
+        glm::vec3 color;
+        float intensity;
+    };
+
+    DirectionalLight(Prototype prototype, ShaderProgram *shaderProgram);
+    ~DirectionalLight() override = default;
 
     void setDirection(glm::vec3 direction);
 

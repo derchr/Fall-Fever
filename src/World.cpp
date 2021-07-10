@@ -13,8 +13,8 @@
 #include <thread>
 
 World::World(std::vector<ShaderProgram *> shaderPrograms)
-    : m_depthMapDirectionalFBO(DepthMapType::Normal, SHADOW_RES),
-      m_shaderProgram(Controller::getShaderProgramByName("defaultProgram", shaderPrograms))
+    : m_shaderProgram(Controller::getShaderProgramByName("defaultProgram", shaderPrograms)),
+      m_depthMapDirectionalFBO(DepthMapType::Normal, SHADOW_RES)
 {
     // Create 4 depthMaps
     for (int i = 0; i < 4; i++) {
@@ -28,6 +28,7 @@ World::World(std::vector<ShaderProgram *> shaderPrograms)
     m_shaderProgram->unbind();
 
     JsonParser modelParser("data/models.json");
+
     std::vector<Model::Prototype> modelPrototypes = modelParser.getModelPrototypes();
 
     {
@@ -52,6 +53,15 @@ World::World(std::vector<ShaderProgram *> shaderPrograms)
 
     for (auto &model : m_models)
         model->initializeOnGPU();
+
+    // TODO: use geometry shader instead of model and load skybox before models.
+    Skybox::Prototype skyboxPrototype = modelParser.getSkyboxPrototype();
+    std::thread skyboxThread([=]() {
+        m_skybox = new Skybox(skyboxPrototype, getModelByName("cube"),
+                              Controller::getShaderProgramByName("skyboxProgram", shaderPrograms));
+
+        std::cout << "Loaded Skybox \"" << skyboxPrototype.texturePath << "\"" << std::endl;
+    });
 
     std::vector<Entity::Prototype> entityPrototypes = modelParser.getEntityPrototypes();
 
@@ -84,13 +94,30 @@ World::World(std::vector<ShaderProgram *> shaderPrograms)
             entities.push_back(currentEntity);
         }
     }
-
     m_entities = entities;
-    m_skybox = modelParser.getSkybox(getModelByName("cube"),
-                                     Controller::getShaderProgramByName("skyboxProgram", shaderPrograms));
 
     JsonParser lightParser("data/lights.json");
-    m_lights = lightParser.getLights(m_shaderProgram);
+    auto lightPrototypes = lightParser.getLightPrototypes();
+
+    std::vector<Light *> lights;
+    {
+        for (auto &prototype : lightPrototypes) {
+            Light *currentLight;
+            auto directionalPrototype = dynamic_cast<DirectionalLight::Prototype *>(prototype.get());
+            if (directionalPrototype) {
+                currentLight = new DirectionalLight(*directionalPrototype, m_shaderProgram);
+            }
+            auto pointPrototype = dynamic_cast<PointLight::Prototype *>(prototype.get());
+            if (pointPrototype) {
+                currentLight = new PointLight(*pointPrototype, m_shaderProgram);
+            }
+            lights.push_back(currentLight);
+        }
+    }
+    m_lights = lights;
+
+    skyboxThread.join();
+    m_skybox->initializeOnGPU();
 }
 
 World::~World()

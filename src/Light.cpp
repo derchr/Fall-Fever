@@ -5,14 +5,15 @@
 
 uint32_t Light::s_idCounter = 0;
 
-// Light
-
 Light::Light(glm::vec3 color, float intensity, ShaderProgram *shaderProgram)
     : m_shaderProgram(shaderProgram), m_intensity(intensity)
 {
     m_id = s_idCounter++;
     m_lightColor = color * intensity;
 }
+
+Light::~Light()
+{}
 
 glm::vec3 Light::getColor()
 {
@@ -42,13 +43,9 @@ void Light::setActive(bool active)
     update();
 }
 
-// PointLight
-
-PointLight::PointLight(glm::vec3 position, glm::vec3 color, float intensity, ShaderProgram *shaderProgram)
-    : Light(color, intensity, shaderProgram), m_position(position)
-{
-    // Empty
-}
+PointLight::PointLight(Prototype prototype, ShaderProgram *shaderProgram)
+    : Light(prototype.color, prototype.intensity, shaderProgram), m_position(prototype.position)
+{}
 
 void PointLight::update()
 {
@@ -79,13 +76,9 @@ void PointLight::setPosition(glm::vec3 position)
     update();
 }
 
-// DirectionalLight
-
-DirectionalLight::DirectionalLight(glm::vec3 direction, glm::vec3 color, float intensity, ShaderProgram *shaderProgram)
-    : Light(color, intensity, shaderProgram), m_direction(direction)
-{
-    // Empty
-}
+DirectionalLight::DirectionalLight(Prototype prototype, ShaderProgram *shaderProgram)
+    : Light(prototype.color, prototype.intensity, shaderProgram), m_direction(prototype.direction)
+{}
 
 void DirectionalLight::update()
 {

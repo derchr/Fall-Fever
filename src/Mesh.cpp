@@ -4,7 +4,7 @@
 #include "VertexArray.h"
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, std::vector<Texture *> textures)
-    : m_numElements(indices.size()), m_textures(textures), m_preInitializationVertexData{vertices, indices}
+    : m_preInitializationVertexData{vertices, indices}, m_numElements(indices.size()), m_textures(textures)
 {}
 
 void Mesh::initializeOnGPU()

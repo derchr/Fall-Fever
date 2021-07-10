@@ -1,34 +1,34 @@
 #pragma once
 
 #include <jsoncpp/json/json.h>
+#include <memory>
 #include <string>
 #include <vector>
 
 #include "Entity.h"
+#include "Light.h"
 #include "Model.h"
 #include "Screen.h"
+#include "ShaderProgram.h"
 #include "Widget.h"
 
-class Light;
 class Screen;
-class Skybox;
 class ShaderProgram;
 class FrameBuffer;
-class Widget;
 
 class JsonParser
 {
 public:
-    JsonParser(const std::string &path);
+    JsonParser(const std::string &jsonFilepath);
     ~JsonParser();
 
     std::vector<Model::Prototype> getModelPrototypes() const;
     std::vector<Entity::Prototype> getEntityPrototypes() const;
-    std::vector<Light *> getLights(ShaderProgram *shaderProgram); // should be under entities too
+    std::vector<std::unique_ptr<Light::Prototype>> getLightPrototypes() const;
     std::vector<Screen::Prototype> getScreenPrototypes() const;
-    Skybox *getSkybox(Model *cubeModel, ShaderProgram *skyboxProgram);
+    Skybox::Prototype getSkyboxPrototype() const;
 
-    std::vector<ShaderProgram *> getShaderPrograms();
+    std::vector<ShaderProgram::Prototype> getShaderProgramPrototypes();
 
 private:
     std::vector<Widget::Prototype> getWidgetPrototypesFromScreen(const Json::Value &screenJson) const;

@@ -10,7 +10,7 @@
 
 uint32_t Model::s_idCounter = 0;
 
-Model::Model(const Prototype &prototype) : m_uniqueName(prototype.modelName), m_id(s_idCounter++)
+Model::Model(const Prototype &prototype) : m_id(s_idCounter++), m_uniqueName(prototype.modelName)
 {
     m_workingPath = prototype.modelPath.substr(0, prototype.modelPath.find_last_of('/'));
 

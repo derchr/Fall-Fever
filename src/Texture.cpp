@@ -28,15 +28,20 @@ void Texture::initializeOnGPU()
 
     GLenum internalFormat;
     GLenum dataFormat;
-    if (m_numComponents == 1) {
+
+    switch (m_numComponents) {
+    case 1:
         internalFormat = GL_RED;
         dataFormat = GL_RED;
-    } else if (m_numComponents == 3) {
+        break;
+    case 3:
         internalFormat = (m_textureType == TextureType::Diffuse) ? GL_SRGB8 : GL_RGB8;
         dataFormat = GL_RGB;
-    } else if (m_numComponents == 4) {
+        break;
+    case 4:
         internalFormat = (m_textureType == TextureType::Diffuse) ? GL_SRGB8_ALPHA8 : GL_RGBA8;
         dataFormat = GL_RGBA;
+        break;
     }
 
     // Push texture to grahics card
@@ -80,6 +85,8 @@ void Texture::bind(uint8_t textureUnit, ShaderProgram *shaderProgram, uint8_t te
     case TextureType::Gloss:
         uniformName += "gloss" + std::to_string(textureTypeNum);
         break;
+    default:
+        break;
     }
 
     // Add u_material as we store textures in a struct
@@ -114,6 +121,9 @@ CubeMap::CubeMap(const char *texturePseudoPath)
 {
     // Reserve space in vector so that elements can be accessed explicitly.
     m_texturePaths.resize(CUBEMAP_FACES_NUM_ITEMS);
+    m_textureBuffers.resize(CUBEMAP_FACES_NUM_ITEMS);
+    m_numComponents.resize(CUBEMAP_FACES_NUM_ITEMS);
+
     fillTexturePathVector(texturePseudoPath);
 
     stbi_set_flip_vertically_on_load(0);
@@ -127,34 +137,20 @@ CubeMap::CubeMap(const char *texturePseudoPath)
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-    for (unsigned int i = 0; i < CUBEMAP_FACES_NUM_ITEMS; i++) {
+    int i = 0;
+    for (auto &path : m_texturePaths) {
 
         int32_t numComponents;
-        auto *textureBuffer =
-            stbi_load(m_texturePaths[i].c_str(), &m_textureWidth, &m_textureHeight, &numComponents, 0);
-
-        GLenum internalFormat;
-        GLenum dataFormat;
-        if (numComponents == 1) {
-            internalFormat = GL_RED;
-            dataFormat = GL_RED;
-        } else if (numComponents == 3) {
-            internalFormat = GL_SRGB8;
-            dataFormat = GL_RGB;
-        } else if (numComponents == 4) {
-            internalFormat = GL_SRGB8_ALPHA8;
-            dataFormat = GL_RGBA;
-        }
+        auto textureBuffer = stbi_load(path.c_str(), &m_textureWidth, &m_textureHeight, &numComponents, 0);
 
         if (!textureBuffer) {
-            std::cout << "[Warning] CubeMap Texture " << m_texturePaths[i].c_str() << " not found!" << std::endl;
+            std::cout << "[Warning] CubeMap Texture " << path.c_str() << " not found!" << std::endl;
             return;
         }
 
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, m_textureWidth, m_textureHeight, 0,
-                     dataFormat, GL_UNSIGNED_BYTE, textureBuffer);
-
-        stbi_image_free(textureBuffer);
+        m_textureBuffers[i] = textureBuffer;
+        m_numComponents[i] = numComponents;
+        i++;
     }
 
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
@@ -184,6 +180,52 @@ CubeMap::CubeMap(int RESOLUTION) : m_textureWidth(RESOLUTION), m_textureHeight(R
 CubeMap::~CubeMap()
 {
     // glDeleteTextures(1, &m_textureId);
+}
+
+void CubeMap::initializeOnGPU()
+{
+    if (m_isInitialized)
+        return;
+
+    m_isInitialized = true;
+
+    glGenTextures(1, &m_textureId);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_textureId);
+
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    int i = 0;
+    for (auto &textureBuffer : m_textureBuffers) {
+        GLenum internalFormat;
+        GLenum dataFormat;
+
+        switch (m_numComponents[i]) {
+        case 1:
+            internalFormat = GL_RED;
+            dataFormat = GL_RED;
+            break;
+        case 3:
+            internalFormat = GL_SRGB8;
+            dataFormat = GL_RGB;
+            break;
+        case 4:
+            internalFormat = GL_SRGB8_ALPHA8;
+            dataFormat = GL_RGBA;
+            break;
+        }
+
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, m_textureWidth, m_textureHeight, 0,
+                     dataFormat, GL_UNSIGNED_BYTE, textureBuffer);
+
+        stbi_image_free(textureBuffer);
+        i++;
+    }
+
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
 void CubeMap::bind(ShaderProgram *shaderProgram)

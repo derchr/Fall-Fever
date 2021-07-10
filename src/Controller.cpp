@@ -37,7 +37,11 @@ Controller::Controller() : m_gameWindow(std::unique_ptr<Window>(new Window))
     m_camera = new Camera(90.0f, m_gameWindow->getWindowAspectRatio());
 
     JsonParser shaderParser("data/shaderPrograms.json");
-    m_shaderPrograms = shaderParser.getShaderPrograms();
+    auto shaderProgramPrototypes = shaderParser.getShaderProgramPrototypes();
+
+    for (auto &prototype : shaderProgramPrototypes) {
+        m_shaderPrograms.push_back(new ShaderProgram(prototype));
+    }
 
     m_postProcessFrameBuffer = new FrameBuffer(m_gameWindow->getWindowWidth(), m_gameWindow->getWindowHeight(),
                                                getShaderProgramByName("postProcessingProgram"));

@@ -10,7 +10,7 @@
 uint32_t Entity::s_idCounter = 0;
 
 Entity::Entity(Prototype prototype, Model *model, ShaderProgram *shaderProgram)
-    : m_uniqueName(prototype.name), m_model(model), m_shaderProgram(shaderProgram), m_id(s_idCounter++)
+    : m_id(s_idCounter++), m_uniqueName(prototype.name), m_model(model), m_shaderProgram(shaderProgram)
 {
     setPosition(prototype.position);
     setRotation(prototype.rotation);
@@ -146,11 +146,19 @@ bool Entity::getIsLightSource()
     return m_isLightSource;
 }
 
-Skybox::Skybox(Model *cubeModel, ShaderProgram *shaderProgram, const char *texturePseudoPath)
-    : m_cubeModel(cubeModel), m_shaderProgram(shaderProgram), m_cubeMap(texturePseudoPath),
+Skybox::Skybox(Prototype prototype, Model *cubeModel, ShaderProgram *shaderProgram)
+    : m_cubeModel(cubeModel), m_shaderProgram(shaderProgram), m_cubeMap(new CubeMap(prototype.texturePath.c_str())),
       m_vertexArray(cubeModel->getMesh(0)->getVertexArray())
+{}
+
+Skybox::~Skybox()
 {
-    // Empty
+    delete m_cubeMap;
+}
+
+void Skybox::initializeOnGPU()
+{
+    m_cubeMap->initializeOnGPU();
 }
 
 void Skybox::draw(glm::mat4 viewMatrix, glm::mat4 projectionMatrix)
@@ -168,9 +176,9 @@ void Skybox::draw(glm::mat4 viewMatrix, glm::mat4 projectionMatrix)
 
     m_shaderProgram->setUniform("u_viewProjectionMatrix", viewProjectionMatrix);
 
-    m_cubeMap.bind(m_shaderProgram);
+    m_cubeMap->bind(m_shaderProgram);
     m_cubeModel->getMesh(0)->drawWithoutTextures();
-    m_cubeMap.unbind();
+    m_cubeMap->unbind();
 
     m_shaderProgram->unbind();
     glDepthMask(GL_TRUE);

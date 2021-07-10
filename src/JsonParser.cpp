@@ -10,12 +10,12 @@
 #include <fstream>
 #include <iostream>
 
-JsonParser::JsonParser(const std::string &path)
+JsonParser::JsonParser(const std::string &jsonFilepath)
 {
-    std::ifstream file(path.c_str(), std::ifstream::binary);
+    std::ifstream file(jsonFilepath.c_str(), std::ifstream::binary);
 
     if (!file) {
-        std::cout << "Error reading file \"" << path << "\"." << std::endl;
+        std::cout << "Error reading file \"" << jsonFilepath << "\"." << std::endl;
         return;
     }
 
@@ -87,9 +87,9 @@ std::vector<Entity::Prototype> JsonParser::getEntityPrototypes() const
     return entityPrototypes;
 }
 
-std::vector<ShaderProgram *> JsonParser::getShaderPrograms()
+std::vector<ShaderProgram::Prototype> JsonParser::getShaderProgramPrototypes()
 {
-    std::vector<ShaderProgram *> temp_shaderPrograms;
+    std::vector<ShaderProgram::Prototype> prototypes;
 
     const Json::Value shaderProgramsJson = m_root["shaderPrograms"];
 
@@ -99,28 +99,23 @@ std::vector<ShaderProgram *> JsonParser::getShaderPrograms()
         std::string shaderProgram_fragmentPath = shaderProgramsJson[index]["fragmentPath"].asString();
         std::string shaderProgram_geometryPath = shaderProgramsJson[index]["geometryPath"].asString();
 
-        ShaderProgram *current_shaderProgram;
-        if (shaderProgram_geometryPath.empty()) {
-            current_shaderProgram =
-                new ShaderProgram(shaderProgram_name, shaderProgram_vertexPath, shaderProgram_fragmentPath);
-        } else {
-            current_shaderProgram = new ShaderProgram(shaderProgram_name, shaderProgram_vertexPath,
-                                                      shaderProgram_geometryPath, shaderProgram_fragmentPath);
-        }
-        temp_shaderPrograms.push_back(current_shaderProgram);
-        std::cout << "Loaded ShaderProgram \"" << shaderProgram_name << "\"" << std::endl;
+        ShaderProgram::Prototype prototype{shaderProgram_name, shaderProgram_vertexPath, shaderProgram_fragmentPath,
+                                           shaderProgram_geometryPath};
+
+        prototypes.push_back(prototype);
+        // std::cout << "Loaded ShaderProgram \"" << shaderProgram_name << "\"" << std::endl;
     }
 
-    return temp_shaderPrograms;
+    return prototypes;
 }
 
-std::vector<Light *> JsonParser::getLights(ShaderProgram *shaderProgram)
+std::vector<std::unique_ptr<Light::Prototype>> JsonParser::getLightPrototypes() const
 {
-    std::vector<Light *> temp_lights;
-    glm::vec3 light_direction = {1.0f, 0.0f, 0.0f};
-    glm::vec3 light_position = {};
-    glm::vec3 light_color = {1.0f, 1.0f, 1.0f};
-    float light_intensity = 10.0f;
+    std::vector<std::unique_ptr<Light::Prototype>> prototypes;
+    glm::vec3 direction = {1.0f, 0.0f, 0.0f};
+    glm::vec3 position = {};
+    glm::vec3 color = {1.0f, 1.0f, 1.0f};
+    float intensity = 10.0f;
 
     const Json::Value directionalLightsJson = m_root["directionalLight"];
 
@@ -129,52 +124,55 @@ std::vector<Light *> JsonParser::getLights(ShaderProgram *shaderProgram)
     Json::Value intensityJson = directionalLightsJson["intensity"];
 
     if (!intensityJson.empty()) {
-        light_intensity = intensityJson.asFloat();
+        intensity = intensityJson.asFloat();
     }
     if (!directionJson.empty()) {
-        light_direction.x = directionJson[0].asFloat();
-        light_direction.y = directionJson[1].asFloat();
-        light_direction.z = directionJson[2].asFloat();
+        direction.x = directionJson[0].asFloat();
+        direction.y = directionJson[1].asFloat();
+        direction.z = directionJson[2].asFloat();
     }
     if (!colorJson.empty()) {
-        light_color.x = colorJson[0].asFloat();
-        light_color.y = colorJson[1].asFloat();
-        light_color.z = colorJson[2].asFloat();
+        color.x = colorJson[0].asFloat();
+        color.y = colorJson[1].asFloat();
+        color.z = colorJson[2].asFloat();
     }
 
-    DirectionalLight *current_directionalLight =
-        new DirectionalLight(light_direction, light_color, light_intensity, shaderProgram);
-    current_directionalLight->setActive(true);
-    temp_lights.push_back(current_directionalLight);
+    auto prototype = std::unique_ptr<Light::Prototype>(new DirectionalLight::Prototype{direction, color, intensity});
+
+    // DirectionalLight *current_directionalLight = new DirectionalLight(*prototype, shaderProgram);
+    // current_directionalLight->setActive(true);
+
+    prototypes.push_back(std::move(prototype));
 
     // Pointlights
     const Json::Value pointLightsJson = m_root["pointLights"];
 
     int index = 0;
     for (; index < (int)pointLightsJson.size(); index++) {
-        PointLight *current_pointLight;
-
         const Json::Value positionJson = pointLightsJson[index]["position"];
         colorJson = pointLightsJson[index]["color"];
         intensityJson = pointLightsJson[index]["intensity"];
 
         if (!intensityJson.empty()) {
-            light_intensity = intensityJson.asFloat();
+            intensity = intensityJson.asFloat();
         }
         if (!positionJson.empty()) {
-            light_position.x = positionJson[0].asFloat();
-            light_position.y = positionJson[1].asFloat();
-            light_position.z = positionJson[2].asFloat();
+            position.x = positionJson[0].asFloat();
+            position.y = positionJson[1].asFloat();
+            position.z = positionJson[2].asFloat();
         }
         if (!colorJson.empty()) {
-            light_color.x = colorJson[0].asFloat();
-            light_color.y = colorJson[1].asFloat();
-            light_color.z = colorJson[2].asFloat();
+            color.x = colorJson[0].asFloat();
+            color.y = colorJson[1].asFloat();
+            color.z = colorJson[2].asFloat();
         }
 
-        current_pointLight = new PointLight(light_position, light_color, light_intensity, shaderProgram);
-        current_pointLight->setActive(true);
-        temp_lights.push_back(current_pointLight);
+        auto prototype = std::unique_ptr<Light::Prototype>(new PointLight::Prototype{position, color, intensity});
+
+        // current_pointLight = new PointLight(*prototype, shaderProgram);
+        // current_pointLight->setActive(true);
+
+        prototypes.push_back(std::move(prototype));
     }
 
     // In case there aren't enough PointLights defined in the Json file
@@ -182,13 +180,16 @@ std::vector<Light *> JsonParser::getLights(ShaderProgram *shaderProgram)
         const glm::vec3 default_position(0.0f);
         const glm::vec3 default_color(1.0f);
         const float default_intensity = 10.0f;
-        PointLight *current_pointLight =
-            new PointLight(default_position, default_color, default_intensity, shaderProgram);
-        current_pointLight->setActive(false);
-        temp_lights.push_back(current_pointLight);
+        auto prototype = std::unique_ptr<PointLight::Prototype>(
+            new PointLight::Prototype{default_position, default_color, default_intensity});
+
+        // PointLight *current_pointLight = new PointLight(*prototype, shaderProgram);
+        // current_pointLight->setActive(false);
+
+        prototypes.push_back(std::move(prototype));
     }
 
-    return temp_lights;
+    return prototypes;
 }
 
 std::vector<Screen::Prototype> JsonParser::getScreenPrototypes() const
@@ -234,15 +235,12 @@ std::vector<Widget::Prototype> JsonParser::getWidgetPrototypesFromScreen(const J
     return widgetPrototypes;
 }
 
-Skybox *JsonParser::getSkybox(Model *cubeModel, ShaderProgram *skyboxProgram)
+Skybox::Prototype JsonParser::getSkyboxPrototype() const
 {
-    Skybox *temp_skybox;
-
     const Json::Value shaderProgramsJson = m_root["skybox"];
 
-    std::string skybox_texturePath = shaderProgramsJson["texturePath"].asString();
-    temp_skybox = new Skybox(cubeModel, skyboxProgram, skybox_texturePath.c_str());
-    std::cout << "Loaded Skybox \"" << skybox_texturePath << "\"" << std::endl;
+    std::string texturePath = shaderProgramsJson["texturePath"].asString();
+    Skybox::Prototype prototype{texturePath};
 
-    return temp_skybox;
+    return prototype;
 }

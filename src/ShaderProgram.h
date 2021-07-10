@@ -8,9 +8,16 @@
 class ShaderProgram
 {
 public:
-    ShaderProgram(const std::string &name, const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
-    ShaderProgram(const std::string &name, const std::string &vertexShaderPath, const std::string &geometryShaderPath,
-                  const std::string &fragmentShaderPath);
+    struct Prototype
+    {
+        std::string name;
+        std::string vertexPath;
+        std::string fragmentPath;
+        std::string geometryPath;
+    };
+
+    ShaderProgram(Prototype prototype);
+
     ~ShaderProgram();
 
     void bind();

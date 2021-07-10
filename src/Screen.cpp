@@ -9,7 +9,7 @@
 uint32_t Screen::s_idCounter = 0;
 
 Screen::Screen(Prototype prototype, FrameBuffer *framebuffer, ShaderProgram *shaderProgram)
-    : m_uniqueName(prototype.name), m_frameBuffer(framebuffer), m_shaderProgram(shaderProgram), m_id(s_idCounter++)
+    : m_id(s_idCounter++), m_uniqueName(prototype.name), m_frameBuffer(framebuffer), m_shaderProgram(shaderProgram)
 {
     for (auto &prototype : prototype.widgetPrototypes) {
         Texture *currentTexture = new Texture(prototype.texturePrototype);

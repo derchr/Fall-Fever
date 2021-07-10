@@ -14,6 +14,7 @@ Imgui::Handler::Handler(GLFWwindow *window) : m_GLFWwindow(window)
     ImGui::CreateContext();
 
     ImGuiIO &io = ImGui::GetIO();
+    (void)io;
     // io.IniFilename = nullptr;
 
     // Setup Platform/Renderer bindings
