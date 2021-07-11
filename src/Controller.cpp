@@ -41,6 +41,7 @@ Controller::Controller() : m_gameWindow(std::unique_ptr<Window>(new Window))
 
     for (auto &prototype : shaderProgramPrototypes) {
         m_shaderPrograms.push_back(new ShaderProgram(prototype));
+        std::cout << "Loaded ShaderProgram \"" << prototype.name << "\"" << std::endl;
     }
 
     m_postProcessFrameBuffer = new FrameBuffer(m_gameWindow->getWindowWidth(), m_gameWindow->getWindowHeight(),

@@ -12,35 +12,12 @@ Widget::Widget(Prototype prototype, Texture *texture)
       m_callbackId(prototype.callBackId)
 {
     m_widgetTextures.push_back(texture);
-
-    double widgetVerticesData[12] = {
-        2 * (m_position.x + m_dimensions.x) - 1.0f,
-        2 * (m_position.y) - 1.0f,
-        0.0f, // Bottom right
-        2 * (m_position.x) - 1.0f,
-        2 * (m_position.y + m_dimensions.y) - 1.0f,
-        0.0f, // Top left
-        2 * (m_position.x) - 1.0f,
-        2 * (m_position.y) - 1.0f,
-        0.0f, // Bottom left
-        2 * (m_position.x + m_dimensions.x) - 1.0f,
-        2 * (m_position.y + m_dimensions.y) - 1.0f,
-        0.0f // Top right
-    };
-
-    unsigned int widgetIndicesData[6] = {0, 1, 2, 0, 3, 1};
-
-    float widgetTextureCoordinates[8] = {1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f};
-
-    m_widgetVertices = VertexArray::createVertices(widgetVerticesData, 12, widgetTextureCoordinates);
-    m_widgetIndices.assign(widgetIndicesData, widgetIndicesData + 6);
-    m_widgetMesh = new Mesh(m_widgetVertices, m_widgetIndices, m_widgetTextures);
-    m_widgetMesh->initializeOnGPU();
 }
 
 Widget::~Widget()
 {
-    delete m_widgetMesh;
+    for (auto &texture : m_widgetTextures)
+        delete texture;
 }
 
 std::string Widget::getUniqueName()
@@ -56,7 +33,28 @@ uint16_t Widget::getCallbackId()
 void Widget::draw(ShaderProgram *shaderProgram)
 {
     shaderProgram->bind();
-    m_widgetMesh->draw(shaderProgram);
+    shaderProgram->setUniform("u_widgetData.position", m_position);
+    shaderProgram->setUniform("u_widgetData.dimensions", m_dimensions);
+
+    GLint wireframe;
+    glGetIntegerv(GL_POLYGON_MODE, &wireframe);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_widgetTextures[0]->getTextureId());
+
+    GLint location = glGetUniformLocation(shaderProgram->getShaderProgramId(), "u_texture");
+    glUniform1i(location, 0);
+
+    // A VAO is necessary although no data is stored in it
+    GLuint temp_vao;
+    glGenVertexArrays(1, &temp_vao);
+    glBindVertexArray(temp_vao);
+    glDrawArrays(GL_POINTS, 0, 3);
+    glBindVertexArray(0);
+
+    glPolygonMode(GL_FRONT_AND_BACK, wireframe);
+
     shaderProgram->unbind();
 }
 

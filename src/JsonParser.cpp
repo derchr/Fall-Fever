@@ -1,11 +1,4 @@
 #include "JsonParser.h"
-#include "Entity.h"
-#include "Light.h"
-#include "Model.h"
-#include "Screen.h"
-#include "ShaderProgram.h"
-#include "Texture.h"
-#include "Widget.h"
 
 #include <fstream>
 #include <iostream>
@@ -103,7 +96,6 @@ std::vector<ShaderProgram::Prototype> JsonParser::getShaderProgramPrototypes()
                                            shaderProgram_geometryPath};
 
         prototypes.push_back(prototype);
-        // std::cout << "Loaded ShaderProgram \"" << shaderProgram_name << "\"" << std::endl;
     }
 
     return prototypes;

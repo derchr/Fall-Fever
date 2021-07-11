@@ -23,7 +23,8 @@
         {
             "unique_name": "menuProgram",
             "vertexPath": "data/shaders/menu.vert",
-            "fragmentPath": "data/shaders/menu.frag"
+            "fragmentPath": "data/shaders/menu.frag",
+            "geometryPath": "data/shaders/menu.geom"
         },
         {
             "unique_name": "directionalShadowDepthProgram",

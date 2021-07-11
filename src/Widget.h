@@ -43,9 +43,5 @@ private:
 
     uint16_t m_callbackId;
 
-    std::vector<Vertex> m_widgetVertices;
-    std::vector<uint32_t> m_widgetIndices;
     std::vector<Texture *> m_widgetTextures;
-
-    Mesh *m_widgetMesh;
 };

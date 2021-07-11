@@ -128,6 +128,12 @@ void ShaderProgram::setUniform(const std::string &name, float value) const
     glUniform1f(location, value);
 }
 
+void ShaderProgram::setUniform(const std::string &name, glm::vec2 vector) const
+{
+    GLint location = retrieveUniformLocation(name);
+    glUniform2f(location, vector.x, vector.y);
+}
+
 void ShaderProgram::setUniform(const std::string &name, glm::vec3 vector) const
 {
     GLint location = retrieveUniformLocation(name);
