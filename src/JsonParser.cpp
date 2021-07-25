@@ -41,9 +41,9 @@ std::vector<Model::Prototype> JsonParser::getModelPrototypes() const
     return modelPrototypes;
 }
 
-std::vector<Entity::Prototype> JsonParser::getEntityPrototypes() const
+std::vector<ModelEntity::Prototype> JsonParser::getEntityPrototypes() const
 {
-    std::vector<Entity::Prototype> entityPrototypes;
+    std::vector<ModelEntity::Prototype> entityPrototypes;
 
     const Json::Value entitiesJson = m_root["entities"];
 
@@ -71,8 +71,8 @@ std::vector<Entity::Prototype> JsonParser::getEntityPrototypes() const
             entityScale = scaleJson.asFloat();
         }
 
-        Entity::Prototype prototype{entityName,      entityModel,    entityShaderProgram,
-                                    entitiyPosition, entityRotation, entityScale};
+        ModelEntity::Prototype prototype(entityName, entitiyPosition, entityRotation, entityScale, entityModel,
+                                         entityShaderProgram);
 
         entityPrototypes.push_back(prototype);
     }
@@ -131,9 +131,6 @@ std::vector<std::unique_ptr<Light::Prototype>> JsonParser::getLightPrototypes() 
 
     auto prototype = std::unique_ptr<Light::Prototype>(new DirectionalLight::Prototype{direction, color, intensity});
 
-    // DirectionalLight *current_directionalLight = new DirectionalLight(*prototype, shaderProgram);
-    // current_directionalLight->setActive(true);
-
     prototypes.push_back(std::move(prototype));
 
     // Pointlights
@@ -161,9 +158,6 @@ std::vector<std::unique_ptr<Light::Prototype>> JsonParser::getLightPrototypes() 
 
         auto prototype = std::unique_ptr<Light::Prototype>(new PointLight::Prototype{position, color, intensity});
 
-        // current_pointLight = new PointLight(*prototype, shaderProgram);
-        // current_pointLight->setActive(true);
-
         prototypes.push_back(std::move(prototype));
     }
 
@@ -174,9 +168,6 @@ std::vector<std::unique_ptr<Light::Prototype>> JsonParser::getLightPrototypes() 
         const float default_intensity = 10.0f;
         auto prototype = std::unique_ptr<PointLight::Prototype>(
             new PointLight::Prototype{default_position, default_color, default_intensity});
-
-        // PointLight *current_pointLight = new PointLight(*prototype, shaderProgram);
-        // current_pointLight->setActive(false);
 
         prototypes.push_back(std::move(prototype));
     }

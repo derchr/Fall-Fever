@@ -11,7 +11,7 @@
 class ShaderProgram;
 
 // Order is important!
-enum cubeMapFaces
+enum class cubeMapFaces
 {
     cm_right,
     cm_left,
@@ -31,7 +31,7 @@ public:
         TextureType textureType;
     };
 
-    Texture(const Prototype &prototype);
+    Texture(const std::string &path, TextureType type);
     ~Texture();
 
     void initializeOnGPU();
@@ -62,7 +62,7 @@ private:
 class CubeMap
 {
 public:
-    CubeMap(const char *texturePseudoPath);
+    CubeMap(const std::string &texturePseudoPath);
     CubeMap(int RESOLUTION);
 
     void initializeOnGPU();
@@ -72,10 +72,10 @@ public:
     void bind(ShaderProgram *shaderProgram);
     void unbind();
 
-    GLuint getTextureId();
+    GLuint getTextureId() const;
 
 private:
-    void fillTexturePathVector(const char *texturePseudoPath);
+    void fillTexturePathVector(const std::string &texturePseudoPath);
 
     bool m_isInitialized = false;
 

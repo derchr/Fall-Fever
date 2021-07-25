@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Entity.h"
+
 #include <glm/glm.hpp>
 #include <string>
 
@@ -7,7 +9,7 @@
 
 class ShaderProgram;
 
-class Light
+class Light : public Entity
 {
 public:
     struct Prototype

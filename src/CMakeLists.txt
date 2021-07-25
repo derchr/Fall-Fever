@@ -11,14 +11,13 @@ add_executable(Fall-Fever
     Model.cpp
     Entity.cpp
     Light.cpp
-    World.cpp
+    Scene.cpp
     FrameBuffer.cpp
     Widget.cpp
     Screen.cpp
     Menu.cpp
     JsonParser.cpp
     Helper.cpp
-    GLBucket.cpp
     imgui/EntityWindow.cpp
     imgui/GeneralInfoWindow.cpp
     imgui/Handler.cpp

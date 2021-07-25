@@ -23,7 +23,7 @@ public:
     ~JsonParser();
 
     std::vector<Model::Prototype> getModelPrototypes() const;
-    std::vector<Entity::Prototype> getEntityPrototypes() const;
+    std::vector<ModelEntity::Prototype> getEntityPrototypes() const;
     std::vector<std::unique_ptr<Light::Prototype>> getLightPrototypes() const;
     std::vector<Screen::Prototype> getScreenPrototypes() const;
     Skybox::Prototype getSkyboxPrototype() const;

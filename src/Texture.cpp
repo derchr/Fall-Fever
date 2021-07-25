@@ -3,8 +3,7 @@
 
 #include <iostream>
 
-Texture::Texture(const Prototype &prototype)
-    : m_texturePath(prototype.texturePath), m_textureType(prototype.textureType)
+Texture::Texture(const std::string &path, TextureType type) : m_texturePath(path), m_textureType(type)
 {
     stbi_set_flip_vertically_on_load(1);
     m_textureBuffer = stbi_load(m_texturePath.c_str(), &m_textureWidth, &m_textureHeight, &m_numComponents, 0);
@@ -117,12 +116,12 @@ GLuint Texture::getTextureId()
     return m_textureId;
 }
 
-CubeMap::CubeMap(const char *texturePseudoPath)
+CubeMap::CubeMap(const std::string &texturePseudoPath)
 {
     // Reserve space in vector so that elements can be accessed explicitly.
-    m_texturePaths.resize(CUBEMAP_FACES_NUM_ITEMS);
-    m_textureBuffers.resize(CUBEMAP_FACES_NUM_ITEMS);
-    m_numComponents.resize(CUBEMAP_FACES_NUM_ITEMS);
+    m_texturePaths.resize(static_cast<int>(cubeMapFaces::CUBEMAP_FACES_NUM_ITEMS));
+    m_textureBuffers.resize(static_cast<int>(cubeMapFaces::CUBEMAP_FACES_NUM_ITEMS));
+    m_numComponents.resize(static_cast<int>(cubeMapFaces::CUBEMAP_FACES_NUM_ITEMS));
 
     fillTexturePathVector(texturePseudoPath);
 
@@ -242,19 +241,19 @@ void CubeMap::unbind()
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
-void CubeMap::fillTexturePathVector(const char *texturePseudoPath)
+void CubeMap::fillTexturePathVector(const std::string &texturePseudoPath)
 {
-    for (unsigned int i = 0; i < CUBEMAP_FACES_NUM_ITEMS; i++) {
-        m_texturePaths[cm_front] = std::string(texturePseudoPath) + "front.png";
-        m_texturePaths[cm_back] = std::string(texturePseudoPath) + "back.png";
-        m_texturePaths[cm_top] = std::string(texturePseudoPath) + "top.png";
-        m_texturePaths[cm_bottom] = std::string(texturePseudoPath) + "bottom.png";
-        m_texturePaths[cm_left] = std::string(texturePseudoPath) + "left.png";
-        m_texturePaths[cm_right] = std::string(texturePseudoPath) + "right.png";
+    for (unsigned int i = 0; i < static_cast<int>(cubeMapFaces::CUBEMAP_FACES_NUM_ITEMS); i++) {
+        m_texturePaths[static_cast<int>(cubeMapFaces::cm_front)] = texturePseudoPath + "front.png";
+        m_texturePaths[static_cast<int>(cubeMapFaces::cm_back)] = texturePseudoPath + "back.png";
+        m_texturePaths[static_cast<int>(cubeMapFaces::cm_top)] = texturePseudoPath + "top.png";
+        m_texturePaths[static_cast<int>(cubeMapFaces::cm_bottom)] = texturePseudoPath + "bottom.png";
+        m_texturePaths[static_cast<int>(cubeMapFaces::cm_left)] = texturePseudoPath + "left.png";
+        m_texturePaths[static_cast<int>(cubeMapFaces::cm_right)] = texturePseudoPath + "right.png";
     }
 }
 
-GLuint CubeMap::getTextureId()
+GLuint CubeMap::getTextureId() const
 {
     return m_textureId;
 }

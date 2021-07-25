@@ -7,7 +7,7 @@
 class ShaderProgram;
 class Window;
 class EventHandler;
-class World;
+class Scene;
 class Camera;
 class Menu;
 class FrameBuffer;
@@ -39,13 +39,13 @@ private:
 
     void updateWindowDimensions();
 
-    void renderImGui(World *world, glm::vec3 *lightColor, bool *rotateEntity, bool *rotateLightSource,
+    void renderImGui(Scene *world, glm::vec3 *lightColor, bool *rotateEntity, bool *rotateLightSource,
                      ShaderProgram *postProcessingProgram, float *intensity, bool *drawShadows);
 
     std::unique_ptr<Window> m_gameWindow;
     EventHandler *m_gameEventHandler;
 
-    World *m_world;
+    Scene *m_world;
 
     Camera *m_camera;
     Menu *m_menu;

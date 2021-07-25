@@ -4,6 +4,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <memory>
 
 class VertexArray;
 class ShaderProgram;
@@ -14,20 +15,22 @@ class Entity
 public:
     struct Prototype
     {
+        Prototype(const std::string &name, glm::vec3 position, glm::vec3 rotation, float scale)
+            : name(name), position(position), rotation(rotation), scale(scale)
+        {}
+        virtual ~Prototype() = default;
+
         std::string name;
-        std::string modelName;
-        std::string shaderProgramName;
         glm::vec3 position;
         glm::vec3 rotation;
         float scale;
     };
 
-    Entity(Prototype prototype, Model *model, ShaderProgram *shaderProgram);
-    ~Entity() = default;
+    Entity(const std::string &name);
+    virtual ~Entity() = 0;
 
-    void draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition);
-    void drawDirectionalShadows(glm::mat4 viewProjMatrix, ShaderProgram *p_shaderProgram);
-    void drawPointShadows(ShaderProgram *p_shaderProgram);
+    uint32_t getId() const;
+    const std::string &getUniqueName() const;
 
     void translate(glm::vec3 vector);
     void rotate(glm::vec3 axis, float radians);
@@ -35,34 +38,54 @@ public:
     void setPosition(glm::vec3 position);
     void setRotation(glm::vec3 eulerAngles);
     void setRotation(glm::vec3 axis, float radians);
-    void setScale(float scaleFactor);
-    void setIsLightSource(bool temp);
+    void setScale(float scale);
 
-    uint32_t getId();
-    std::string getUniqueName();
-    glm::vec3 getPosition();
-    glm::mat4 getModelMatrix();
-    bool getIsLightSource();
+    glm::vec3 getPosition() const;
+    glm::mat4 getModelMatrix() const;
 
-private:
+protected:
     void updateModelMatrix();
 
     const uint32_t m_id;
     static uint32_t s_idCounter;
+
+    // TODO
+    std::weak_ptr<Entity> m_parent;
+    std::vector<std::shared_ptr<Entity>> m_children;
+
     std::string m_uniqueName;
 
-    Model *m_model;
-    ShaderProgram *m_shaderProgram;
-
-    bool m_isLightSource = false;
-
     glm::mat4 m_modelMatrix = glm::mat4(1.0f);
-
     glm::vec3 m_position = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::vec3 m_velocity = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::quat m_quaternion;
+    float m_scale = 1.0f;
+};
 
-    float m_modelScale = 1.0f;
+class ModelEntity : public Entity
+{
+public:
+    struct Prototype : public Entity::Prototype
+    {
+        Prototype(const std::string &name, glm::vec3 position, glm::vec3 rotation, float scale,
+                  const std::string &modelName, const std::string &shaderProgramName)
+            : Entity::Prototype(name, position, rotation, scale), modelName(modelName),
+              shaderProgramName(shaderProgramName)
+        {}
+        std::string modelName;
+        std::string shaderProgramName;
+    };
+
+    ModelEntity(Prototype prototype, Model *model, ShaderProgram *shaderProgram);
+    ~ModelEntity() = default;
+
+    void draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition);
+    void drawDirectionalShadows(glm::mat4 viewProjMatrix, ShaderProgram *p_shaderProgram);
+    void drawPointShadows(ShaderProgram *p_shaderProgram);
+
+private:
+    Model *m_model;
+    ShaderProgram *m_shaderProgram;
 };
 
 class Skybox

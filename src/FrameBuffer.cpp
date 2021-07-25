@@ -6,6 +6,24 @@
 #include <cstddef>
 #include <iostream>
 
+AbstractFrameBuffer::~AbstractFrameBuffer()
+{}
+
+void AbstractFrameBuffer::bind() const
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
+}
+
+void AbstractFrameBuffer::unbind() const
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+GLuint AbstractFrameBuffer::getFBO() const
+{
+    return m_FBO;
+}
+
 FrameBuffer::FrameBuffer(uint32_t width, uint32_t height, ShaderProgram *shaderProgram) : m_shaderProgram(shaderProgram)
 {
     glGenFramebuffers(1, &m_FBO);
@@ -21,17 +39,12 @@ FrameBuffer::~FrameBuffer()
     glDeleteRenderbuffers(1, &m_depthStencilBuffer);
 }
 
-void FrameBuffer::bind()
+GLuint FrameBuffer::getTextureId() const
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
+    return m_colorBuffer;
 }
 
-void FrameBuffer::unbind()
-{
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-void FrameBuffer::render()
+void FrameBuffer::drawOnEntireScreen() const
 {
     // Disable wireframe mode
     GLint wireframe;
@@ -92,47 +105,34 @@ void FrameBuffer::generateTextures(uint32_t width, uint32_t height)
     unbind();
 }
 
-void FrameBuffer::setExposureCorrection(bool exposureCorrection)
+void FrameBuffer::setExposureCorrection(bool exposureCorrection) const
 {
     m_shaderProgram->bind();
     m_shaderProgram->setUniform("u_exposureCorrection", exposureCorrection);
     m_shaderProgram->unbind();
 }
 
-GLuint FrameBuffer::getTextureId()
-{
-    return m_colorBuffer;
-}
+AbstractDepthMap::~AbstractDepthMap()
+{}
 
-DepthMap::DepthMap(DepthMapType type, int RESOLUTION)
+DepthMap::DepthMap(int RESOLUTION)
 {
-    glGenFramebuffers(1, &m_depthMapFBO);
+    glGenFramebuffers(1, &m_FBO);
     bind();
 
-    if (type == DepthMapType::Normal) {
+    glGenTextures(1, &m_depthMap);
+    glBindTexture(GL_TEXTURE_2D, m_depthMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, RESOLUTION, RESOLUTION, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-        glGenTextures(1, &m_depthMap);
-        glBindTexture(GL_TEXTURE_2D, m_depthMap);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, RESOLUTION, RESOLUTION, 0, GL_DEPTH_COMPONENT, GL_FLOAT,
-                     NULL);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthMap, 0);
-        glDrawBuffer(GL_NONE);
-        glReadBuffer(GL_NONE);
-
-    } else if (type == DepthMapType::CubeMap) {
-        m_cubeMap = new CubeMap(RESOLUTION);
-
-        glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_cubeMap->getTextureId(), 0);
-        glDrawBuffer(GL_NONE);
-        glReadBuffer(GL_NONE);
-    }
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthMap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         std::cout << "[Error] FrameBuffer is not complete!" << std::endl;
@@ -146,27 +146,32 @@ DepthMap::~DepthMap()
     //    delete m_cubeMap;
 }
 
-void DepthMap::bind()
-{
-    glBindFramebuffer(GL_FRAMEBUFFER, m_depthMapFBO);
-}
-
-void DepthMap::unbind()
-{
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-GLuint DepthMap::getFBO()
-{
-    return m_depthMapFBO;
-}
-
-GLuint DepthMap::getDepthMap()
+GLuint DepthMap::getDepthMap() const
 {
     return m_depthMap;
 }
 
-GLuint DepthMap::getCubeMapId()
+DepthMapCube::DepthMapCube(int RESOLUTION)
+{
+    glGenFramebuffers(1, &m_FBO);
+    bind();
+
+    m_cubeMap = new CubeMap(RESOLUTION);
+
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_cubeMap->getTextureId(), 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cout << "[Error] FrameBuffer is not complete!" << std::endl;
+
+    unbind();
+}
+
+DepthMapCube::~DepthMapCube()
+{}
+
+GLuint DepthMapCube::getCubeMapTextureId()
 {
     return m_cubeMap->getTextureId();
 }

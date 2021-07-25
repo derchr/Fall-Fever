@@ -25,14 +25,15 @@ void Mesh::draw(ShaderProgram *shaderProgram)
     uint8_t typeNumberCount[static_cast<int>(TextureType::TEXTURE_TYPE_NUM_ITEMS)]{0};
     glBindTexture(GL_TEXTURE_2D, 0);
     // Bind all textures in order to its texture unit
-    for (auto it = m_textures.begin(); it != m_textures.end(); it++) {
-        const int i = it - m_textures.begin();
+    int i = 0;
+    for (auto it : m_textures) {
+        TextureType currentTextureType = it->getTextureType();
 
-        TextureType currentTextureType = (*it)->getTextureType();
-
-        (*it)->bind(i, shaderProgram, typeNumberCount[static_cast<int>(currentTextureType)]);
+        it->bind(i, shaderProgram, typeNumberCount[static_cast<int>(currentTextureType)]);
 
         typeNumberCount[static_cast<int>(currentTextureType)] += 1;
+
+        i++;
     }
 
     // Draw elements

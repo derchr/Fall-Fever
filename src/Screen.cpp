@@ -12,7 +12,8 @@ Screen::Screen(Prototype prototype, FrameBuffer *framebuffer, ShaderProgram *sha
     : m_id(s_idCounter++), m_uniqueName(prototype.name), m_frameBuffer(framebuffer), m_shaderProgram(shaderProgram)
 {
     for (auto &prototype : prototype.widgetPrototypes) {
-        Texture *currentTexture = new Texture(prototype.texturePrototype);
+        auto texturePrototype = prototype.texturePrototype;
+        Texture *currentTexture = new Texture(texturePrototype.texturePath, texturePrototype.textureType);
         currentTexture->initializeOnGPU();
 
         Widget *currentWidget = new Widget(prototype, currentTexture);
@@ -70,6 +71,6 @@ void Screen::draw() const
     }
 
     m_frameBuffer->unbind();
-    m_frameBuffer->render();
+    m_frameBuffer->drawOnEntireScreen();
     m_frameBuffer->setExposureCorrection(true);
 }

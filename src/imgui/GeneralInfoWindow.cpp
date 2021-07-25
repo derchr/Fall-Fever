@@ -1,13 +1,13 @@
 #include "GeneralInfoWindow.h"
 #include "../Controller.h"
 #include "../Entity.h"
+#include "../Scene.h"
 #include "../ShaderProgram.h"
-#include "../World.h"
 
 #include <imgui.h>
 #include <math.h>
 
-Imgui::GeneralInfoWindow::GeneralInfoWindow(Controller *controller, World *world, ShaderProgram *postProcessingProgram,
+Imgui::GeneralInfoWindow::GeneralInfoWindow(Controller *controller, Scene *world, ShaderProgram *postProcessingProgram,
                                             bool *rotateEntity, bool *drawShadows, bool *rotateLightSource,
                                             glm::vec3 *lightColor, float *exposure, float *intensity)
     : m_controller(controller), m_world(world), m_postProcessingProgram(postProcessingProgram),
@@ -26,7 +26,7 @@ void Imgui::GeneralInfoWindow::addWidgets()
 
     ImGui::Checkbox("Rotate Object", m_rotateEntity);
 
-    Entity *mainObject = m_world->getEntityById(0);
+    ModelEntity *mainObject = m_world->getEntityById(0);
     mainObject->setPosition(glm::vec3(m_translation[0], m_translation[1], m_translation[2]));
     if (!*m_rotateEntity) {
         mainObject->setRotation(glm::vec3(0.f, 1.0f, 0.f), m_rotation);

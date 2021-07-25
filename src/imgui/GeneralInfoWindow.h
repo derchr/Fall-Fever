@@ -4,7 +4,7 @@
 
 #include <glm/glm.hpp>
 
-class World;
+class Scene;
 class ShaderProgram;
 class Controller;
 
@@ -13,7 +13,7 @@ namespace Imgui {
 class GeneralInfoWindow : public Window
 {
 public:
-    GeneralInfoWindow(Controller *controller, World *world, ShaderProgram *postProcessingProgram, bool *rotateEntity,
+    GeneralInfoWindow(Controller *controller, Scene *world, ShaderProgram *postProcessingProgram, bool *rotateEntity,
                       bool *drawShadows, bool *rotateLightSource, glm::vec3 *lightColor, float *exposure,
                       float *intensity);
 
@@ -21,7 +21,7 @@ private:
     void addWidgets() override;
 
     Controller *m_controller;
-    World *m_world;
+    Scene *m_world;
     ShaderProgram *m_postProcessingProgram;
 
     bool *m_rotateEntity;

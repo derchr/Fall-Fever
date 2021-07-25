@@ -9,15 +9,95 @@
 
 uint32_t Entity::s_idCounter = 0;
 
-Entity::Entity(Prototype prototype, Model *model, ShaderProgram *shaderProgram)
-    : m_id(s_idCounter++), m_uniqueName(prototype.name), m_model(model), m_shaderProgram(shaderProgram)
+Entity::Entity(const std::string &name) : m_id(s_idCounter++), m_uniqueName(name)
+{}
+
+Entity::~Entity()
+{}
+
+uint32_t Entity::getId() const
+{
+    return m_id;
+}
+
+const std::string &Entity::getUniqueName() const
+{
+    return m_uniqueName;
+}
+
+void Entity::translate(glm::vec3 vector)
+{
+    m_position += vector;
+    updateModelMatrix();
+}
+
+void Entity::rotate(glm::vec3 axis, float radians)
+{
+    glm::quat rotation = glm::angleAxis(radians, axis);
+    m_quaternion = rotation * m_quaternion;
+    updateModelMatrix();
+}
+
+void Entity::setPosition(glm::vec3 position)
+{
+    m_position = position;
+    updateModelMatrix();
+}
+
+void Entity::setRotation(glm::vec3 eulerAngles)
+{
+    m_quaternion = glm::quat(eulerAngles);
+    updateModelMatrix();
+}
+
+void Entity::setRotation(glm::vec3 axis, float radians)
+{
+    m_quaternion = glm::angleAxis(radians, axis);
+    updateModelMatrix();
+}
+
+void Entity::setScale(float scale)
+{
+    m_scale = scale;
+    updateModelMatrix();
+}
+
+void Entity::updateModelMatrix()
+{
+    // Translate * Rotate * Scale * vertex_vec;
+    // First scaling, then rotation, then translation
+
+    // Translate
+    glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), m_position);
+
+    // Rotate
+    glm::mat4 rotationMatrix = glm::toMat4(m_quaternion);
+
+    // Scale
+    glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(m_scale, m_scale, m_scale));
+
+    m_modelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
+}
+
+glm::vec3 Entity::getPosition() const
+{
+    return m_position;
+}
+
+glm::mat4 Entity::getModelMatrix() const
+{
+    return m_modelMatrix;
+}
+
+ModelEntity::ModelEntity(Prototype prototype, Model *model, ShaderProgram *shaderProgram)
+    : Entity(prototype.name), m_model(model), m_shaderProgram(shaderProgram)
 {
     setPosition(prototype.position);
     setRotation(prototype.rotation);
     setScale(prototype.scale);
 }
 
-void Entity::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition)
+void ModelEntity::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition)
 {
     m_shaderProgram->bind();
 
@@ -37,113 +117,29 @@ void Entity::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition)
     m_shaderProgram->unbind();
 }
 
-void Entity::drawDirectionalShadows(glm::mat4 viewProjMatrix, ShaderProgram *p_shaderProgram)
+void ModelEntity::drawDirectionalShadows(glm::mat4 viewProjMatrix, ShaderProgram *shaderProgram)
 {
-    p_shaderProgram->bind();
+    shaderProgram->bind();
 
     glm::mat4 modelViewProj = viewProjMatrix * m_modelMatrix;
-    p_shaderProgram->setUniform("u_modelViewProjMatrix", modelViewProj);
+    shaderProgram->setUniform("u_modelViewProjMatrix", modelViewProj);
 
     // Draw the model
     m_model->drawWithoutTextures();
 
-    p_shaderProgram->unbind();
+    shaderProgram->unbind();
 }
 
-void Entity::drawPointShadows(ShaderProgram *p_shaderProgram)
+void ModelEntity::drawPointShadows(ShaderProgram *shaderProgram)
 {
-    p_shaderProgram->bind();
+    shaderProgram->bind();
 
-    p_shaderProgram->setUniform("u_modelMatrix", m_modelMatrix);
+    shaderProgram->setUniform("u_modelMatrix", m_modelMatrix);
 
     // Draw the model
     m_model->drawWithoutTextures();
 
-    p_shaderProgram->unbind();
-}
-
-void Entity::translate(glm::vec3 vector)
-{
-    m_position += vector;
-    updateModelMatrix();
-}
-
-void Entity::rotate(glm::vec3 axis, float radians)
-{
-    glm::quat rotation = glm::angleAxis(radians, axis);
-    m_quaternion = rotation * m_quaternion;
-    updateModelMatrix();
-}
-
-void Entity::setPosition(glm::vec3 position)
-{
-    this->m_position = position;
-    updateModelMatrix();
-}
-
-void Entity::setRotation(glm::vec3 eulerAngles)
-{
-    m_quaternion = glm::quat(eulerAngles);
-    updateModelMatrix();
-}
-
-void Entity::setRotation(glm::vec3 axis, float radians)
-{
-    m_quaternion = glm::angleAxis(radians, axis);
-    updateModelMatrix();
-}
-
-void Entity::setScale(float scaleFactor)
-{
-    m_modelScale = scaleFactor;
-    updateModelMatrix();
-}
-
-void Entity::updateModelMatrix()
-{
-    // Translate * Rotate * Scale * vertex_vec;
-    // First scaling, then rotation, then translation
-
-    // Translate
-    glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), m_position);
-
-    // Rotate
-    glm::mat4 rotationMatrix = glm::toMat4(m_quaternion);
-
-    // Scale
-    glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(m_modelScale, m_modelScale, m_modelScale));
-
-    m_modelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
-}
-
-void Entity::setIsLightSource(bool temp)
-{
-    m_isLightSource = temp;
-}
-
-uint32_t Entity::getId()
-{
-    return m_id;
-}
-
-std::string Entity::getUniqueName()
-{
-    return m_uniqueName;
-}
-
-glm::vec3 Entity::getPosition()
-{
-    return m_position;
-}
-
-glm::mat4 Entity::getModelMatrix()
-{
-    return m_modelMatrix;
-}
-
-bool Entity::getIsLightSource()
-{
-    return m_isLightSource;
+    shaderProgram->unbind();
 }
 
 Skybox::Skybox(Prototype prototype, Model *cubeModel, ShaderProgram *shaderProgram)

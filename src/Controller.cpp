@@ -22,13 +22,13 @@
 #include "Light.h"
 #include "Menu.h"
 #include "Model.h"
+#include "Scene.h"
 #include "Screen.h"
 #include "ShaderProgram.h"
 #include "Texture.h"
 #include "VertexArray.h"
 #include "Widget.h"
 #include "Window.h"
-#include "World.h"
 
 Controller::Controller() : m_gameWindow(std::unique_ptr<Window>(new Window))
 {
@@ -57,7 +57,7 @@ Controller::Controller() : m_gameWindow(std::unique_ptr<Window>(new Window))
     // Show main menu when loading is finished...
     m_menu->showScreenByName("mainMenuScreen");
 
-    m_world = new World(m_shaderPrograms);
+    m_world = new Scene(m_shaderPrograms);
 
 #ifdef _DEBUG
     m_imguiHandler = std::unique_ptr<Imgui::Handler>(new Imgui::Handler(m_gameWindow->getGLFWwindow()));
@@ -87,11 +87,10 @@ void Controller::run()
 {
     updateExposure(getShaderProgramByName("postProcessingProgram"));
 
-    Entity *lightSource = m_world->getEntityByName("light");
+    ModelEntity *lightSource = m_world->getEntityByName("light");
     lightSource->setScale(0.1f);
     lightSource->setRotation(glm::vec3(0.f));
     lightSource->setPosition(glm::vec3(-2.f, 1.5f, 2.f));
-    lightSource->setIsLightSource(true);
 
     m_camera->translate(glm::vec3(0.0f, 1.5f, 5.0f));
 
@@ -158,7 +157,7 @@ void Controller::run()
             m_world->draw(m_camera->getViewProj(), m_camera->getPosition());
 
             m_postProcessFrameBuffer->unbind();
-            m_postProcessFrameBuffer->render();
+            m_postProcessFrameBuffer->drawOnEntireScreen();
 
 #ifdef _DEBUG
             m_imguiHandler->renderWindows();

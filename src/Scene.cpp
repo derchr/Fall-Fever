@@ -1,7 +1,8 @@
-#include "World.h"
+#include "Scene.h"
 #include "Camera.h"
 #include "Controller.h"
 #include "Entity.h"
+#include "FrameBuffer.h"
 #include "JsonParser.h"
 #include "Light.h"
 #include "Model.h"
@@ -12,13 +13,13 @@
 #include <iostream>
 #include <thread>
 
-World::World(std::vector<ShaderProgram *> shaderPrograms)
+Scene::Scene(std::vector<ShaderProgram *> shaderPrograms)
     : m_shaderProgram(Controller::getShaderProgramByName("defaultProgram", shaderPrograms)),
-      m_depthMapDirectionalFBO(DepthMapType::Normal, SHADOW_RES)
+      m_depthMapDirectionalFBO(SHADOW_RES)
 {
     // Create 4 depthMaps
     for (int i = 0; i < 4; i++) {
-        DepthMap *temp_depthMap = new DepthMap(DepthMapType::CubeMap, SHADOW_RES);
+        DepthMapCube *temp_depthMap = new DepthMapCube(SHADOW_RES);
         m_depthMapPointFBO.push_back(temp_depthMap);
     }
 
@@ -63,9 +64,9 @@ World::World(std::vector<ShaderProgram *> shaderPrograms)
         std::cout << "Loaded Skybox \"" << skyboxPrototype.texturePath << "\"" << std::endl;
     });
 
-    std::vector<Entity::Prototype> entityPrototypes = modelParser.getEntityPrototypes();
+    std::vector<ModelEntity::Prototype> entityPrototypes = modelParser.getEntityPrototypes();
 
-    std::vector<Entity *> entities;
+    std::vector<ModelEntity *> entities;
     {
         for (auto &prototype : entityPrototypes) {
             // Get model
@@ -86,7 +87,7 @@ World::World(std::vector<ShaderProgram *> shaderPrograms)
                 currentProgram = Controller::getShaderProgramByName("basic", shaderPrograms);
             }
 
-            Entity *currentEntity = new Entity(prototype, currentModel, currentProgram);
+            ModelEntity *currentEntity = new ModelEntity(prototype, currentModel, currentProgram);
 
             std::cout << "Loaded Entity \"" << prototype.name << "\" with model \"" << prototype.modelName << "\""
                       << std::endl;
@@ -120,7 +121,7 @@ World::World(std::vector<ShaderProgram *> shaderPrograms)
     m_skybox->initializeOnGPU();
 }
 
-World::~World()
+Scene::~Scene()
 {
     // Iterate over depthMapPointFBO vector and delete all items
     for (auto it = m_depthMapPointFBO.begin(); it != m_depthMapPointFBO.end(); it++) {
@@ -137,12 +138,12 @@ World::~World()
     delete m_skybox;
 }
 
-void World::addEntity(Entity *entity)
+void Scene::addEntity(ModelEntity *entity)
 {
     m_entities.push_back(entity);
 }
 
-void World::removeEntityByName(std::string name)
+void Scene::removeEntityByName(std::string name)
 {
     for (auto it = m_entities.begin(); it != m_entities.end(); it++) {
         if ((*it)->getUniqueName() == name) {
@@ -154,14 +155,14 @@ void World::removeEntityByName(std::string name)
     std::cout << "[Warning] Entity with name " << name << " could not be removed." << std::endl;
 }
 
-void World::clearEntities()
+void Scene::clearEntities()
 {
     for (auto it = m_entities.begin(); it != m_entities.end(); it++) {
         m_entities.erase(it);
     }
 }
 
-void World::updatePointLight(unsigned int lightId, bool active, glm::vec3 position, glm::vec3 color, float intensity)
+void Scene::updatePointLight(unsigned int lightId, bool active, glm::vec3 position, glm::vec3 color, float intensity)
 {
     std::vector<PointLight *> pointLights = getPointLights();
     pointLights[lightId]->setActive(active);
@@ -170,7 +171,7 @@ void World::updatePointLight(unsigned int lightId, bool active, glm::vec3 positi
     pointLights[lightId]->setColor(color);
 }
 
-void World::updateDirectionalLight(bool active, glm::vec3 direction, glm::vec3 color)
+void Scene::updateDirectionalLight(bool active, glm::vec3 direction, glm::vec3 color)
 {
     DirectionalLight *directionalLight = getDirectionalLight();
     directionalLight->setActive(active);
@@ -178,7 +179,7 @@ void World::updateDirectionalLight(bool active, glm::vec3 direction, glm::vec3 c
     directionalLight->setColor(color);
 }
 
-void World::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition)
+void Scene::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition)
 {
     // Draw all entities
     for (auto it = m_entities.begin(); it != m_entities.end(); it++) {
@@ -189,7 +190,7 @@ void World::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition)
     // calculateShadows();
 }
 
-void World::calculateShadows(ShaderProgram *directionalShaderProgram, ShaderProgram *pointShaderProgram)
+void Scene::calculateShadows(ShaderProgram *directionalShaderProgram, ShaderProgram *pointShaderProgram)
 {
     // Get old viewport dimensions to reset them later...
     GLint VIEWPORT[4];
@@ -285,7 +286,7 @@ void World::calculateShadows(ShaderProgram *directionalShaderProgram, ShaderProg
         textureUnit = static_cast<int>(TextureType::TEXTURE_TYPE_NUM_ITEMS) * 2 + i + 1;
         m_shaderProgram->setUniform("u_texture_pointShadowMap0", (int)textureUnit);
         glActiveTexture(GL_TEXTURE0 + textureUnit);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, m_depthMapPointFBO[i]->getCubeMapId());
+        glBindTexture(GL_TEXTURE_CUBE_MAP, m_depthMapPointFBO[i]->getCubeMapTextureId());
 
         m_shaderProgram->unbind();
     }
@@ -295,7 +296,7 @@ void World::calculateShadows(ShaderProgram *directionalShaderProgram, ShaderProg
     glCullFace(GL_FRONT);
 }
 
-Model *World::getModelByName(std::string name)
+Model *Scene::getModelByName(std::string name)
 {
     for (auto it = m_models.begin(); it != m_models.end(); it++) {
         if ((*it)->getUniqueName() == name) {
@@ -306,7 +307,7 @@ Model *World::getModelByName(std::string name)
     return nullptr;
 }
 
-Entity *World::getEntityByName(std::string name)
+ModelEntity *Scene::getEntityByName(std::string name)
 {
     for (auto it = m_entities.begin(); it != m_entities.end(); it++) {
         if ((*it)->getUniqueName() == name) {
@@ -317,7 +318,7 @@ Entity *World::getEntityByName(std::string name)
     return nullptr;
 }
 
-Entity *World::getEntityById(uint32_t id)
+ModelEntity *Scene::getEntityById(uint32_t id)
 {
     for (auto it = m_entities.begin(); it != m_entities.end(); it++) {
         if ((*it)->getId() == id) {
@@ -328,7 +329,7 @@ Entity *World::getEntityById(uint32_t id)
     return nullptr;
 }
 
-std::vector<PointLight *> World::getPointLights()
+std::vector<PointLight *> Scene::getPointLights()
 {
     std::vector<PointLight *> temp_pointLights;
 
@@ -342,7 +343,7 @@ std::vector<PointLight *> World::getPointLights()
     return temp_pointLights;
 }
 
-DirectionalLight *World::getDirectionalLight()
+DirectionalLight *Scene::getDirectionalLight()
 {
     DirectionalLight *temp_directionalLight = nullptr;
 
@@ -355,12 +356,12 @@ DirectionalLight *World::getDirectionalLight()
     return temp_directionalLight;
 }
 
-std::vector<Entity *> World::getEntities()
+std::vector<ModelEntity *> Scene::getEntities()
 {
     return m_entities;
 }
 
-Skybox *World::getSkybox()
+Skybox *Scene::getSkybox()
 {
     return m_skybox;
 }

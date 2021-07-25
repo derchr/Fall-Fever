@@ -9,7 +9,7 @@
 #include <vector>
 
 class Camera;
-class Entity;
+class ModelEntity;
 class Light;
 class PointLight;
 class DirectionalLight;
@@ -17,25 +17,25 @@ class ShaderProgram;
 class Skybox;
 class Model;
 
-class World
+class Scene
 {
 public:
-    World(std::vector<ShaderProgram *> shaderPrograms);
-    ~World();
+    Scene(std::vector<ShaderProgram *> shaderPrograms);
+    ~Scene();
 
-    void addEntity(Entity *entity);
+    void addEntity(ModelEntity *entity);
     void removeEntityByName(std::string name);
     void clearEntities();
 
     void updatePointLight(unsigned int lightId, bool active, glm::vec3 position, glm::vec3 color, float intensity);
     void updateDirectionalLight(bool active, glm::vec3 direction, glm::vec3 color);
 
-    std::vector<Entity *> getEntities();
+    std::vector<ModelEntity *> getEntities();
     std::vector<PointLight *> getPointLights();
     DirectionalLight *getDirectionalLight();
     Skybox *getSkybox();
-    Entity *getEntityByName(std::string name);
-    Entity *getEntityById(uint32_t id);
+    ModelEntity *getEntityByName(std::string name);
+    ModelEntity *getEntityById(uint32_t id);
     Model *getModelByName(std::string name);
 
     void draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition);
@@ -45,7 +45,7 @@ private:
     ShaderProgram *m_shaderProgram;
 
     std::vector<Model *> m_models;
-    std::vector<Entity *> m_entities;
+    std::vector<ModelEntity *> m_entities;
     Skybox *m_skybox;
 
     // Lights
@@ -54,7 +54,7 @@ private:
     // Shadows
     const int SHADOW_RES = 4096 / 4;
     DepthMap m_depthMapDirectionalFBO;
-    std::vector<DepthMap *> m_depthMapPointFBO;
+    std::vector<DepthMapCube *> m_depthMapPointFBO;
     // Shadow projection matrices
     const float m_nearPlaneDirectional = 1.0f;
     const float m_farPlaneDirectional = 15.0f;
