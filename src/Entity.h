@@ -15,12 +15,14 @@ class Entity
 public:
     struct Prototype
     {
-        Prototype(const std::string &name, glm::vec3 position, glm::vec3 rotation, float scale)
-            : name(name), position(position), rotation(rotation), scale(scale)
+        Prototype(const std::string &name, const std::string &parent, glm::vec3 position, glm::vec3 rotation,
+                  float scale)
+            : name(name), parent(parent), position(position), rotation(rotation), scale(scale)
         {}
         virtual ~Prototype() = default;
 
         std::string name;
+        std::string parent;
         glm::vec3 position;
         glm::vec3 rotation;
         float scale;
@@ -31,6 +33,13 @@ public:
 
     uint32_t getId() const;
     const std::string &getUniqueName() const;
+
+    void setParent(Entity *parent);
+    void addChild(Entity *child);
+    const std::vector<Entity *> &getChildren() const
+    {
+        return m_children;
+    }
 
     void translate(glm::vec3 vector);
     void rotate(glm::vec3 axis, float radians);
@@ -50,8 +59,10 @@ protected:
     static uint32_t s_idCounter;
 
     // TODO
-    std::weak_ptr<Entity> m_parent;
-    std::vector<std::shared_ptr<Entity>> m_children;
+    // std::weak_ptr<Entity> m_parent;
+    Entity *m_parent = nullptr;
+    // std::vector<std::shared_ptr<Entity>> m_children;
+    std::vector<Entity *> m_children;
 
     std::string m_uniqueName;
 
@@ -67,9 +78,9 @@ class ModelEntity : public Entity
 public:
     struct Prototype : public Entity::Prototype
     {
-        Prototype(const std::string &name, glm::vec3 position, glm::vec3 rotation, float scale,
-                  const std::string &modelName, const std::string &shaderProgramName)
-            : Entity::Prototype(name, position, rotation, scale), modelName(modelName),
+        Prototype(const std::string &name, const std::string &parent, glm::vec3 position, glm::vec3 rotation,
+                  float scale, const std::string &modelName, const std::string &shaderProgramName)
+            : Entity::Prototype(name, parent, position, rotation, scale), modelName(modelName),
               shaderProgramName(shaderProgramName)
         {}
         std::string modelName;

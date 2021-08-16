@@ -10,14 +10,13 @@
 Imgui::GeneralInfoWindow::GeneralInfoWindow(Controller *controller, Scene *world, ShaderProgram *postProcessingProgram,
                                             bool *rotateEntity, bool *drawShadows, bool *rotateLightSource,
                                             glm::vec3 *lightColor, float *exposure, float *intensity)
-    : m_controller(controller), m_world(world), m_postProcessingProgram(postProcessingProgram),
+    : Window("Debug Utils"), m_controller(controller), m_scene(world), m_postProcessingProgram(postProcessingProgram),
       m_rotateEntity(rotateEntity), m_drawShadows(drawShadows), m_rotateLightSource(rotateLightSource),
       m_lightColor(lightColor), m_exposure(exposure), m_intensity(intensity)
 {}
 
 void Imgui::GeneralInfoWindow::addWidgets()
 {
-    ImGui::Begin("Debug Utils");
     ImGui::Text("Object");
 
     ImGui::SliderFloat("Rotation", &m_rotation, 0, 2 * M_PI);
@@ -26,7 +25,7 @@ void Imgui::GeneralInfoWindow::addWidgets()
 
     ImGui::Checkbox("Rotate Object", m_rotateEntity);
 
-    ModelEntity *mainObject = m_world->getEntityById(0);
+    ModelEntity *mainObject = m_scene->getEntityById(0);
     mainObject->setPosition(glm::vec3(m_translation[0], m_translation[1], m_translation[2]));
     if (!*m_rotateEntity) {
         mainObject->setRotation(glm::vec3(0.f, 1.0f, 0.f), m_rotation);
@@ -53,6 +52,4 @@ void Imgui::GeneralInfoWindow::addWidgets()
 
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0 / ImGui::GetIO().Framerate,
                 ImGui::GetIO().Framerate);
-
-    ImGui::End();
 }

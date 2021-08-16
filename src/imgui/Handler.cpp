@@ -38,6 +38,13 @@ void Imgui::Handler::addImguiWindow(std::shared_ptr<Window> window)
 
 void Imgui::Handler::renderWindows()
 {
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
     for (auto window : m_windows)
         window->render();
+
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }

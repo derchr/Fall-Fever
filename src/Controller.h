@@ -45,7 +45,7 @@ private:
     std::unique_ptr<Window> m_gameWindow;
     EventHandler *m_gameEventHandler;
 
-    Scene *m_world;
+    Scene *m_scene;
 
     Camera *m_camera;
     Menu *m_menu;

@@ -14,10 +14,18 @@ class Light : public Entity
 public:
     struct Prototype
     {
+        Prototype(const std::string &name, const std::string &parent, glm::vec3 color, float intensity)
+            : name(name), parent(parent), color(color), intensity(intensity)
+        {}
         virtual ~Prototype() = default;
+
+        std::string name;
+        std::string parent;
+        glm::vec3 color;
+        float intensity;
     };
 
-    Light(glm::vec3 color, float intensity, ShaderProgram *shaderProgram);
+    Light(const std::string &name, glm::vec3 color, float intensity, ShaderProgram *shaderProgram);
     virtual ~Light() = 0;
 
     virtual void update() = 0;
@@ -49,12 +57,11 @@ class PointLight : public Light
 public:
     struct Prototype : public Light::Prototype
     {
-        Prototype(glm::vec3 position, glm::vec3 color, float intensity)
-            : position(position), color(color), intensity(intensity)
+        Prototype(const std::string &name, const std::string &parent, glm::vec3 position, glm::vec3 color,
+                  float intensity)
+            : Light::Prototype(name, parent, color, intensity), position(position)
         {}
         glm::vec3 position;
-        glm::vec3 color;
-        float intensity;
     };
 
     PointLight(Prototype prototype, ShaderProgram *shaderProgram);
@@ -76,12 +83,10 @@ class DirectionalLight : public Light
 public:
     struct Prototype : public Light::Prototype
     {
-        Prototype(glm::vec3 direction, glm::vec3 color, float intensity)
-            : direction(direction), color(color), intensity(intensity)
+        Prototype(const std::string &name, glm::vec3 direction, glm::vec3 color, float intensity)
+            : Light::Prototype(name, "", color, intensity), direction(direction)
         {}
         glm::vec3 direction;
-        glm::vec3 color;
-        float intensity;
     };
 
     DirectionalLight(Prototype prototype, ShaderProgram *shaderProgram);

@@ -28,7 +28,7 @@ Scene::Scene(std::vector<ShaderProgram *> shaderPrograms)
     m_shaderProgram->setUniform("u_material.shininess", 100.0f);
     m_shaderProgram->unbind();
 
-    JsonParser modelParser("data/models.json");
+    JsonParser modelParser("data/scene.json");
 
     std::vector<Model::Prototype> modelPrototypes = modelParser.getModelPrototypes();
 
@@ -66,7 +66,6 @@ Scene::Scene(std::vector<ShaderProgram *> shaderPrograms)
 
     std::vector<ModelEntity::Prototype> entityPrototypes = modelParser.getEntityPrototypes();
 
-    std::vector<ModelEntity *> entities;
     {
         for (auto &prototype : entityPrototypes) {
             // Get model
@@ -92,12 +91,19 @@ Scene::Scene(std::vector<ShaderProgram *> shaderPrograms)
             std::cout << "Loaded Entity \"" << prototype.name << "\" with model \"" << prototype.modelName << "\""
                       << std::endl;
 
-            entities.push_back(currentEntity);
+            if (!prototype.parent.empty()) {
+                Entity *parent = getEntityByName(prototype.parent);
+                if (parent) {
+                    parent->addChild(currentEntity);
+                    currentEntity->setParent(parent);
+                }
+            }
+
+            m_entities.push_back(currentEntity);
         }
     }
-    m_entities = entities;
 
-    JsonParser lightParser("data/lights.json");
+    JsonParser lightParser("data/scene.json");
     auto lightPrototypes = lightParser.getLightPrototypes();
 
     std::vector<Light *> lights;
@@ -111,6 +117,13 @@ Scene::Scene(std::vector<ShaderProgram *> shaderPrograms)
             auto pointPrototype = dynamic_cast<PointLight::Prototype *>(prototype.get());
             if (pointPrototype) {
                 currentLight = new PointLight(*pointPrototype, m_shaderProgram);
+                if (!pointPrototype->parent.empty()) {
+                    Entity *parent = getEntityByName(pointPrototype->parent);
+                    if (parent) {
+                        parent->addChild(currentLight);
+                        currentLight->setParent(parent);
+                    }
+                }
             }
             lights.push_back(currentLight);
         }

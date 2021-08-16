@@ -4,17 +4,12 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-Imgui::Window::Window()
+Imgui::Window::Window(const std::string &title) : m_title(title)
 {}
 
 void Imgui::Window::render()
 {
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-
+    ImGui::Begin(m_title.c_str());
     addWidgets();
-
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    ImGui::End();
 }

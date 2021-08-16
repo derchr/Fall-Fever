@@ -9,6 +9,7 @@
 #include <GLFW/glfw3.h>
 
 #ifdef _DEBUG
+#include "imgui/EntityWindow.h"
 #include "imgui/GeneralInfoWindow.h"
 #include "imgui/Handler.h"
 #endif
@@ -57,7 +58,7 @@ Controller::Controller() : m_gameWindow(std::unique_ptr<Window>(new Window))
     // Show main menu when loading is finished...
     m_menu->showScreenByName("mainMenuScreen");
 
-    m_world = new Scene(m_shaderPrograms);
+    m_scene = new Scene(m_shaderPrograms);
 
 #ifdef _DEBUG
     m_imguiHandler = std::unique_ptr<Imgui::Handler>(new Imgui::Handler(m_gameWindow->getGLFWwindow()));
@@ -70,7 +71,7 @@ Controller::~Controller()
         delete program;
     }
 
-    delete m_world;
+    delete m_scene;
     delete m_camera;
     delete m_menu;
     delete m_postProcessFrameBuffer;
@@ -87,7 +88,7 @@ void Controller::run()
 {
     updateExposure(getShaderProgramByName("postProcessingProgram"));
 
-    ModelEntity *lightSource = m_world->getEntityByName("light");
+    ModelEntity *lightSource = m_scene->getEntityByName("light");
     lightSource->setScale(0.1f);
     lightSource->setRotation(glm::vec3(0.f));
     lightSource->setPosition(glm::vec3(-2.f, 1.5f, 2.f));
@@ -99,10 +100,13 @@ void Controller::run()
     glm::vec3 lightColor = glm::vec3(1.f);
     float intensity = 7.5f;
 #ifdef _DEBUG
-    std::shared_ptr<Imgui::Window> imguiWindow = std::make_shared<Imgui::GeneralInfoWindow>(
-        this, m_world, getShaderProgramByName("postProcessingProgram"), &rotateEntity, &drawShadows, &rotateLightSource,
+    std::shared_ptr<Imgui::Window> generalWindow = std::make_shared<Imgui::GeneralInfoWindow>(
+        this, m_scene, getShaderProgramByName("postProcessingProgram"), &rotateEntity, &drawShadows, &rotateLightSource,
         &lightColor, &m_exposure, &intensity);
-    m_imguiHandler->addImguiWindow(imguiWindow);
+    m_imguiHandler->addImguiWindow(generalWindow);
+
+    std::shared_ptr<Imgui::Window> entityWindow = std::make_shared<Imgui::EntityWindow>(m_scene->getEntities());
+    m_imguiHandler->addImguiWindow(entityWindow);
 #endif
 
     // This is the game loop
@@ -116,14 +120,14 @@ void Controller::run()
         if (rotateLightSource) {
             float radius = 4.0;
             glm::vec3 newPos = glm::vec3(-cos(glfwGetTime() * 0.5), 0.5f, sin(glfwGetTime() * 0.5)) * radius;
-            m_world->getEntityByName("light")->setPosition(newPos);
+            m_scene->getEntityByName("light")->setPosition(newPos);
         }
         if (rotateEntity) {
-            m_world->getEntityById(0)->rotate(glm::vec3(0.0f, 1.0f, 0.0f), -0.2f * m_deltaTime);
+            m_scene->getEntityById(0)->rotate(glm::vec3(0.0f, 1.0f, 0.0f), -0.2f * m_deltaTime);
         }
 
-        m_world->updatePointLight(0, true, m_world->getEntityByName("light")->getPosition(), lightColor, intensity);
-        m_world->updateDirectionalLight(true, m_world->getDirectionalLight()->getDirection(), lightColor);
+        m_scene->updatePointLight(0, true, m_scene->getEntityByName("light")->getPosition(), lightColor, intensity);
+        m_scene->updateDirectionalLight(true, m_scene->getDirectionalLight()->getDirection(), lightColor);
         getShaderProgramByName("lightProgram")->bind();
         getShaderProgramByName("lightProgram")->setUniform("v_lightColor", lightColor * 100.0f);
         getShaderProgramByName("lightProgram")->unbind();
@@ -137,7 +141,7 @@ void Controller::run()
         getShaderProgramByName("defaultProgram")->unbind();
         if (drawShadows || firstRun) {
             firstRun = false;
-            m_world->calculateShadows(getShaderProgramByName("directionalShadowDepthProgram"),
+            m_scene->calculateShadows(getShaderProgramByName("directionalShadowDepthProgram"),
                                       getShaderProgramByName("pointShadowDepthProgram"));
         }
 
@@ -153,8 +157,8 @@ void Controller::run()
             m_camera->lookForward();
             m_camera->updateVPM();
 
-            m_world->getSkybox()->draw(m_camera->getView(), m_camera->getProj());
-            m_world->draw(m_camera->getViewProj(), m_camera->getPosition());
+            m_scene->getSkybox()->draw(m_camera->getView(), m_camera->getProj());
+            m_scene->draw(m_camera->getViewProj(), m_camera->getPosition());
 
             m_postProcessFrameBuffer->unbind();
             m_postProcessFrameBuffer->drawOnEntireScreen();

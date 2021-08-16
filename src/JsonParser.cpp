@@ -52,11 +52,13 @@ std::vector<ModelEntity::Prototype> JsonParser::getEntityPrototypes() const
         std::string entityModel = entitiesJson[index]["model"].asString();
         std::string entityShaderProgram = entitiesJson[index]["shaderProgram"].asString();
         glm::vec3 entitiyPosition = {}, entityRotation = {};
+        std::string entityParent = "";
         float entityScale = 1.0f;
 
         const Json::Value positionJson = entitiesJson[index]["position"];
         const Json::Value rotationJson = entitiesJson[index]["rotation"];
         const Json::Value scaleJson = entitiesJson[index]["scale"];
+        const Json::Value parentJson = entitiesJson[index]["parent"];
         if (!positionJson.empty()) {
             entitiyPosition.x = positionJson[0].asFloat();
             entitiyPosition.y = positionJson[1].asFloat();
@@ -70,9 +72,11 @@ std::vector<ModelEntity::Prototype> JsonParser::getEntityPrototypes() const
         if (!scaleJson.empty()) {
             entityScale = scaleJson.asFloat();
         }
+        if (!parentJson.empty())
+            entityParent = parentJson.asString();
 
-        ModelEntity::Prototype prototype(entityName, entitiyPosition, entityRotation, entityScale, entityModel,
-                                         entityShaderProgram);
+        ModelEntity::Prototype prototype(entityName, entityParent, entitiyPosition, entityRotation, entityScale,
+                                         entityModel, entityShaderProgram);
 
         entityPrototypes.push_back(prototype);
     }
@@ -107,6 +111,7 @@ std::vector<std::unique_ptr<Light::Prototype>> JsonParser::getLightPrototypes() 
     glm::vec3 direction = {1.0f, 0.0f, 0.0f};
     glm::vec3 position = {};
     glm::vec3 color = {1.0f, 1.0f, 1.0f};
+    std::string unique_name = "";
     float intensity = 10.0f;
 
     const Json::Value directionalLightsJson = m_root["directionalLight"];
@@ -114,6 +119,7 @@ std::vector<std::unique_ptr<Light::Prototype>> JsonParser::getLightPrototypes() 
     const Json::Value directionJson = directionalLightsJson["direction"];
     Json::Value colorJson = directionalLightsJson["color"];
     Json::Value intensityJson = directionalLightsJson["intensity"];
+    Json::Value nameJson = directionalLightsJson["unique_name"];
 
     if (!intensityJson.empty()) {
         intensity = intensityJson.asFloat();
@@ -128,8 +134,11 @@ std::vector<std::unique_ptr<Light::Prototype>> JsonParser::getLightPrototypes() 
         color.y = colorJson[1].asFloat();
         color.z = colorJson[2].asFloat();
     }
+    if (!nameJson.empty())
+        unique_name = nameJson.asString();
 
-    auto prototype = std::unique_ptr<Light::Prototype>(new DirectionalLight::Prototype{direction, color, intensity});
+    auto prototype =
+        std::unique_ptr<Light::Prototype>(new DirectionalLight::Prototype{unique_name, direction, color, intensity});
 
     prototypes.push_back(std::move(prototype));
 
@@ -141,6 +150,9 @@ std::vector<std::unique_ptr<Light::Prototype>> JsonParser::getLightPrototypes() 
         const Json::Value positionJson = pointLightsJson[index]["position"];
         colorJson = pointLightsJson[index]["color"];
         intensityJson = pointLightsJson[index]["intensity"];
+        nameJson = pointLightsJson[index]["unique_name"];
+        const Json::Value parentJson = pointLightsJson[index]["parent"];
+        std::string parent = "";
 
         if (!intensityJson.empty()) {
             intensity = intensityJson.asFloat();
@@ -156,7 +168,15 @@ std::vector<std::unique_ptr<Light::Prototype>> JsonParser::getLightPrototypes() 
             color.z = colorJson[2].asFloat();
         }
 
-        auto prototype = std::unique_ptr<Light::Prototype>(new PointLight::Prototype{position, color, intensity});
+        unique_name = "";
+        if (!nameJson.empty())
+            unique_name = nameJson.asString();
+
+        if (!parentJson.empty())
+            parent = parentJson.asString();
+
+        auto prototype = std::unique_ptr<Light::Prototype>(
+            new PointLight::Prototype{unique_name, parent, position, color, intensity});
 
         prototypes.push_back(std::move(prototype));
     }
@@ -167,7 +187,7 @@ std::vector<std::unique_ptr<Light::Prototype>> JsonParser::getLightPrototypes() 
         const glm::vec3 default_color(1.0f);
         const float default_intensity = 10.0f;
         auto prototype = std::unique_ptr<PointLight::Prototype>(
-            new PointLight::Prototype{default_position, default_color, default_intensity});
+            new PointLight::Prototype{"_fallbackLight", "", default_position, default_color, default_intensity});
 
         prototypes.push_back(std::move(prototype));
     }

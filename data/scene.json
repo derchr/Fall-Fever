@@ -40,6 +40,7 @@
         },
         {
             "unique_name": "container",
+            "parent": "backpack",
             "model": "container",
             "shaderProgram": "defaultProgram",
             "position": [
@@ -65,6 +66,7 @@
         }
     ],
     "directionalLight": {
+        "unique_name": "directionalLight",
         "intensity": 0.25,
         "direction": [
             -0.2,
@@ -79,6 +81,8 @@
     },
     "pointLights": [
         {
+            "unique_name": "pointLight0",
+            "parent": "light",
             "intensity": 7.5,
             "position": [
                 0.0,

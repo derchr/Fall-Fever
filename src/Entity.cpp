@@ -25,39 +25,75 @@ const std::string &Entity::getUniqueName() const
     return m_uniqueName;
 }
 
+void Entity::setParent(Entity *parent)
+{
+    m_parent = parent;
+}
+
+void Entity::addChild(Entity *child)
+{
+    m_children.push_back(child);
+}
+
 void Entity::translate(glm::vec3 vector)
 {
+    for (auto &child : m_children) {
+        child->translate(vector);
+    }
+
     m_position += vector;
+
     updateModelMatrix();
 }
 
 void Entity::rotate(glm::vec3 axis, float radians)
 {
+    for (auto &child : m_children) {
+        child->rotate(axis, radians);
+    }
+
     glm::quat rotation = glm::angleAxis(radians, axis);
     m_quaternion = rotation * m_quaternion;
+
     updateModelMatrix();
 }
 
 void Entity::setPosition(glm::vec3 position)
 {
+    for (auto &child : m_children) {
+        child->setPosition(child->getPosition() - m_position + position);
+    }
+
     m_position = position;
     updateModelMatrix();
 }
 
 void Entity::setRotation(glm::vec3 eulerAngles)
 {
+    for (auto &child : m_children) {
+        child->setRotation(eulerAngles);
+    }
+
     m_quaternion = glm::quat(eulerAngles);
     updateModelMatrix();
 }
 
 void Entity::setRotation(glm::vec3 axis, float radians)
 {
+    for (auto &child : m_children) {
+        child->setRotation(axis, radians);
+    }
+
     m_quaternion = glm::angleAxis(radians, axis);
     updateModelMatrix();
 }
 
 void Entity::setScale(float scale)
 {
+    for (auto &child : m_children) {
+        child->setScale(scale);
+    }
+
     m_scale = scale;
     updateModelMatrix();
 }

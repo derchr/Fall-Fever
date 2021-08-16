@@ -21,7 +21,7 @@ private:
     void addWidgets() override;
 
     Controller *m_controller;
-    Scene *m_world;
+    Scene *m_scene;
     ShaderProgram *m_postProcessingProgram;
 
     bool *m_rotateEntity;
