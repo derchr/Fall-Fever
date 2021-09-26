@@ -2,10 +2,10 @@
 #include "Mesh.h"
 #include "ShaderProgram.h"
 #include "Texture.h"
+#include "util/Log.h"
 
 #include <fstream>
 #include <future>
-#include <iostream>
 
 uint32_t Model::s_idCounter = 0;
 
@@ -59,7 +59,7 @@ void Model::loadModel(const std::string &pathToModel)
     std::ifstream input(pathToModel, std::ios::in | std::ios::binary);
 
     if (!input.is_open()) {
-        std::cerr << "Could not find model file " << pathToModel << std::endl;
+        Log::logger().warn("Could not find model file {}", pathToModel);
         return;
     }
 
@@ -94,9 +94,9 @@ void Model::loadModel(const std::string &pathToModel)
 
         for (unsigned int i = 0; i < numTextures; i++) {
             std::string texturePath = m_workingPath + '/' + textureSources[i].c_str();
-            Texture::Prototype texturePrototype{texturePath, textureTypes[i]};
+
             auto loadModel = [=, &mutex]() {
-                Texture *currentTex = new Texture(texturePrototype.texturePath, texturePrototype.textureType);
+                Texture *currentTex = new Texture({texturePath, textureTypes[i]});
 
                 std::lock_guard<std::mutex> lock(mutex);
                 m_textures.push_back(currentTex);
@@ -114,7 +114,7 @@ void Model::loadModel(const std::string &pathToModel)
     }
 
     if (!hasNormalMap) {
-        Texture *currentTex = new Texture("data/res/models/tex/fallback_normal.png", TextureType::Normal);
+        Texture *currentTex = new Texture({"data/res/models/tex/fallback_normal.png", TextureType::Normal});
 
         m_textures.push_back(currentTex);
     }

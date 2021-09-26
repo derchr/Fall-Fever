@@ -1,4 +1,3 @@
-#include <iostream>
 #include <vector>
 
 #include <glad/glad.h>
@@ -30,6 +29,7 @@
 #include "VertexArray.h"
 #include "Widget.h"
 #include "Window.h"
+#include "util/Log.h"
 
 Controller::Controller() : m_gameWindow(std::unique_ptr<Window>(new Window))
 {
@@ -42,7 +42,7 @@ Controller::Controller() : m_gameWindow(std::unique_ptr<Window>(new Window))
 
     for (auto &prototype : shaderProgramPrototypes) {
         m_shaderPrograms.push_back(new ShaderProgram(prototype));
-        std::cout << "Loaded ShaderProgram \"" << prototype.name << "\"" << std::endl;
+        Log::logger().info("Loaded shaderprogram \"{}\"", prototype.name);
     }
 
     m_postProcessFrameBuffer = new FrameBuffer(m_gameWindow->getWindowWidth(), m_gameWindow->getWindowHeight(),
@@ -105,8 +105,8 @@ void Controller::run()
         &lightColor, &m_exposure, &intensity);
     m_imguiHandler->addImguiWindow(generalWindow);
 
-    std::shared_ptr<Imgui::Window> entityWindow = std::make_shared<Imgui::EntityWindow>(m_scene->getEntities());
-    m_imguiHandler->addImguiWindow(entityWindow);
+    // std::shared_ptr<Imgui::Window> entityWindow = std::make_shared<Imgui::EntityWindow>(m_scene->getEntities());
+    // m_imguiHandler->addImguiWindow(entityWindow);
 #endif
 
     // This is the game loop
@@ -236,8 +236,7 @@ ShaderProgram *Controller::getShaderProgramByName(const std::string &name, std::
             return program;
         }
     }
-
-    std::cout << "[Warning] ShaderProgram could not be found by name \"" << name << "\"" << std::endl;
+    Log::logger().critical("Shaderprogram could not be found by name \"{}\"", name);
     return nullptr;
 }
 

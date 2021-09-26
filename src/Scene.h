@@ -24,7 +24,7 @@ public:
     ~Scene();
 
     void addEntity(ModelEntity *entity);
-    void removeEntityByName(std::string name);
+    void removeEntityByName(const std::string &name);
     void clearEntities();
 
     void updatePointLight(unsigned int lightId, bool active, glm::vec3 position, glm::vec3 color, float intensity);
@@ -34,9 +34,9 @@ public:
     std::vector<PointLight *> getPointLights();
     DirectionalLight *getDirectionalLight();
     Skybox *getSkybox();
-    ModelEntity *getEntityByName(std::string name);
+    ModelEntity *getEntityByName(const std::string &name);
     ModelEntity *getEntityById(uint32_t id);
-    Model *getModelByName(std::string name);
+    Model *getModelByName(const std::string &name);
 
     void draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition);
     void calculateShadows(ShaderProgram *directionalShaderProgram, ShaderProgram *pointShaderProgram);

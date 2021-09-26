@@ -13,7 +13,7 @@ Screen::Screen(Prototype prototype, FrameBuffer *framebuffer, ShaderProgram *sha
 {
     for (auto &prototype : prototype.widgetPrototypes) {
         auto texturePrototype = prototype.texturePrototype;
-        Texture *currentTexture = new Texture(texturePrototype.texturePath, texturePrototype.textureType);
+        Texture *currentTexture = new Texture({texturePrototype.texturePath, texturePrototype.textureType});
         currentTexture->initializeOnGPU();
 
         Widget *currentWidget = new Widget(prototype, currentTexture);

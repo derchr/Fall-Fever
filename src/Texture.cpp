@@ -1,16 +1,15 @@
 #include "Texture.h"
 #include "ShaderProgram.h"
+#include "util/Log.h"
 
-#include <iostream>
-
-Texture::Texture(const std::string &path, TextureType type) : m_texturePath(path), m_textureType(type)
+Texture::Texture(const Prototype &texturePrototype)
+    : m_texturePath(texturePrototype.texturePath), m_textureType(texturePrototype.textureType)
 {
     stbi_set_flip_vertically_on_load(1);
     m_textureBuffer = stbi_load(m_texturePath.c_str(), &m_textureWidth, &m_textureHeight, &m_numComponents, 0);
-    if (!m_textureBuffer) {
-        std::cout << "[Warning] Texture " << m_texturePath << " not found!" << std::endl;
-        return;
-    }
+
+    if (!m_textureBuffer)
+        Log::logger().warn("Texture {} could not be loaded", m_texturePath);
 }
 
 Texture::~Texture()
@@ -20,11 +19,6 @@ Texture::~Texture()
 
 void Texture::initializeOnGPU()
 {
-    if (m_isInitialized)
-        return;
-
-    m_isInitialized = true;
-
     GLenum internalFormat;
     GLenum dataFormat;
 
@@ -111,7 +105,7 @@ std::string Texture::getPath()
     return m_texturePath;
 }
 
-GLuint Texture::getTextureId()
+GLuint Texture::textureId()
 {
     return m_textureId;
 }
@@ -143,7 +137,7 @@ CubeMap::CubeMap(const std::string &texturePseudoPath)
         auto textureBuffer = stbi_load(path.c_str(), &m_textureWidth, &m_textureHeight, &numComponents, 0);
 
         if (!textureBuffer) {
-            std::cout << "[Warning] CubeMap Texture " << path.c_str() << " not found!" << std::endl;
+            Log::logger().warn("CubeMap texture {} could not be loaded", path);
             return;
         }
 

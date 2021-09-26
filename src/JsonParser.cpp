@@ -1,14 +1,14 @@
 #include "JsonParser.h"
+#include "util/Log.h"
 
 #include <fstream>
-#include <iostream>
 
 JsonParser::JsonParser(const std::string &jsonFilepath)
 {
     std::ifstream file(jsonFilepath.c_str(), std::ifstream::binary);
 
     if (!file) {
-        std::cout << "Error reading file \"" << jsonFilepath << "\"." << std::endl;
+        Log::logger().warn("Could not read json file \"{}\"", jsonFilepath);
         return;
     }
 
@@ -17,7 +17,7 @@ JsonParser::JsonParser(const std::string &jsonFilepath)
     bool parsingSuccessful = Json::parseFromStream(m_rbuilder, file, &m_root, &errs);
     file.close();
     if (!parsingSuccessful) {
-        std::cout << "Failed to parse file\n" << errs << std::endl;
+        Log::logger().warn("Could not parse json file \"{}\":{}", jsonFilepath, errs);
         return;
     }
 }

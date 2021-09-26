@@ -1,3 +1,6 @@
 [submodule "data/res"]
 	path = data/res
 	url = git@gitlab.com:4VRDriver/fall-fever-resources.git
+[submodule "lib/spdlog"]
+	path = lib/spdlog
+	url = git@github.com:gabime/spdlog.git

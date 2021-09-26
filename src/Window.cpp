@@ -2,16 +2,15 @@
 #include "Helper.h"
 #include "ShaderProgram.h"
 #include "definitions/window.h"
+#include "util/Log.h"
 
 #include <GLFW/glfw3.h>
-#include <iostream>
 
 Window::Window()
 {
     // Initialize GLFW
-    if (!glfwInit()) {
+    if (!glfwInit())
         exit(-1);
-    }
 
     m_width = INIT_WINDOW_WIDTH;
     m_height = INIT_WINDOW_HEIGHT;
@@ -29,12 +28,11 @@ Window::Window()
 #endif
 
     m_window = glfwCreateWindow(m_width, m_height, "OpenGL", NULL, NULL);
-    if (!m_window) {
-        std::cout << "Failed to create window" << std::endl;
-    }
+    if (!m_window)
+        Log::logger().critical("Failed to create window");
 
     // Wait for window to maximize (in case)
-    Helper::sleep(1000);
+    // Helper::sleep(1000);
 
     glfwGetWindowPos(m_window, &m_posX, &m_posY);
     glfwGetWindowSize(m_window, &m_width, &m_height);
@@ -44,12 +42,12 @@ Window::Window()
 
     // Initialize GLAD
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        std::cout << "Failed to initialize GLAD" << std::endl;
+        Log::logger().critical("Failed to initialize GLAD");
         exit(-1);
     }
 
 #ifdef _DEBUG
-    std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
+    Log::logger().debug("OpenGL version: {}", glGetString(GL_VERSION));
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback(Helper::gl_debug_callback, NULL);
 

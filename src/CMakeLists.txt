@@ -6,6 +6,7 @@ add_executable(Fall-Fever
     ShaderProgram.cpp
     VertexArray.cpp
     Texture.cpp
+    TextureFactory.cpp
     Camera.cpp
     Mesh.cpp
     Model.cpp
@@ -22,6 +23,7 @@ add_executable(Fall-Fever
     imgui/GeneralInfoWindow.cpp
     imgui/Handler.cpp
     imgui/Window.cpp
+    util/Log.cpp
 )
 
 target_link_libraries(
@@ -35,6 +37,7 @@ target_link_libraries(
     ${FREETYPE_LIBRARIES}
     imgui
     pthread
+    spdlog
 )
 
 target_compile_options(Fall-Fever PRIVATE -Wall -Wextra -pedantic)

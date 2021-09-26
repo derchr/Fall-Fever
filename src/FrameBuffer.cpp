@@ -1,10 +1,9 @@
 #include "FrameBuffer.h"
-
 #include "ShaderProgram.h"
 #include "Texture.h"
+#include "util/Log.h"
 
 #include <cstddef>
-#include <iostream>
 
 AbstractFrameBuffer::~AbstractFrameBuffer()
 {}
@@ -99,7 +98,7 @@ void FrameBuffer::generateTextures(uint32_t width, uint32_t height)
     glBindTexture(GL_TEXTURE_2D, 0);
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        std::cout << "[Error] FrameBuffer is not complete!" << std::endl;
+        Log::logger().error("Framebuffer not complete");
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     unbind();
@@ -135,7 +134,7 @@ DepthMap::DepthMap(int RESOLUTION)
     glReadBuffer(GL_NONE);
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        std::cout << "[Error] FrameBuffer is not complete!" << std::endl;
+        Log::logger().error("Framebuffer not complete");
 
     unbind();
 }
@@ -163,7 +162,7 @@ DepthMapCube::DepthMapCube(int RESOLUTION)
     glReadBuffer(GL_NONE);
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        std::cout << "[Error] FrameBuffer is not complete!" << std::endl;
+        Log::logger().error("Framebuffer not complete");
 
     unbind();
 }

@@ -1,7 +1,7 @@
 #include "Helper.h"
+#include "util/Log.h"
 
 #include <algorithm>
-#include <iostream>
 
 #ifdef __linux__
 #include <unistd.h>
@@ -122,13 +122,13 @@ void Helper::gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum sev
     }
 
     if (severity == GL_DEBUG_SEVERITY_HIGH || severity == GL_DEBUG_SEVERITY_MEDIUM)
-        std::cout << "[OpenGL Debug Message]" << std::endl
-                  << "Message: " << _message << std::endl
-                  << "Source: " << _source << std::endl
-                  << "Type: " << _type << std::endl
-                  << "ID: " << id << std::endl
-                  << "Severity: " << _severity << std::endl
-                  << std::endl;
+        Log::logger().info("[OpenGL Debug Message]\n"
+                           "Message: {}\n"
+                           "Source: {}\n"
+                           "Type: {}\n"
+                           "ID: {}\n"
+                           "Severity: {}\n",
+                           _message, _source, _type, id, _severity);
 }
 
 Helper::Timer::Timer(const std::string &name) : m_name(name)
@@ -143,5 +143,5 @@ Helper::Timer::~Timer()
     m_duration = m_end - m_start;
     float ms = m_duration.count() * 1000.0f;
 
-    std::cout << "Timer " << m_name << " took " << ms << "ms!" << std::endl;
+    Log::logger().info("Timer {} took {}", m_name, ms);
 }

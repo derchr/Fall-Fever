@@ -135,6 +135,10 @@ ModelEntity::ModelEntity(Prototype prototype, Model *model, ShaderProgram *shade
 
 void ModelEntity::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition)
 {
+    for (auto &child : m_children)
+        if (auto childModel = dynamic_cast<ModelEntity *>(child))
+            childModel->draw(viewProjMatrix, viewPosition);
+
     m_shaderProgram->bind();
 
     glm::mat4 modelViewProj = viewProjMatrix * m_modelMatrix;
@@ -155,6 +159,10 @@ void ModelEntity::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition)
 
 void ModelEntity::drawDirectionalShadows(glm::mat4 viewProjMatrix, ShaderProgram *shaderProgram)
 {
+    for (auto &child : m_children)
+        if (auto childModel = dynamic_cast<ModelEntity *>(child))
+            childModel->drawDirectionalShadows(viewProjMatrix, shaderProgram);
+
     shaderProgram->bind();
 
     glm::mat4 modelViewProj = viewProjMatrix * m_modelMatrix;
@@ -168,6 +176,10 @@ void ModelEntity::drawDirectionalShadows(glm::mat4 viewProjMatrix, ShaderProgram
 
 void ModelEntity::drawPointShadows(ShaderProgram *shaderProgram)
 {
+    for (auto &child : m_children)
+        if (auto childModel = dynamic_cast<ModelEntity *>(child))
+            childModel->drawPointShadows(shaderProgram);
+
     shaderProgram->bind();
 
     shaderProgram->setUniform("u_modelMatrix", m_modelMatrix);

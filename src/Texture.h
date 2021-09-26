@@ -31,20 +31,22 @@ public:
         TextureType textureType;
     };
 
-    Texture(const std::string &path, TextureType type);
-    ~Texture();
-
-    void initializeOnGPU();
-
     void bind(uint8_t textureUnit, ShaderProgram *shaderProgram, uint8_t textureTypeNum);
     void unbind();
 
     TextureType getTextureType();
     std::string getPath();
-    GLuint getTextureId();
+    GLuint textureId();
+
+    Texture(const Prototype &texturePrototype); // TODO make private
+    void initializeOnGPU();                     // TODO make private
+    ~Texture();                                 // TODO make private
 
 private:
-    bool m_isInitialized = false;
+    Texture(const Texture &other) = delete;
+    Texture(Texture &&other) = delete;
+    Texture &operator=(const Texture &other) = delete;
+    Texture &operator=(Texture &&other) = delete;
 
     std::string m_texturePath;
 
@@ -54,9 +56,11 @@ private:
     int32_t m_textureHeight;
     int32_t m_numComponents;
 
-    GLuint m_textureId;
+    GLuint m_textureId; // TODO inherit from abstract class resource
 
     TextureType m_textureType;
+
+    friend class TextureFactory;
 };
 
 class CubeMap

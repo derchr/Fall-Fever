@@ -8,9 +8,9 @@
 #include "Model.h"
 #include "ShaderProgram.h"
 #include "Texture.h"
+#include "util/Log.h"
 
 #include <future>
-#include <iostream>
 #include <thread>
 
 Scene::Scene(std::vector<ShaderProgram *> shaderPrograms)
@@ -41,8 +41,7 @@ Scene::Scene(std::vector<ShaderProgram *> shaderPrograms)
             auto loadModel = [=, &mutex]() {
                 Model *currentModel = new Model(prototype);
 
-                std::cout << "Loaded Model \"" << prototype.modelName << "\" from \"" << prototype.modelPath << "\""
-                          << std::endl;
+                Log::logger().info("Loaded model \"{}\": {}", prototype.modelName, prototype.modelPath);
 
                 std::lock_guard<std::mutex> lock(mutex);
                 m_models.push_back(currentModel);
@@ -61,7 +60,7 @@ Scene::Scene(std::vector<ShaderProgram *> shaderPrograms)
         m_skybox = new Skybox(skyboxPrototype, getModelByName("cube"),
                               Controller::getShaderProgramByName("skyboxProgram", shaderPrograms));
 
-        std::cout << "Loaded Skybox \"" << skyboxPrototype.texturePath << "\"" << std::endl;
+        Log::logger().info("Loaded skybox: {}", skyboxPrototype.texturePath);
     });
 
     std::vector<ModelEntity::Prototype> entityPrototypes = modelParser.getEntityPrototypes();
@@ -74,8 +73,8 @@ Scene::Scene(std::vector<ShaderProgram *> shaderPrograms)
             if (!currentModel) {
                 // Apply fallback model (first model in vector)
                 currentModel = m_models[0];
-                std::cout << "[Warning] Model could not be found by name \"" << prototype.modelName << "\""
-                          << std::endl;
+
+                Log::logger().warn("Model could not be found by name \"{}\"", prototype.modelName);
             }
 
             // Get shaderprogram
@@ -88,8 +87,7 @@ Scene::Scene(std::vector<ShaderProgram *> shaderPrograms)
 
             ModelEntity *currentEntity = new ModelEntity(prototype, currentModel, currentProgram);
 
-            std::cout << "Loaded Entity \"" << prototype.name << "\" with model \"" << prototype.modelName << "\""
-                      << std::endl;
+            Log::logger().info("Loaded entity \"{}\" with model \"{}\"", prototype.name, prototype.modelName);
 
             if (!prototype.parent.empty()) {
                 Entity *parent = getEntityByName(prototype.parent);
@@ -97,9 +95,8 @@ Scene::Scene(std::vector<ShaderProgram *> shaderPrograms)
                     parent->addChild(currentEntity);
                     currentEntity->setParent(parent);
                 }
-            }
-
-            m_entities.push_back(currentEntity);
+            } else
+                m_entities.push_back(currentEntity);
         }
     }
 
@@ -156,7 +153,7 @@ void Scene::addEntity(ModelEntity *entity)
     m_entities.push_back(entity);
 }
 
-void Scene::removeEntityByName(std::string name)
+void Scene::removeEntityByName(const std::string &name)
 {
     for (auto it = m_entities.begin(); it != m_entities.end(); it++) {
         if ((*it)->getUniqueName() == name) {
@@ -165,7 +162,7 @@ void Scene::removeEntityByName(std::string name)
         }
     }
 
-    std::cout << "[Warning] Entity with name " << name << " could not be removed." << std::endl;
+    Log::logger().warn("Entity \"{}\" could not be removed", name);
 }
 
 void Scene::clearEntities()
@@ -309,25 +306,25 @@ void Scene::calculateShadows(ShaderProgram *directionalShaderProgram, ShaderProg
     glCullFace(GL_FRONT);
 }
 
-Model *Scene::getModelByName(std::string name)
+Model *Scene::getModelByName(const std::string &name)
 {
     for (auto it = m_models.begin(); it != m_models.end(); it++) {
         if ((*it)->getUniqueName() == name) {
             return *it;
         }
     }
-    std::cout << "[Warning] Model could not be found by unique name \"" << name << "\"" << std::endl;
+    Log::logger().warn("Model could not be found by unique name \"{}\"", name);
     return nullptr;
 }
 
-ModelEntity *Scene::getEntityByName(std::string name)
+ModelEntity *Scene::getEntityByName(const std::string &name)
 {
     for (auto it = m_entities.begin(); it != m_entities.end(); it++) {
         if ((*it)->getUniqueName() == name) {
             return *it;
         }
     }
-    std::cout << "[Warning] Entity could not be found by unique name \"" << name << "\"" << std::endl;
+    Log::logger().warn("Entity could not be found by unique name \"{}\"", name);
     return nullptr;
 }
 
@@ -338,7 +335,7 @@ ModelEntity *Scene::getEntityById(uint32_t id)
             return *it;
         }
     }
-    std::cout << "[Warning] Entity could not be found by ID \"" << id << "\"" << std::endl;
+    Log::logger().warn("Entity could not be found by ID \"{}\"", id);
     return nullptr;
 }
 

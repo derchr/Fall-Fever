@@ -41,7 +41,7 @@ void Widget::draw(ShaderProgram *shaderProgram)
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_widgetTextures[0]->getTextureId());
+    glBindTexture(GL_TEXTURE_2D, m_widgetTextures[0]->textureId());
 
     GLint location = glGetUniformLocation(shaderProgram->getShaderProgramId(), "u_texture");
     glUniform1i(location, 0);

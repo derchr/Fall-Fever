@@ -1,10 +1,8 @@
 #include "ShaderProgram.h"
+#include "util/Log.h"
 
 #include <fstream>
-#include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <iostream>
-#include <string>
 
 ShaderProgram::ShaderProgram(Prototype prototype) : m_uniqueName(prototype.name)
 {
@@ -29,10 +27,9 @@ ShaderProgram::ShaderProgram(Prototype prototype) : m_uniqueName(prototype.name)
 
     GLint isLinked = 0;
     glGetProgramiv(m_shaderProgramId, GL_LINK_STATUS, &isLinked);
-    if (!isLinked) {
-        std::cout << "Failed to link shaderProgram: " << prototype.vertexPath << ", " << prototype.geometryPath << ", "
-                  << prototype.fragmentPath << std::endl;
-    }
+    if (!isLinked)
+        Log::logger().critical("Failed to link shaderProgram \"{}\", \"{}\", \"{}\"", prototype.vertexPath,
+                               prototype.geometryPath, prototype.fragmentPath);
 
 #ifdef _RELEASE
     glDetachShader(program, vs);
@@ -69,7 +66,7 @@ std::string ShaderProgram::parse(const std::string &filename)
     shaderfile.open(filename, std::ios::in);
 
     if (!shaderfile.is_open()) {
-        std::cerr << "Shader " << filename << " not found!" << std::endl;
+        Log::logger().critical("Shader \"{}\" not found", filename);
         exit(-1);
     }
 
@@ -92,7 +89,7 @@ GLuint ShaderProgram::compile(const std::string &shaderSource, GLenum type)
         glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &length);
         char *message = new char[length];
         glGetShaderInfoLog(shaderId, length, &length, message);
-        std::cout << "Shader compile error: " << message << std::endl;
+        Log::logger().error("Shader compilation failed: {}", message);
         delete[] message;
         return 0;
     }

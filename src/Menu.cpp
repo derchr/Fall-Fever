@@ -7,8 +7,7 @@
 #include "Widget.h"
 #include "Window.h"
 #include "definitions/eventActions.h"
-
-#include <iostream>
+#include "util/Log.h"
 
 Menu::Menu(FrameBuffer *p_framebuffer, ShaderProgram *p_shaderProgram)
     : m_frameBuffer(p_framebuffer), m_shaderProgram(p_shaderProgram)
