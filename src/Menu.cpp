@@ -71,7 +71,6 @@ void Menu::handleMouseButtonActionMap(const MouseButtonActionMap &mouseButtonAct
         auto widgets = m_activeScreen->getWidgets();
         for (auto it = widgets.begin(); it != widgets.end(); it++) {
             if ((*it)->isHovered(window)) {
-                // std::cout << (*it)->getUniqueName() << " clicked!" << std::endl;
                 if ((*it)->getCallbackId() == 1)
                     resetActiveScreen();
                 if ((*it)->getCallbackId() == 2)

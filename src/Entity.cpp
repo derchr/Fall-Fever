@@ -1,8 +1,10 @@
 #include "Entity.h"
 #include "Mesh.h"
-#include "Model.h"
 #include "ShaderProgram.h"
 #include "VertexArray.h"
+#include "resources/CubeMap.h"
+#include "resources/Model.h"
+#include "resources/ResourceHandler.h"
 
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -125,7 +127,7 @@ glm::mat4 Entity::getModelMatrix() const
     return m_modelMatrix;
 }
 
-ModelEntity::ModelEntity(Prototype prototype, Model *model, ShaderProgram *shaderProgram)
+ModelEntity::ModelEntity(Prototype prototype, const Model *model, ShaderProgram *shaderProgram)
     : Entity(prototype.name), m_model(model), m_shaderProgram(shaderProgram)
 {
     setPosition(prototype.position);
@@ -191,18 +193,20 @@ void ModelEntity::drawPointShadows(ShaderProgram *shaderProgram)
 }
 
 Skybox::Skybox(Prototype prototype, Model *cubeModel, ShaderProgram *shaderProgram)
-    : m_cubeModel(cubeModel), m_shaderProgram(shaderProgram), m_cubeMap(new CubeMap(prototype.texturePath.c_str())),
-      m_vertexArray(cubeModel->getMesh(0)->getVertexArray())
-{}
+    : m_cubeModel(cubeModel), m_shaderProgram(shaderProgram), m_vertexArray(cubeModel->getMesh(0)->getVertexArray())
+{
+    m_cubeMap =
+        ResourceHandler::instance().registerResource<TextureCubeMap>(TextureCubeMapDescriptor{prototype.texturePath});
+}
 
 Skybox::~Skybox()
 {
-    delete m_cubeMap;
+    // delete m_cubeMap;
 }
 
 void Skybox::initializeOnGPU()
 {
-    m_cubeMap->initializeOnGPU();
+    // m_cubeMap->initializeOnGPU();
 }
 
 void Skybox::draw(glm::mat4 viewMatrix, glm::mat4 projectionMatrix)
@@ -220,9 +224,10 @@ void Skybox::draw(glm::mat4 viewMatrix, glm::mat4 projectionMatrix)
 
     m_shaderProgram->setUniform("u_viewProjectionMatrix", viewProjectionMatrix);
 
-    m_cubeMap->bind(m_shaderProgram);
+    auto cubeMap = std::static_pointer_cast<TextureCubeMap>(ResourceHandler::instance().resource(m_cubeMap));
+    cubeMap->bind(m_shaderProgram);
     m_cubeModel->getMesh(0)->drawWithoutTextures();
-    m_cubeMap->unbind();
+    cubeMap->unbind();
 
     m_shaderProgram->unbind();
     glDepthMask(GL_TRUE);

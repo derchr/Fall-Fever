@@ -2,16 +2,6 @@
 
 #include <glm/glm.hpp>
 
-enum class TextureType
-{
-    Diffuse,
-    Specular,
-    Normal,
-    Height,
-    Gloss,
-    TEXTURE_TYPE_NUM_ITEMS
-};
-
 struct Vertex
 {
     // Postition

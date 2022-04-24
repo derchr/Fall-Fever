@@ -5,9 +5,10 @@
 #include "FrameBuffer.h"
 #include "JsonParser.h"
 #include "Light.h"
-#include "Model.h"
 #include "ShaderProgram.h"
-#include "Texture.h"
+#include "resources/Model.h"
+#include "resources/ResourceHandler.h"
+#include "resources/Texture.h"
 #include "util/Log.h"
 
 #include <future>
@@ -30,34 +31,32 @@ Scene::Scene(std::vector<ShaderProgram *> shaderPrograms)
 
     JsonParser modelParser("data/scene.json");
 
-    std::vector<Model::Prototype> modelPrototypes = modelParser.getModelPrototypes();
+    std::vector<ModelDescriptor> modelDescriptors = modelParser.getModelDescriptors();
 
     {
         std::vector<std::future<void>> futures;
         std::mutex mutex;
 
-        for (auto &prototype : modelPrototypes) {
+        for (const auto &descriptor : modelDescriptors) {
 
             auto loadModel = [=, &mutex]() {
-                Model *currentModel = new Model(prototype);
+                ResourceId model = ResourceHandler::instance().registerResource<Model>(descriptor);
 
-                Log::logger().info("Loaded model \"{}\": {}", prototype.modelName, prototype.modelPath);
+                Log::logger().info("Loaded model \"{}\": {}", descriptor.name, descriptor.path);
 
                 std::lock_guard<std::mutex> lock(mutex);
-                m_models.push_back(currentModel);
+                m_models.push_back(model);
             };
 
             futures.push_back(std::async(std::launch::async, loadModel));
         }
     }
 
-    for (auto &model : m_models)
-        model->initializeOnGPU();
-
     // TODO: use geometry shader instead of model and load skybox before models.
     Skybox::Prototype skyboxPrototype = modelParser.getSkyboxPrototype();
     std::thread skyboxThread([=]() {
-        m_skybox = new Skybox(skyboxPrototype, getModelByName("cube"),
+        m_skybox = new Skybox(skyboxPrototype,
+                              std::static_pointer_cast<Model>(ResourceHandler::instance().resource("cube")).get(),
                               Controller::getShaderProgramByName("skyboxProgram", shaderPrograms));
 
         Log::logger().info("Loaded skybox: {}", skyboxPrototype.texturePath);
@@ -68,11 +67,13 @@ Scene::Scene(std::vector<ShaderProgram *> shaderPrograms)
     {
         for (auto &prototype : entityPrototypes) {
             // Get model
-            Model *currentModel = getModelByName(prototype.modelName);
+            const Model *currentModel =
+                std::static_pointer_cast<Model>(ResourceHandler::instance().resource(prototype.modelName)).get();
 
             if (!currentModel) {
                 // Apply fallback model (first model in vector)
-                currentModel = m_models[0];
+                currentModel = std::static_pointer_cast<Model>(ResourceHandler::instance().resource("fallback"))
+                                   .get(); // TODO rename fallbackModel
 
                 Log::logger().warn("Model could not be found by name \"{}\"", prototype.modelName);
             }
@@ -138,9 +139,9 @@ Scene::~Scene()
         delete (*it);
     }
     // Iterate over models and entities and delete all items
-    for (auto it = m_models.begin(); it != m_models.end(); it++) {
-        delete (*it);
-    }
+    // for (auto it = m_models.begin(); it != m_models.end(); it++) {
+    //     delete (*it);
+    // }
     for (auto it = m_entities.begin(); it != m_entities.end(); it++) {
         delete (*it);
     }
@@ -304,17 +305,6 @@ void Scene::calculateShadows(ShaderProgram *directionalShaderProgram, ShaderProg
     // Reset viewport size
     glViewport(VIEWPORT[0], VIEWPORT[1], VIEWPORT[2], VIEWPORT[3]);
     glCullFace(GL_FRONT);
-}
-
-Model *Scene::getModelByName(const std::string &name)
-{
-    for (auto it = m_models.begin(); it != m_models.end(); it++) {
-        if ((*it)->getUniqueName() == name) {
-            return *it;
-        }
-    }
-    Log::logger().warn("Model could not be found by unique name \"{}\"", name);
-    return nullptr;
 }
 
 ModelEntity *Scene::getEntityByName(const std::string &name)

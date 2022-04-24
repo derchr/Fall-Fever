@@ -1,9 +1,10 @@
 #include "Mesh.h"
 #include "ShaderProgram.h"
-#include "Texture.h"
 #include "VertexArray.h"
+#include "resources/ResourceHandler.h"
+#include "resources/Texture.h"
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, std::vector<Texture *> textures)
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, std::vector<ResourceId> textures)
     : m_preInitializationVertexData{vertices, indices}, m_numElements(indices.size()), m_textures(textures)
 {}
 
@@ -27,9 +28,10 @@ void Mesh::draw(ShaderProgram *shaderProgram)
     // Bind all textures in order to its texture unit
     int i = 0;
     for (auto it : m_textures) {
-        TextureType currentTextureType = it->getTextureType();
+        auto texture = std::static_pointer_cast<Texture>(ResourceHandler::instance().resource(it));
+        TextureType currentTextureType = texture->textureType();
 
-        it->bind(i, shaderProgram, typeNumberCount[static_cast<int>(currentTextureType)]);
+        texture->bind(i, shaderProgram, typeNumberCount[static_cast<int>(currentTextureType)]);
 
         typeNumberCount[static_cast<int>(currentTextureType)] += 1;
 
@@ -42,8 +44,9 @@ void Mesh::draw(ShaderProgram *shaderProgram)
     m_vertexArray->unbind();
 
     // Unbind all textures
-    for (auto it = m_textures.begin(); it != m_textures.end(); it++) {
-        (*it)->unbind();
+    for (auto it : m_textures) {
+        auto texture = std::static_pointer_cast<Texture>(ResourceHandler::instance().resource(it));
+        texture->unbind();
     }
 }
 

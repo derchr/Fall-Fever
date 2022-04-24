@@ -5,11 +5,8 @@ add_executable(Fall-Fever
     EventHandler.cpp
     ShaderProgram.cpp
     VertexArray.cpp
-    Texture.cpp
-    TextureFactory.cpp
     Camera.cpp
     Mesh.cpp
-    Model.cpp
     Entity.cpp
     Light.cpp
     Scene.cpp
@@ -24,6 +21,11 @@ add_executable(Fall-Fever
     imgui/Handler.cpp
     imgui/Window.cpp
     util/Log.cpp
+    resources/Resource.cpp
+    resources/ResourceHandler.cpp
+    resources/Texture.cpp
+    resources/Model.cpp
+    resources/CubeMap.cpp
 )
 
 target_link_libraries(

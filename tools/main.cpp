@@ -18,11 +18,13 @@
 #include <fstream>
 
 #include "../src/definitions/models.h"
+#include "../src/resources/TextureTypes.h"
 #include "primitiveModel.h"
 
 void processNode(aiNode *node, const aiScene *scene, Model *model);
 Mesh processMesh(aiMesh *mesh, const aiScene *scene, Model *model);
-std::vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, uint8_t textureType, Mesh *mesh, Model *model);
+std::vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, uint8_t textureType, Mesh *mesh,
+                                          Model *model);
 
 int main(int argc, char** argv) {
 
@@ -221,7 +223,9 @@ Mesh processMesh(aiMesh *mesh, const aiScene *scene, Model *model) {
     return currentMesh;
 }
 
-std::vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, uint8_t textureType, Mesh *mesh, Model *model) {
+std::vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, uint8_t textureType, Mesh *mesh,
+                                          Model *model)
+{
 
     std::vector<Texture> textures;
     for(uint32_t i = 0; i < mat->GetTextureCount(type); i++) {

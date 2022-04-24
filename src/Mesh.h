@@ -1,17 +1,17 @@
 #pragma once
 
+#include "VertexArray.h"
 #include "definitions/models.h"
+#include "resources/Texture.h"
 
 #include <vector>
 
 class ShaderProgram;
-class Texture;
-class VertexArray;
 
 class Mesh
 {
 public:
-    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture *> textures);
+    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<ResourceId> textures);
     ~Mesh();
 
     void initializeOnGPU();
@@ -31,7 +31,7 @@ private:
     bool m_isInitialized = false;
 
     uint32_t m_numElements;
-    std::vector<Texture *> m_textures;
+    std::vector<ResourceId> m_textures;
 
     VertexArray *m_vertexArray;
 };

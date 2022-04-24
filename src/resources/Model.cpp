@@ -1,57 +1,44 @@
 #include "Model.h"
-#include "Mesh.h"
-#include "ShaderProgram.h"
-#include "Texture.h"
-#include "util/Log.h"
+#include "../util/Log.h"
+#include "ResourceHandler.h"
 
 #include <fstream>
 #include <future>
 
-uint32_t Model::s_idCounter = 0;
-
-Model::Model(const Prototype &prototype) : m_id(s_idCounter++), m_uniqueName(prototype.modelName)
+Model::Model(const ModelDescriptor &descriptor) : Resource(descriptor.path), NamedResource(descriptor.name)
 {
-    m_workingPath = prototype.modelPath.substr(0, prototype.modelPath.find_last_of('/'));
+    m_workingPath = descriptor.path.substr(0, descriptor.path.find_last_of('/'));
 
-    loadModel(prototype.modelPath);
+    loadModel(descriptor.path);
 }
 
-void Model::initializeOnGPU()
+void Model::initialize()
 {
-    if (m_isInitialized)
-        return;
-
-    m_isInitialized = true;
-
-    for (auto texture : m_textures)
-        texture->initializeOnGPU();
+    m_initialized = true;
 
     for (auto mesh : m_meshes)
         mesh->initializeOnGPU();
 }
 
-Model::~Model()
-{
-    // Go through all loaded textures and delete them
-    for (auto it = m_textures.begin(); it != m_textures.end(); it++) {
-        delete (*it);
-    }
-}
-
-void Model::draw(ShaderProgram *shaderProgram)
+void Model::draw(ShaderProgram *shaderProgram) const
 {
     // Iterate through every mesh and call the draw function
-    for (auto mesh : m_meshes) {
+    for (const auto &mesh : m_meshes) {
         mesh->draw(shaderProgram);
     }
 }
 
-void Model::drawWithoutTextures()
+void Model::drawWithoutTextures() const
 {
     // Iterate through every mesh and call the draw function
-    for (auto mesh : m_meshes) {
+    for (const auto &mesh : m_meshes) {
         mesh->drawWithoutTextures();
     }
+}
+
+Mesh *Model::getMesh(unsigned int index) const
+{
+    return m_meshes[index];
 }
 
 void Model::loadModel(const std::string &pathToModel)
@@ -96,10 +83,11 @@ void Model::loadModel(const std::string &pathToModel)
             std::string texturePath = m_workingPath + '/' + textureSources[i].c_str();
 
             auto loadModel = [=, &mutex]() {
-                Texture *currentTex = new Texture({texturePath, textureTypes[i]});
+                ResourceId texture = ResourceHandler::instance().registerResource<Texture>(
+                    TextureDescriptor{texturePath, textureTypes[i]});
 
                 std::lock_guard<std::mutex> lock(mutex);
-                m_textures.push_back(currentTex);
+                m_textures.push_back(texture);
             };
 
             futures.push_back(std::async(std::launch::async, loadModel));
@@ -114,9 +102,10 @@ void Model::loadModel(const std::string &pathToModel)
     }
 
     if (!hasNormalMap) {
-        Texture *currentTex = new Texture({"data/res/models/tex/fallback_normal.png", TextureType::Normal});
+        ResourceId texture = ResourceHandler::instance().registerResource<Texture>(
+            TextureDescriptor{"data/res/models/tex/fallback_normal.png", TextureType::Normal});
 
-        m_textures.push_back(currentTex);
+        m_textures.push_back(texture);
     }
 
     // Here starts the first mesh
@@ -144,7 +133,7 @@ void Model::loadModel(const std::string &pathToModel)
         input.read((char *)meshIndices.data(), indexBlockSize);
 
         std::vector<uint32_t> meshTextureIds;
-        std::vector<Texture *> meshTextures;
+        std::vector<ResourceId> meshTextures;
 
         for (unsigned int i = 0; i < numMeshTextureIds; i++) {
             uint32_t currentTextureId;
@@ -165,14 +154,4 @@ void Model::loadModel(const std::string &pathToModel)
     }
 
     input.close();
-}
-
-Mesh *Model::getMesh(unsigned int index)
-{
-    return m_meshes[index];
-}
-
-const std::string &Model::getUniqueName()
-{
-    return m_uniqueName;
 }

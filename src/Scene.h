@@ -1,6 +1,7 @@
 #pragma once
 
 #include "FrameBuffer.h"
+#include "resources/Resource.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -36,7 +37,6 @@ public:
     Skybox *getSkybox();
     ModelEntity *getEntityByName(const std::string &name);
     ModelEntity *getEntityById(uint32_t id);
-    Model *getModelByName(const std::string &name);
 
     void draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition);
     void calculateShadows(ShaderProgram *directionalShaderProgram, ShaderProgram *pointShaderProgram);
@@ -44,7 +44,7 @@ public:
 private:
     ShaderProgram *m_shaderProgram;
 
-    std::vector<Model *> m_models;
+    std::vector<ResourceId> m_models;
     std::vector<ModelEntity *> m_entities;
     Skybox *m_skybox;
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Texture.h"
 #include "definitions/models.h"
+#include "resources/Texture.h"
 
 #include <glm/glm.hpp>
 #include <string>
@@ -9,7 +9,6 @@
 
 class Menu;
 class ShaderProgram;
-class Texture;
 class Window;
 class Mesh;
 
@@ -21,12 +20,11 @@ public:
         std::string name;
         glm::vec2 position;
         glm::vec2 dimensions;
-        Texture::Prototype texturePrototype;
+        TextureDescriptor texturePrototype;
         uint16_t callBackId; // TODO: will be removed...
     };
 
-    Widget(Prototype prototype, Texture *texture);
-    ~Widget();
+    Widget(Prototype prototype, ResourceId texture);
 
     void draw(ShaderProgram *shaderProgram);
 
@@ -43,5 +41,5 @@ private:
 
     uint16_t m_callbackId;
 
-    std::vector<Texture *> m_widgetTextures;
+    std::vector<ResourceId> m_widgetTextures;
 };

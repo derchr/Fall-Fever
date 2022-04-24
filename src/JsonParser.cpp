@@ -25,20 +25,19 @@ JsonParser::JsonParser(const std::string &jsonFilepath)
 JsonParser::~JsonParser()
 {}
 
-std::vector<Model::Prototype> JsonParser::getModelPrototypes() const
+std::vector<ModelDescriptor> JsonParser::getModelDescriptors() const
 {
     const Json::Value modelsJson = m_root["models"];
 
-    std::vector<Model::Prototype> modelPrototypes;
+    std::vector<ModelDescriptor> modelDescriptors;
 
     for (unsigned int index = 0; index < modelsJson.size(); index++) {
         std::string modelName = modelsJson[index]["unique_name"].asString();
         std::string modelPath = modelsJson[index]["path"].asString();
-        Model::Prototype prototype{modelName, modelPath};
-        modelPrototypes.push_back(prototype);
+        modelDescriptors.push_back({modelPath, modelName});
     }
 
-    return modelPrototypes;
+    return modelDescriptors;
 }
 
 std::vector<ModelEntity::Prototype> JsonParser::getEntityPrototypes() const
@@ -229,9 +228,9 @@ std::vector<Widget::Prototype> JsonParser::getWidgetPrototypesFromScreen(const J
         glm::vec2 position(currentWidgetPosition[0].asFloat(), currentWidgetPosition[1].asFloat());
         glm::vec2 dimensions(currentWidgetDimensions[0].asFloat(), currentWidgetDimensions[1].asFloat());
         uint16_t callBackId = currentWidgetJson["callbackId"].asUInt();
-        Texture::Prototype texturePrototype{currentWidgetTextureJson.asString(), TextureType::Diffuse};
+        TextureDescriptor textureDescriptor{currentWidgetTextureJson.asString(), TextureType::Diffuse};
 
-        Widget::Prototype widgetPrototype{name, position, dimensions, texturePrototype, callBackId};
+        Widget::Prototype widgetPrototype{name, position, dimensions, textureDescriptor, callBackId};
 
         widgetPrototypes.push_back(widgetPrototype);
     }

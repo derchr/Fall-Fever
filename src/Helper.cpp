@@ -122,13 +122,13 @@ void Helper::gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum sev
     }
 
     if (severity == GL_DEBUG_SEVERITY_HIGH || severity == GL_DEBUG_SEVERITY_MEDIUM)
-        Log::logger().info("[OpenGL Debug Message]\n"
-                           "Message: {}\n"
-                           "Source: {}\n"
-                           "Type: {}\n"
-                           "ID: {}\n"
-                           "Severity: {}\n",
-                           _message, _source, _type, id, _severity);
+        Log::logger().debug("\n[OpenGL Debug Message]\n"
+                            "Message: {}\n"
+                            "Source: {}\n"
+                            "Type: {}\n"
+                            "ID: {}\n"
+                            "Severity: {}\n",
+                            _message, _source, _type, id, _severity);
 }
 
 Helper::Timer::Timer(const std::string &name) : m_name(name)

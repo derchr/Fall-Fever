@@ -3,8 +3,9 @@
 #include "Helper.h"
 #include "Menu.h"
 #include "ShaderProgram.h"
-#include "Texture.h"
+// #include "Texture.h"
 #include "Widget.h"
+#include "resources/ResourceHandler.h"
 
 uint32_t Screen::s_idCounter = 0;
 
@@ -13,10 +14,9 @@ Screen::Screen(Prototype prototype, FrameBuffer *framebuffer, ShaderProgram *sha
 {
     for (auto &prototype : prototype.widgetPrototypes) {
         auto texturePrototype = prototype.texturePrototype;
-        Texture *currentTexture = new Texture({texturePrototype.texturePath, texturePrototype.textureType});
-        currentTexture->initializeOnGPU();
+        ResourceId textureId = ResourceHandler::instance().registerResource<Texture>(texturePrototype);
 
-        Widget *currentWidget = new Widget(prototype, currentTexture);
+        Widget *currentWidget = new Widget(prototype, textureId);
         m_widgets.push_back(currentWidget);
     }
 }
@@ -25,9 +25,6 @@ Screen::~Screen()
 {
     // Iterate over Widgets and Textures to delete all of them
     for (auto it = m_widgets.begin(); it != m_widgets.end(); it++) {
-        delete *it;
-    }
-    for (auto it = m_textures.begin(); it != m_textures.end(); it++) {
         delete *it;
     }
 }

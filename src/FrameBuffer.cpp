@@ -1,6 +1,8 @@
 #include "FrameBuffer.h"
 #include "ShaderProgram.h"
-#include "Texture.h"
+#include "resources/CubeMap.h"
+#include "resources/ResourceHandler.h"
+#include "resources/Texture.h"
 #include "util/Log.h"
 
 #include <cstddef>
@@ -150,14 +152,15 @@ GLuint DepthMap::getDepthMap() const
     return m_depthMap;
 }
 
-DepthMapCube::DepthMapCube(int RESOLUTION)
+DepthMapCube::DepthMapCube(int resolution)
 {
     glGenFramebuffers(1, &m_FBO);
     bind();
 
-    m_cubeMap = new CubeMap(RESOLUTION);
+    m_cubeMap = ResourceHandler::instance().registerResource<InternalCubeMap>(resolution);
+    GLuint glId = std::static_pointer_cast<InternalCubeMap>(ResourceHandler::instance().resource(m_cubeMap))->glId();
 
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_cubeMap->getTextureId(), 0);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, glId, 0);
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
 
@@ -172,5 +175,5 @@ DepthMapCube::~DepthMapCube()
 
 GLuint DepthMapCube::getCubeMapTextureId()
 {
-    return m_cubeMap->getTextureId();
+    return std::static_pointer_cast<InternalCubeMap>(ResourceHandler::instance().resource(m_cubeMap))->glId();
 }

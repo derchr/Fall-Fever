@@ -1,14 +1,17 @@
 #pragma once
 
-#include "Texture.h"
+#include "resources/Resource.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <memory>
+#include <string>
+#include <vector>
 
 class VertexArray;
 class ShaderProgram;
 class Model;
+class TextureCubeMap;
 
 class Entity
 {
@@ -87,7 +90,7 @@ public:
         std::string shaderProgramName;
     };
 
-    ModelEntity(Prototype prototype, Model *model, ShaderProgram *shaderProgram);
+    ModelEntity(Prototype prototype, const Model *model, ShaderProgram *shaderProgram);
     ~ModelEntity() = default;
 
     void draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition);
@@ -95,7 +98,7 @@ public:
     void drawPointShadows(ShaderProgram *p_shaderProgram);
 
 private:
-    Model *m_model;
+    const Model *m_model;
     ShaderProgram *m_shaderProgram;
 };
 
@@ -120,7 +123,7 @@ private:
     Model *m_cubeModel;
     ShaderProgram *m_shaderProgram;
 
-    CubeMap *m_cubeMap;
+    ResourceId m_cubeMap;
 
     VertexArray *m_vertexArray;
 };

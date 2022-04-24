@@ -1,5 +1,6 @@
 #pragma once
 
+#include "resources/CubeMap.h"
 #include <glad/glad.h>
 
 class ShaderProgram;
@@ -51,7 +52,7 @@ public:
 class DepthMap : public AbstractDepthMap
 {
 public:
-    DepthMap(int RESOLUTION);
+    DepthMap(int resolution);
     ~DepthMap();
 
     GLuint getDepthMap() const;
@@ -63,11 +64,11 @@ private:
 class DepthMapCube : public AbstractDepthMap
 {
 public:
-    DepthMapCube(int RESOLUTION);
+    DepthMapCube(int resolution);
     ~DepthMapCube();
 
     GLuint getCubeMapTextureId();
 
 private:
-    CubeMap *m_cubeMap;
+    ResourceId m_cubeMap;
 };

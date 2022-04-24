@@ -1,15 +1,15 @@
 #pragma once
 
+#include "Widget.h"
+#include "resources/Texture.h"
+
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-#include "Widget.h"
-
 class Menu;
 class FrameBuffer;
 class ShaderProgram;
-class Texture;
 
 class Screen
 {
@@ -38,7 +38,7 @@ private:
     FrameBuffer *m_frameBuffer;
     ShaderProgram *m_shaderProgram;
 
-    std::vector<Texture *> m_textures;
+    std::vector<ResourceId> m_textures;
     std::vector<Widget *> m_widgets;
 
     mutable std::unordered_map<std::string, Widget *> m_widgetNameCache;

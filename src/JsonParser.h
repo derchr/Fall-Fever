@@ -7,10 +7,10 @@
 
 #include "Entity.h"
 #include "Light.h"
-#include "Model.h"
 #include "Screen.h"
 #include "ShaderProgram.h"
 #include "Widget.h"
+#include "resources/Model.h"
 
 class Screen;
 class ShaderProgram;
@@ -22,7 +22,7 @@ public:
     JsonParser(const std::string &jsonFilepath);
     ~JsonParser();
 
-    std::vector<Model::Prototype> getModelPrototypes() const;
+    std::vector<ModelDescriptor> getModelDescriptors() const;
     std::vector<ModelEntity::Prototype> getEntityPrototypes() const;
     std::vector<std::unique_ptr<Light::Prototype>> getLightPrototypes() const;
     std::vector<Screen::Prototype> getScreenPrototypes() const;

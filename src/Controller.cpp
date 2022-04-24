@@ -21,14 +21,15 @@
 #include "JsonParser.h"
 #include "Light.h"
 #include "Menu.h"
-#include "Model.h"
 #include "Scene.h"
 #include "Screen.h"
 #include "ShaderProgram.h"
-#include "Texture.h"
 #include "VertexArray.h"
 #include "Widget.h"
 #include "Window.h"
+#include "resources/Model.h"
+#include "resources/ResourceHandler.h"
+#include "resources/Texture.h"
 #include "util/Log.h"
 
 Controller::Controller() : m_gameWindow(std::unique_ptr<Window>(new Window))

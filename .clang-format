@@ -4,6 +4,7 @@ AccessModifierOffset: '-4'
 AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: Never
 AllowShortLoopsOnASingleLine: 'false'
+AlwaysBreakTemplateDeclarations: 'true'
 BreakBeforeBraces: Mozilla
 ColumnLimit: '120'
 IndentWidth: '4'

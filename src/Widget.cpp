@@ -4,20 +4,15 @@
 #include "ShaderProgram.h"
 #include "VertexArray.h"
 #include "Window.h"
+#include "resources/ResourceHandler.h"
 
 #include <GLFW/glfw3.h>
 
-Widget::Widget(Prototype prototype, Texture *texture)
+Widget::Widget(Prototype prototype, ResourceId texture)
     : m_position(prototype.position), m_dimensions(prototype.dimensions), m_uniqueName(prototype.name),
       m_callbackId(prototype.callBackId)
 {
     m_widgetTextures.push_back(texture);
-}
-
-Widget::~Widget()
-{
-    for (auto &texture : m_widgetTextures)
-        delete texture;
 }
 
 std::string Widget::getUniqueName()
@@ -41,7 +36,8 @@ void Widget::draw(ShaderProgram *shaderProgram)
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_widgetTextures[0]->textureId());
+    auto texture = std::static_pointer_cast<Texture>(ResourceHandler::instance().resource(m_widgetTextures[0]));
+    glBindTexture(GL_TEXTURE_2D, texture->glId());
 
     GLint location = glGetUniformLocation(shaderProgram->getShaderProgramId(), "u_texture");
     glUniform1i(location, 0);
