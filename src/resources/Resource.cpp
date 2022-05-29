@@ -3,9 +3,9 @@
 
 ResourceId Resource::s_idCounter = 0;
 
-Resource::Resource(const std::string &path) : m_id(s_idCounter++), m_path(path)
+Resource::Resource(const std::filesystem::path &path) : m_id(s_idCounter++), m_path(path)
 {
-    Log::logger().info("Resource \"{}\" with id {} created", m_path, m_id);
+    Log::logger().info("Resource \"{}\" with id {} created", m_path.string(), m_id);
 }
 
 ResourceId Resource::id() const
@@ -18,7 +18,7 @@ bool Resource::isInitialized() const
     return m_initialized;
 }
 
-const std::string &Resource::resourcePath() const
+const std::filesystem::path &Resource::resourcePath() const
 {
     return m_path;
 }

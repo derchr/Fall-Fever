@@ -54,13 +54,12 @@ Scene::Scene(std::vector<ShaderProgram *> shaderPrograms)
 
     // TODO: use geometry shader instead of model and load skybox before models.
     Skybox::Prototype skyboxPrototype = modelParser.getSkyboxPrototype();
-    std::thread skyboxThread([=]() {
-        m_skybox = new Skybox(skyboxPrototype,
-                              std::static_pointer_cast<Model>(ResourceHandler::instance().resource("cube")).get(),
-                              Controller::getShaderProgramByName("skyboxProgram", shaderPrograms));
+    m_skybox =
+        new Skybox(skyboxPrototype, std::static_pointer_cast<Model>(ResourceHandler::instance().resource("cube")).get(),
+                   Controller::getShaderProgramByName("skyboxProgram", shaderPrograms));
 
-        Log::logger().info("Loaded skybox: {}", skyboxPrototype.texturePath);
-    });
+    Log::logger().info("Loaded skybox: {}", skyboxPrototype.texturePath);
+    m_skybox->initializeOnGPU();
 
     std::vector<ModelEntity::Prototype> entityPrototypes = modelParser.getEntityPrototypes();
 
@@ -127,9 +126,6 @@ Scene::Scene(std::vector<ShaderProgram *> shaderPrograms)
         }
     }
     m_lights = lights;
-
-    skyboxThread.join();
-    m_skybox->initializeOnGPU();
 }
 
 Scene::~Scene()

@@ -9,7 +9,7 @@ Texture::Texture(const TextureDescriptor &descriptor)
     m_textureBuffer = stbi_load(resourcePath().c_str(), &m_textureWidth, &m_textureHeight, &m_numComponents, 0);
 
     if (!m_textureBuffer)
-        Log::logger().warn("Texture {} could not be loaded", resourcePath());
+        Log::logger().warn("Texture {} could not be loaded", resourcePath().string());
 }
 
 void Texture::initialize()

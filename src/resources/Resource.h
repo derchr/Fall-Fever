@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <filesystem>
 #include <glad/glad.h>
 #include <string>
 
@@ -9,14 +10,14 @@ using ResourceId = uint64_t;
 class Resource
 {
 public:
-    Resource(const std::string &path);
+    Resource(const std::filesystem::path &path);
     Resource(const Resource &other) = delete;
     Resource(Resource &&other) = delete;
     Resource &operator=(const Resource &other) = delete;
     Resource &operator=(Resource &&other) = delete;
 
     ResourceId id() const;
-    const std::string &resourcePath() const;
+    const std::filesystem::path &resourcePath() const;
 
 protected:
     bool isInitialized() const;
@@ -28,7 +29,7 @@ private:
     ResourceId m_id;
     static ResourceId s_idCounter;
 
-    std::string m_path;
+    std::filesystem::path m_path;
 
     friend class ResourceHandler;
 };

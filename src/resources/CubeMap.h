@@ -30,7 +30,7 @@ struct TextureCubeMapDescriptor
 class AbstractCubeMap : public AbstractTexture
 {
 public:
-    AbstractCubeMap(const std::string path) : AbstractTexture(path)
+    AbstractCubeMap(const std::string &path) : AbstractTexture(path)
     {}
 
     void bind(ShaderProgram *shaderProgram) const;
