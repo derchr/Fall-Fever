@@ -19,22 +19,20 @@ class Handler;
 class Controller
 {
 public:
+    Controller();
     ~Controller();
-
-    static Controller &instance();
 
     void run();
 
     void setMaxFps(uint16_t fps);
 
+    // TODO remove...
     ShaderProgram *getShaderProgramByName(const std::string &name);
     static ShaderProgram *getShaderProgramByName(const std::string &name, std::vector<ShaderProgram *> shaderPrograms);
 
     void updateExposure(ShaderProgram *shaderProgram);
 
 private:
-    Controller();
-
     void limit_framerate();
 
     void updateWindowDimensions();
@@ -48,13 +46,8 @@ private:
     Scene *m_scene;
 
     Camera *m_camera;
-    Menu *m_menu;
 
     std::vector<ShaderProgram *> m_shaderPrograms;
-
-#ifdef _DEBUG
-    std::unique_ptr<Imgui::Handler> m_imguiHandler;
-#endif
 
     FrameBuffer *m_postProcessFrameBuffer;
 

@@ -13,7 +13,7 @@ int main(int argc, char **argv)
 #endif
 
     // Create controller
-    Controller &controller = Controller::instance();
+    Controller controller;
 
     const char *fps_env = std::getenv("MAXFPS");
     if (fps_env) {

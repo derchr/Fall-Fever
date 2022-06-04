@@ -11,21 +11,17 @@ add_executable(Fall-Fever
     Light.cpp
     Scene.cpp
     FrameBuffer.cpp
-    Widget.cpp
-    Screen.cpp
-    Menu.cpp
-    JsonParser.cpp
     Helper.cpp
-    imgui/EntityWindow.cpp
-    imgui/GeneralInfoWindow.cpp
-    imgui/Handler.cpp
-    imgui/Window.cpp
-    util/Log.cpp
     resources/Resource.cpp
     resources/ResourceHandler.cpp
     resources/Texture.cpp
     resources/Model.cpp
     resources/CubeMap.cpp
+    util/Log.cpp
+    # imgui/EntityWindow.cpp
+    # imgui/GeneralInfoWindow.cpp
+    # imgui/Handler.cpp
+    # imgui/Window.cpp
 )
 
 target_link_libraries(

@@ -3,7 +3,6 @@
 #include "Controller.h"
 #include "Entity.h"
 #include "FrameBuffer.h"
-#include "JsonParser.h"
 #include "Light.h"
 #include "ShaderProgram.h"
 #include "resources/Model.h"
@@ -12,6 +11,7 @@
 #include "util/Log.h"
 
 #include <future>
+#include <memory>
 #include <thread>
 
 Scene::Scene(std::vector<ShaderProgram *> shaderPrograms)
@@ -29,9 +29,13 @@ Scene::Scene(std::vector<ShaderProgram *> shaderPrograms)
     m_shaderProgram->setUniform("u_material.shininess", 100.0f);
     m_shaderProgram->unbind();
 
-    JsonParser modelParser("data/scene.json");
-
-    std::vector<ModelDescriptor> modelDescriptors = modelParser.getModelDescriptors();
+    std::array modelDescriptors{
+        ModelDescriptor{"fallback", "data/res/models/fallback.ffo"},
+        ModelDescriptor{"backpack", "data/res/models/backpack.ffo"},
+        ModelDescriptor{"ground", "data/res/models/wood_floor.ffo"},
+        ModelDescriptor{"cube", "data/res/models/cube.ffo"},
+        ModelDescriptor{"container", "data/res/models/container.ffo"},
+    };
 
     {
         std::vector<std::future<void>> futures;
@@ -53,7 +57,7 @@ Scene::Scene(std::vector<ShaderProgram *> shaderPrograms)
     }
 
     // TODO: use geometry shader instead of model and load skybox before models.
-    Skybox::Prototype skyboxPrototype = modelParser.getSkyboxPrototype();
+    Skybox::Prototype skyboxPrototype{"data/res/textures/skybox/"};
     m_skybox =
         new Skybox(skyboxPrototype, std::static_pointer_cast<Model>(ResourceHandler::instance().resource("cube")).get(),
                    Controller::getShaderProgramByName("skyboxProgram", shaderPrograms));
@@ -61,7 +65,13 @@ Scene::Scene(std::vector<ShaderProgram *> shaderPrograms)
     Log::logger().info("Loaded skybox: {}", skyboxPrototype.texturePath);
     m_skybox->initializeOnGPU();
 
-    std::vector<ModelEntity::Prototype> entityPrototypes = modelParser.getEntityPrototypes();
+    std::array entityPrototypes{
+        ModelEntity::Prototype{"backpack", "", {0., 1., 0.}, {}, 0.6, "backpack", "defaultProgram"},
+        ModelEntity::Prototype{
+            "container", "backpack", {10., 1., 0.}, {45., 45., 45.}, 1., "container", "defaultProgram"},
+        ModelEntity::Prototype{"ground", "", {}, {}, 1., "ground", "defaultProgram"},
+        ModelEntity::Prototype{"light", "", {}, {}, 1., "cube", "lightProgram"},
+    };
 
     {
         for (auto &prototype : entityPrototypes) {
@@ -100,8 +110,13 @@ Scene::Scene(std::vector<ShaderProgram *> shaderPrograms)
         }
     }
 
-    JsonParser lightParser("data/scene.json");
-    auto lightPrototypes = lightParser.getLightPrototypes();
+    // Order important
+    std::array<std::unique_ptr<Light::Prototype>, 2> lightPrototypes{
+        std::unique_ptr<DirectionalLight::Prototype>(
+            new DirectionalLight::Prototype{"directionalLight", {-0.2, -1.0, -0.3}, {1., 1., 1.}, 0.25}),
+        std::unique_ptr<PointLight::Prototype>(
+            new PointLight::Prototype{"pointLight0", "light", {0., 1., 0.}, {1., 1., 1.}, 7.5}),
+    };
 
     std::vector<Light *> lights;
     {
@@ -119,10 +134,13 @@ Scene::Scene(std::vector<ShaderProgram *> shaderPrograms)
                     if (parent) {
                         parent->addChild(currentLight);
                         currentLight->setParent(parent);
+                    } else {
+                        Log::logger().warn("Could not find entity \"{}\"", pointPrototype->parent);
                     }
                 }
             }
             lights.push_back(currentLight);
+            Log::logger().info("Loaded light \"{}\"", prototype->name);
         }
     }
     m_lights = lights;

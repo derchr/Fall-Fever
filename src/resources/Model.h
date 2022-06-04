@@ -8,8 +8,8 @@
 
 struct ModelDescriptor
 {
-    std::string path;
     std::string name;
+    std::string path;
 };
 
 class Model : public Resource, public NamedResource

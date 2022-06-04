@@ -1,36 +1,23 @@
-#include <vector>
-
-#include <glad/glad.h>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
-#include <GLFW/glfw3.h>
-
-#ifdef _DEBUG
-#include "imgui/EntityWindow.h"
-#include "imgui/GeneralInfoWindow.h"
-#include "imgui/Handler.h"
-#endif
-
-#include "Camera.h"
 #include "Controller.h"
+#include "Camera.h"
 #include "Entity.h"
 #include "EventHandler.h"
 #include "Helper.h"
-#include "JsonParser.h"
 #include "Light.h"
-#include "Menu.h"
 #include "Scene.h"
-#include "Screen.h"
 #include "ShaderProgram.h"
 #include "VertexArray.h"
-#include "Widget.h"
 #include "Window.h"
 #include "resources/Model.h"
 #include "resources/ResourceHandler.h"
 #include "resources/Texture.h"
 #include "util/Log.h"
+
+#include <GLFW/glfw3.h>
+#include <array>
+#include <glad/glad.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 Controller::Controller() : m_gameWindow(std::unique_ptr<Window>(new Window))
 {
@@ -38,8 +25,17 @@ Controller::Controller() : m_gameWindow(std::unique_ptr<Window>(new Window))
 
     m_camera = new Camera(90.0f, m_gameWindow->getWindowAspectRatio());
 
-    JsonParser shaderParser("data/shaderPrograms.json");
-    auto shaderProgramPrototypes = shaderParser.getShaderProgramPrototypes();
+    std::array shaderProgramPrototypes{
+        ShaderProgram::Prototype{"defaultProgram", "data/shaders/basic.vert", "data/shaders/basic.frag", ""},
+        ShaderProgram::Prototype{"lightProgram", "data/shaders/light.vert", "data/shaders/light.frag", ""},
+        ShaderProgram::Prototype{"skyboxProgram", "data/shaders/skybox.vert", "data/shaders/skybox.frag", ""},
+        ShaderProgram::Prototype{"postProcessingProgram", "data/shaders/postprocessing.vert",
+                                 "data/shaders/postprocessing.frag", ""},
+        ShaderProgram::Prototype{"directionalShadowDepthProgram", "data/shaders/directionalShadowDepth.vert",
+                                 "data/shaders/directionalShadowDepth.frag", ""},
+        ShaderProgram::Prototype{"pointShadowDepthProgram", "data/shaders/pointShadowDepth.vert",
+                                 "data/shaders/pointShadowDepth.frag", "data/shaders/pointShadowDepth.geom"},
+    };
 
     for (auto &prototype : shaderProgramPrototypes) {
         m_shaderPrograms.push_back(new ShaderProgram(prototype));
@@ -49,21 +45,7 @@ Controller::Controller() : m_gameWindow(std::unique_ptr<Window>(new Window))
     m_postProcessFrameBuffer = new FrameBuffer(m_gameWindow->getWindowWidth(), m_gameWindow->getWindowHeight(),
                                                getShaderProgramByName("postProcessingProgram"));
 
-    m_menu = new Menu(m_postProcessFrameBuffer, getShaderProgramByName("menuProgram"));
-
-    // Show loading screen...
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    m_menu->showScreenByName("loadingScreen");
-    glfwSwapBuffers(m_gameWindow->getGLFWwindow());
-
-    // Show main menu when loading is finished...
-    m_menu->showScreenByName("mainMenuScreen");
-
     m_scene = new Scene(m_shaderPrograms);
-
-#ifdef _DEBUG
-    m_imguiHandler = std::unique_ptr<Imgui::Handler>(new Imgui::Handler(m_gameWindow->getGLFWwindow()));
-#endif
 }
 
 Controller::~Controller()
@@ -74,15 +56,8 @@ Controller::~Controller()
 
     delete m_scene;
     delete m_camera;
-    delete m_menu;
     delete m_postProcessFrameBuffer;
     delete m_gameEventHandler;
-}
-
-Controller &Controller::instance()
-{
-    static Controller s_instance;
-    return s_instance;
 }
 
 void Controller::run()
@@ -96,19 +71,9 @@ void Controller::run()
 
     m_camera->translate(glm::vec3(0.0f, 1.5f, 5.0f));
 
-    // imgui stuff
-    bool rotateLightSource = false, rotateEntity = false, drawShadows = false;
-    glm::vec3 lightColor = glm::vec3(1.f);
-    float intensity = 7.5f;
-#ifdef _DEBUG
-    std::shared_ptr<Imgui::Window> generalWindow = std::make_shared<Imgui::GeneralInfoWindow>(
-        this, m_scene, getShaderProgramByName("postProcessingProgram"), &rotateEntity, &drawShadows, &rotateLightSource,
-        &lightColor, &m_exposure, &intensity);
-    m_imguiHandler->addImguiWindow(generalWindow);
-
-    // std::shared_ptr<Imgui::Window> entityWindow = std::make_shared<Imgui::EntityWindow>(m_scene->getEntities());
-    // m_imguiHandler->addImguiWindow(entityWindow);
-#endif
+    bool drawShadows = false;
+    float intensity = 7.5;
+    glm::vec3 lightColor{1., 1., 1.};
 
     // This is the game loop
     while (!glfwWindowShouldClose(m_gameWindow->getGLFWwindow())) {
@@ -117,20 +82,10 @@ void Controller::run()
         limit_framerate();
 
         // --- Update game ---
-
-        if (rotateLightSource) {
-            float radius = 4.0;
-            glm::vec3 newPos = glm::vec3(-cos(glfwGetTime() * 0.5), 0.5f, sin(glfwGetTime() * 0.5)) * radius;
-            m_scene->getEntityByName("light")->setPosition(newPos);
-        }
-        if (rotateEntity) {
-            m_scene->getEntityById(0)->rotate(glm::vec3(0.0f, 1.0f, 0.0f), -0.2f * m_deltaTime);
-        }
-
         m_scene->updatePointLight(0, true, m_scene->getEntityByName("light")->getPosition(), lightColor, intensity);
         m_scene->updateDirectionalLight(true, m_scene->getDirectionalLight()->getDirection(), lightColor);
         getShaderProgramByName("lightProgram")->bind();
-        getShaderProgramByName("lightProgram")->setUniform("v_lightColor", lightColor * 100.0f);
+        getShaderProgramByName("lightProgram")->setUniform("v_lightColor", glm::vec3{1., 1., 1.} * 100.0f);
         getShaderProgramByName("lightProgram")->unbind();
 
         // --- Render and buffer swap ---
@@ -148,26 +103,18 @@ void Controller::run()
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        auto activeScreen = m_menu->getActiveScreen();
-        if (activeScreen) {
-            activeScreen->draw();
-        } else {
-            m_postProcessFrameBuffer->bind();
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        m_postProcessFrameBuffer->bind();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            m_camera->lookForward();
-            m_camera->updateVPM();
+        m_camera->lookForward();
+        m_camera->updateVPM();
 
-            m_scene->getSkybox()->draw(m_camera->getView(), m_camera->getProj());
-            m_scene->draw(m_camera->getViewProj(), m_camera->getPosition());
+        m_scene->getSkybox()->draw(m_camera->getView(), m_camera->getProj());
+        m_scene->draw(m_camera->getViewProj(), m_camera->getPosition());
 
-            m_postProcessFrameBuffer->unbind();
-            m_postProcessFrameBuffer->drawOnEntireScreen();
+        m_postProcessFrameBuffer->unbind();
+        m_postProcessFrameBuffer->drawOnEntireScreen();
 
-#ifdef _DEBUG
-            m_imguiHandler->renderWindows();
-#endif
-        }
         glfwSwapBuffers(m_gameWindow->getGLFWwindow());
 
         // Update window size
@@ -184,12 +131,7 @@ void Controller::run()
             m_camera->updateDirectionFromMouseInput(m_gameEventHandler->getCameraMouseActionMap());
         }
 
-        m_menu->writeWindowActions(m_gameEventHandler->getWindowActionMap());
         m_gameWindow->handleWindowActionMap(m_gameEventHandler->getWindowActionMap());
-
-        // Handle widget pressed event only when a screen is currently active
-        if (m_menu->getActiveScreen())
-            m_menu->handleMouseButtonActionMap(m_gameEventHandler->getMouseButtonActionMap(), m_gameWindow.get());
     }
 }
 
