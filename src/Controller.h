@@ -27,10 +27,11 @@ public:
     void setMaxFps(uint16_t fps);
 
     // TODO remove...
-    ShaderProgram *getShaderProgramByName(const std::string &name);
-    static ShaderProgram *getShaderProgramByName(const std::string &name, std::vector<ShaderProgram *> shaderPrograms);
+    std::shared_ptr<ShaderProgram> getShaderProgramByName(const std::string &name);
+    static std::shared_ptr<ShaderProgram>
+    getShaderProgramByName(const std::string &name, std::vector<std::shared_ptr<ShaderProgram>> shaderPrograms);
 
-    void updateExposure(ShaderProgram *shaderProgram);
+    void updateExposure(ShaderProgram &shaderProgram);
 
 private:
     void limit_framerate();
@@ -43,13 +44,13 @@ private:
     std::unique_ptr<Window> m_gameWindow;
     EventHandler *m_gameEventHandler;
 
-    Scene *m_scene;
+    std::shared_ptr<Scene> m_scene;
 
     Camera *m_camera;
 
-    std::vector<ShaderProgram *> m_shaderPrograms;
+    std::vector<std::shared_ptr<ShaderProgram>> m_shaderPrograms;
 
-    FrameBuffer *m_postProcessFrameBuffer;
+    std::shared_ptr<FrameBuffer> m_postProcessFrameBuffer;
 
     uint16_t m_MAX_FPS = 60;
     double m_deltaTime;

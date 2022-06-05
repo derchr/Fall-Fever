@@ -14,20 +14,20 @@
 #include <memory>
 #include <thread>
 
-Scene::Scene(std::vector<ShaderProgram *> shaderPrograms)
-    : m_shaderProgram(Controller::getShaderProgramByName("defaultProgram", shaderPrograms)),
-      m_depthMapDirectionalFBO(SHADOW_RES)
+Scene::Scene(std::vector<std::shared_ptr<ShaderProgram>> shaderPrograms)
+    : m_shaderProgram(*Controller::getShaderProgramByName("defaultProgram", shaderPrograms))
+//   m_depthMapDirectionalFBO(SHADOW_RES)
 {
-    // Create 4 depthMaps
-    for (int i = 0; i < 4; i++) {
-        DepthMapCube *temp_depthMap = new DepthMapCube(SHADOW_RES);
-        m_depthMapPointFBO.push_back(temp_depthMap);
-    }
+    // // Create 4 depthMaps
+    // for (int i = 0; i < 4; i++) {
+    //     DepthMapCube *temp_depthMap = new DepthMapCube(SHADOW_RES);
+    //     m_depthMapPointFBO.push_back(temp_depthMap);
+    // }
 
     // This will be removed in future when gloss maps are implemented
-    m_shaderProgram->bind();
-    m_shaderProgram->setUniform("u_material.shininess", 100.0f);
-    m_shaderProgram->unbind();
+    m_shaderProgram.bind();
+    m_shaderProgram.setUniform("u_material.shininess", 100.0f);
+    m_shaderProgram.unbind();
 
     std::array modelDescriptors{
         ModelDescriptor{"fallback", "data/res/models/fallback.ffo"},
@@ -58,19 +58,18 @@ Scene::Scene(std::vector<ShaderProgram *> shaderPrograms)
 
     // TODO: use geometry shader instead of model and load skybox before models.
     Skybox::Prototype skyboxPrototype{"data/res/textures/skybox/"};
-    m_skybox =
-        new Skybox(skyboxPrototype, std::static_pointer_cast<Model>(ResourceHandler::instance().resource("cube")).get(),
-                   Controller::getShaderProgramByName("skyboxProgram", shaderPrograms));
+    m_skybox = std::make_shared<Skybox>(
+        skyboxPrototype, std::static_pointer_cast<Model>(ResourceHandler::instance().resource("cube")).get(),
+        Controller::getShaderProgramByName("skyboxProgram", shaderPrograms).get());
 
     Log::logger().info("Loaded skybox: {}", skyboxPrototype.texturePath);
     m_skybox->initializeOnGPU();
 
     std::array entityPrototypes{
-        ModelEntity::Prototype{"backpack", "", {0., 1., 0.}, {}, 0.6, "backpack", "defaultProgram"},
-        ModelEntity::Prototype{
-            "container", "backpack", {10., 1., 0.}, {45., 45., 45.}, 1., "container", "defaultProgram"},
-        ModelEntity::Prototype{"ground", "", {}, {}, 1., "ground", "defaultProgram"},
-        ModelEntity::Prototype{"light", "", {}, {}, 1., "cube", "lightProgram"},
+        ModelEntity::Prototype{"backpack", {0., 1., 0.}, {}, 0.6, "backpack", "defaultProgram"},
+        ModelEntity::Prototype{"container", {10., 1., 0.}, {45., 45., 45.}, 1., "container", "defaultProgram"},
+        ModelEntity::Prototype{"ground", {}, {}, 1., "ground", "defaultProgram"},
+        ModelEntity::Prototype{"light", {}, {}, 1., "cube", "lightProgram"},
     };
 
     {
@@ -88,25 +87,15 @@ Scene::Scene(std::vector<ShaderProgram *> shaderPrograms)
             }
 
             // Get shaderprogram
-            ShaderProgram *currentProgram =
-                Controller::getShaderProgramByName(prototype.shaderProgramName, shaderPrograms);
+            auto currentProgram = Controller::getShaderProgramByName(prototype.shaderProgramName, shaderPrograms);
 
             if (!currentProgram) {
                 currentProgram = Controller::getShaderProgramByName("basic", shaderPrograms);
             }
 
-            ModelEntity *currentEntity = new ModelEntity(prototype, currentModel, currentProgram);
+            m_entities.push_back(std::make_shared<ModelEntity>(prototype, currentModel, currentProgram.get()));
 
             Log::logger().info("Loaded entity \"{}\" with model \"{}\"", prototype.name, prototype.modelName);
-
-            if (!prototype.parent.empty()) {
-                Entity *parent = getEntityByName(prototype.parent);
-                if (parent) {
-                    parent->addChild(currentEntity);
-                    currentEntity->setParent(parent);
-                }
-            } else
-                m_entities.push_back(currentEntity);
         }
     }
 
@@ -118,27 +107,19 @@ Scene::Scene(std::vector<ShaderProgram *> shaderPrograms)
             new PointLight::Prototype{"pointLight0", "light", {0., 1., 0.}, {1., 1., 1.}, 7.5}),
     };
 
-    std::vector<Light *> lights;
+    std::vector<std::shared_ptr<Light>> lights;
     {
         for (auto &prototype : lightPrototypes) {
-            Light *currentLight;
+            std::shared_ptr<Light> currentLight;
             auto directionalPrototype = dynamic_cast<DirectionalLight::Prototype *>(prototype.get());
             if (directionalPrototype) {
-                currentLight = new DirectionalLight(*directionalPrototype, m_shaderProgram);
+                currentLight = std::make_shared<DirectionalLight>(*directionalPrototype, &m_shaderProgram);
             }
             auto pointPrototype = dynamic_cast<PointLight::Prototype *>(prototype.get());
             if (pointPrototype) {
-                currentLight = new PointLight(*pointPrototype, m_shaderProgram);
-                if (!pointPrototype->parent.empty()) {
-                    Entity *parent = getEntityByName(pointPrototype->parent);
-                    if (parent) {
-                        parent->addChild(currentLight);
-                        currentLight->setParent(parent);
-                    } else {
-                        Log::logger().warn("Could not find entity \"{}\"", pointPrototype->parent);
-                    }
+                currentLight = std::make_shared<PointLight>(*pointPrototype, &m_shaderProgram);
                 }
-            }
+
             lights.push_back(currentLight);
             Log::logger().info("Loaded light \"{}\"", prototype->name);
         }
@@ -146,50 +127,9 @@ Scene::Scene(std::vector<ShaderProgram *> shaderPrograms)
     m_lights = lights;
 }
 
-Scene::~Scene()
-{
-    // Iterate over depthMapPointFBO vector and delete all items
-    for (auto it = m_depthMapPointFBO.begin(); it != m_depthMapPointFBO.end(); it++) {
-        delete (*it);
-    }
-    // Iterate over models and entities and delete all items
-    // for (auto it = m_models.begin(); it != m_models.end(); it++) {
-    //     delete (*it);
-    // }
-    for (auto it = m_entities.begin(); it != m_entities.end(); it++) {
-        delete (*it);
-    }
-
-    delete m_skybox;
-}
-
-void Scene::addEntity(ModelEntity *entity)
-{
-    m_entities.push_back(entity);
-}
-
-void Scene::removeEntityByName(const std::string &name)
-{
-    for (auto it = m_entities.begin(); it != m_entities.end(); it++) {
-        if ((*it)->getUniqueName() == name) {
-            m_entities.erase(it);
-            return;
-        }
-    }
-
-    Log::logger().warn("Entity \"{}\" could not be removed", name);
-}
-
-void Scene::clearEntities()
-{
-    for (auto it = m_entities.begin(); it != m_entities.end(); it++) {
-        m_entities.erase(it);
-    }
-}
-
 void Scene::updatePointLight(unsigned int lightId, bool active, glm::vec3 position, glm::vec3 color, float intensity)
 {
-    std::vector<PointLight *> pointLights = getPointLights();
+    auto pointLights = getPointLights();
     pointLights[lightId]->setActive(active);
     pointLights[lightId]->setPosition(position);
     pointLights[lightId]->setIntensity(intensity);
@@ -198,7 +138,7 @@ void Scene::updatePointLight(unsigned int lightId, bool active, glm::vec3 positi
 
 void Scene::updateDirectionalLight(bool active, glm::vec3 direction, glm::vec3 color)
 {
-    DirectionalLight *directionalLight = getDirectionalLight();
+    auto directionalLight = getDirectionalLight();
     directionalLight->setActive(active);
     directionalLight->setDirection(direction);
     directionalLight->setColor(color);
@@ -215,113 +155,114 @@ void Scene::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition)
     // calculateShadows();
 }
 
-void Scene::calculateShadows(ShaderProgram *directionalShaderProgram, ShaderProgram *pointShaderProgram)
-{
-    // Get old viewport dimensions to reset them later...
-    GLint VIEWPORT[4];
-    glGetIntegerv(GL_VIEWPORT, VIEWPORT);
+// void Scene::calculateShadows(ShaderProgram *directionalShaderProgram, ShaderProgram *pointShaderProgram)
+// {
+//     // Get old viewport dimensions to reset them later...
+//     GLint VIEWPORT[4];
+//     glGetIntegerv(GL_VIEWPORT, VIEWPORT);
 
-    glViewport(0, 0, SHADOW_RES, SHADOW_RES);
-    // Switch face culling (Peter panning)
-    glCullFace(GL_BACK);
+//     glViewport(0, 0, SHADOW_RES, SHADOW_RES);
+//     // Switch face culling (Peter panning)
+//     glCullFace(GL_BACK);
 
-    m_depthMapDirectionalFBO.bind();
+//     m_depthMapDirectionalFBO.bind();
 
-    glClear(GL_DEPTH_BUFFER_BIT);
+//     glClear(GL_DEPTH_BUFFER_BIT);
 
-    // --- Directional shadows ---
-    glm::mat4 directionalLightView =
-        glm::lookAt(-5.0f * glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat4 directionalLightViewProjectionMatrix = m_directionalLightProjection * directionalLightView;
+//     // --- Directional shadows ---
+//     glm::mat4 directionalLightView =
+//         glm::lookAt(-5.0f * glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f,
+//         0.0f));
+//     glm::mat4 directionalLightViewProjectionMatrix = m_directionalLightProjection * directionalLightView;
 
-    // Draw scene from light perspective
-    // Draw all entities
-    for (auto it = m_entities.begin(); it != m_entities.end(); it++) {
-        (*it)->drawDirectionalShadows(directionalLightViewProjectionMatrix, directionalShaderProgram);
-    }
+//     // Draw scene from light perspective
+//     // Draw all entities
+//     for (auto it = m_entities.begin(); it != m_entities.end(); it++) {
+//         (*it)->drawDirectionalShadows(directionalLightViewProjectionMatrix, directionalShaderProgram);
+//     }
 
-    m_depthMapDirectionalFBO.unbind();
+//     m_depthMapDirectionalFBO.unbind();
 
-    m_shaderProgram->bind();
+//     m_shaderProgram->bind();
 
-    // Send lightViewProjMatrix to basic shader
-    m_shaderProgram->setUniform("u_directionalLightViewProjMatrix", directionalLightViewProjectionMatrix);
+//     // Send lightViewProjMatrix to basic shader
+//     m_shaderProgram->setUniform("u_directionalLightViewProjMatrix", directionalLightViewProjectionMatrix);
 
-    // Send shadowMap to basic shader
-    int textureUnit = static_cast<int>(TextureType::TEXTURE_TYPE_NUM_ITEMS) * 2;
-    m_shaderProgram->setUniform("u_texture_directionalShadowMap", (int)textureUnit);
-    glActiveTexture(GL_TEXTURE0 + textureUnit);
-    glBindTexture(GL_TEXTURE_2D, m_depthMapDirectionalFBO.getDepthMap());
+//     // Send shadowMap to basic shader
+//     int textureUnit = static_cast<int>(TextureType::TEXTURE_TYPE_NUM_ITEMS) * 2;
+//     m_shaderProgram->setUniform("u_texture_directionalShadowMap", (int)textureUnit);
+//     glActiveTexture(GL_TEXTURE0 + textureUnit);
+//     glBindTexture(GL_TEXTURE_2D, m_depthMapDirectionalFBO.getDepthMap());
 
-    m_shaderProgram->unbind();
+//     m_shaderProgram->unbind();
 
-    // --- Point shadows ---
-    std::vector<PointLight *> pointLights = getPointLights();
+//     // --- Point shadows ---
+//     std::vector<PointLight *> pointLights = getPointLights();
 
-    // 4 depthMaps for 4 point lights
-    for (int i = 0; i < 1; i++) {
-        m_depthMapPointFBO[i]->bind();
+//     // 4 depthMaps for 4 point lights
+//     for (int i = 0; i < 1; i++) {
+//         m_depthMapPointFBO[i]->bind();
 
-        glClear(GL_DEPTH_BUFFER_BIT);
+//         glClear(GL_DEPTH_BUFFER_BIT);
 
-        // Create 6 view matrices for every face of the cubeMap
-        std::vector<glm::mat4> viewProjMatrices;
-        glm::vec3 lightPos = pointLights[i]->getPosition();
-        viewProjMatrices.push_back(m_pointLightProjection * glm::lookAt(lightPos,
-                                                                        lightPos + glm::vec3(1.0f, 0.0f, 0.0f),
-                                                                        glm::vec3(0.0f, -1.0f, 0.0f)));
-        viewProjMatrices.push_back(m_pointLightProjection * glm::lookAt(lightPos,
-                                                                        lightPos + glm::vec3(-1.0f, 0.0f, 0.0f),
-                                                                        glm::vec3(0.0f, -1.0f, 0.0f)));
-        viewProjMatrices.push_back(m_pointLightProjection * glm::lookAt(lightPos,
-                                                                        lightPos + glm::vec3(0.0f, 1.0f, 0.0f),
-                                                                        glm::vec3(0.0f, 0.0f, 1.0f)));
-        viewProjMatrices.push_back(m_pointLightProjection * glm::lookAt(lightPos,
-                                                                        lightPos + glm::vec3(0.0f, -1.0f, 0.0f),
-                                                                        glm::vec3(0.0f, 0.0f, -1.0f)));
-        viewProjMatrices.push_back(m_pointLightProjection * glm::lookAt(lightPos,
-                                                                        lightPos + glm::vec3(0.0f, 0.0f, 1.0f),
-                                                                        glm::vec3(0.0f, -1.0f, 0.0f)));
-        viewProjMatrices.push_back(m_pointLightProjection * glm::lookAt(lightPos,
-                                                                        lightPos + glm::vec3(0.0f, 0.0f, -1.0f),
-                                                                        glm::vec3(0.0f, -1.0f, 0.0f)));
+//         // Create 6 view matrices for every face of the cubeMap
+//         std::vector<glm::mat4> viewProjMatrices;
+//         glm::vec3 lightPos = pointLights[i]->getPosition();
+//         viewProjMatrices.push_back(m_pointLightProjection * glm::lookAt(lightPos,
+//                                                                         lightPos + glm::vec3(1.0f, 0.0f, 0.0f),
+//                                                                         glm::vec3(0.0f, -1.0f, 0.0f)));
+//         viewProjMatrices.push_back(m_pointLightProjection * glm::lookAt(lightPos,
+//                                                                         lightPos + glm::vec3(-1.0f, 0.0f, 0.0f),
+//                                                                         glm::vec3(0.0f, -1.0f, 0.0f)));
+//         viewProjMatrices.push_back(m_pointLightProjection * glm::lookAt(lightPos,
+//                                                                         lightPos + glm::vec3(0.0f, 1.0f, 0.0f),
+//                                                                         glm::vec3(0.0f, 0.0f, 1.0f)));
+//         viewProjMatrices.push_back(m_pointLightProjection * glm::lookAt(lightPos,
+//                                                                         lightPos + glm::vec3(0.0f, -1.0f, 0.0f),
+//                                                                         glm::vec3(0.0f, 0.0f, -1.0f)));
+//         viewProjMatrices.push_back(m_pointLightProjection * glm::lookAt(lightPos,
+//                                                                         lightPos + glm::vec3(0.0f, 0.0f, 1.0f),
+//                                                                         glm::vec3(0.0f, -1.0f, 0.0f)));
+//         viewProjMatrices.push_back(m_pointLightProjection * glm::lookAt(lightPos,
+//                                                                         lightPos + glm::vec3(0.0f, 0.0f, -1.0f),
+//                                                                         glm::vec3(0.0f, -1.0f, 0.0f)));
 
-        pointShaderProgram->bind();
+//         pointShaderProgram->bind();
 
-        for (int i = 0; i < 6; i++) {
-            pointShaderProgram->setUniform(("u_shadowMatrices[" + std::to_string(i) + "]").c_str(),
-                                           viewProjMatrices[i]);
-        }
+//         for (int i = 0; i < 6; i++) {
+//             pointShaderProgram->setUniform(("u_shadowMatrices[" + std::to_string(i) + "]").c_str(),
+//                                            viewProjMatrices[i]);
+//         }
 
-        pointShaderProgram->setUniform("pointShadowDepthMapFarPlane", m_farPlanePoint);
-        pointShaderProgram->setUniform("v_lightPos", lightPos);
+//         pointShaderProgram->setUniform("pointShadowDepthMapFarPlane", m_farPlanePoint);
+//         pointShaderProgram->setUniform("v_lightPos", lightPos);
 
-        // Draw scene from light perspective
-        // Draw all entities
-        for (auto it = m_entities.begin(); it != m_entities.end(); it++) {
-            (*it)->drawPointShadows(pointShaderProgram);
-        }
+//         // Draw scene from light perspective
+//         // Draw all entities
+//         for (auto it = m_entities.begin(); it != m_entities.end(); it++) {
+//             (*it)->drawPointShadows(pointShaderProgram);
+//         }
 
-        m_depthMapPointFBO[i]->unbind();
+//         m_depthMapPointFBO[i]->unbind();
 
-        m_shaderProgram->bind();
+//         m_shaderProgram->bind();
 
-        m_shaderProgram->setUniform("pointShadowDepthMapFarPlane", m_farPlanePoint);
+//         m_shaderProgram->setUniform("pointShadowDepthMapFarPlane", m_farPlanePoint);
 
-        textureUnit = static_cast<int>(TextureType::TEXTURE_TYPE_NUM_ITEMS) * 2 + i + 1;
-        m_shaderProgram->setUniform("u_texture_pointShadowMap0", (int)textureUnit);
-        glActiveTexture(GL_TEXTURE0 + textureUnit);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, m_depthMapPointFBO[i]->getCubeMapTextureId());
+//         textureUnit = static_cast<int>(TextureType::TEXTURE_TYPE_NUM_ITEMS) * 2 + i + 1;
+//         m_shaderProgram->setUniform("u_texture_pointShadowMap0", (int)textureUnit);
+//         glActiveTexture(GL_TEXTURE0 + textureUnit);
+//         glBindTexture(GL_TEXTURE_CUBE_MAP, m_depthMapPointFBO[i]->getCubeMapTextureId());
 
-        m_shaderProgram->unbind();
-    }
+//         m_shaderProgram->unbind();
+//     }
 
-    // Reset viewport size
-    glViewport(VIEWPORT[0], VIEWPORT[1], VIEWPORT[2], VIEWPORT[3]);
-    glCullFace(GL_FRONT);
-}
+//     // Reset viewport size
+//     glViewport(VIEWPORT[0], VIEWPORT[1], VIEWPORT[2], VIEWPORT[3]);
+//     glCullFace(GL_FRONT);
+// }
 
-ModelEntity *Scene::getEntityByName(const std::string &name)
+std::shared_ptr<ModelEntity> Scene::getEntityByName(const std::string &name)
 {
     for (auto it = m_entities.begin(); it != m_entities.end(); it++) {
         if ((*it)->getUniqueName() == name) {
@@ -332,7 +273,7 @@ ModelEntity *Scene::getEntityByName(const std::string &name)
     return nullptr;
 }
 
-ModelEntity *Scene::getEntityById(uint32_t id)
+std::shared_ptr<ModelEntity> Scene::getEntityById(uint32_t id)
 {
     for (auto it = m_entities.begin(); it != m_entities.end(); it++) {
         if ((*it)->getId() == id) {
@@ -343,12 +284,12 @@ ModelEntity *Scene::getEntityById(uint32_t id)
     return nullptr;
 }
 
-std::vector<PointLight *> Scene::getPointLights()
+std::vector<std::shared_ptr<PointLight>> Scene::getPointLights()
 {
-    std::vector<PointLight *> temp_pointLights;
+    std::vector<std::shared_ptr<PointLight>> temp_pointLights;
 
     for (auto it = m_lights.begin(); it != m_lights.end(); it++) {
-        PointLight *temp_pointLight = dynamic_cast<PointLight *>(*it);
+        auto temp_pointLight = std::dynamic_pointer_cast<PointLight>(*it);
         if (temp_pointLight) {
             temp_pointLights.push_back(temp_pointLight);
         }
@@ -357,12 +298,12 @@ std::vector<PointLight *> Scene::getPointLights()
     return temp_pointLights;
 }
 
-DirectionalLight *Scene::getDirectionalLight()
+std::shared_ptr<DirectionalLight> Scene::getDirectionalLight()
 {
-    DirectionalLight *temp_directionalLight = nullptr;
+    std::shared_ptr<DirectionalLight> temp_directionalLight;
 
     for (auto it = m_lights.begin(); it != m_lights.end(); it++) {
-        temp_directionalLight = dynamic_cast<DirectionalLight *>(*it);
+        temp_directionalLight = std::dynamic_pointer_cast<DirectionalLight>(*it);
         if (temp_directionalLight)
             break;
     }
@@ -370,12 +311,12 @@ DirectionalLight *Scene::getDirectionalLight()
     return temp_directionalLight;
 }
 
-std::vector<ModelEntity *> Scene::getEntities()
+std::vector<std::shared_ptr<ModelEntity>> Scene::getEntities()
 {
     return m_entities;
 }
 
-Skybox *Scene::getSkybox()
+std::shared_ptr<Skybox> Scene::getSkybox()
 {
     return m_skybox;
 }

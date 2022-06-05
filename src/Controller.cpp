@@ -38,33 +38,34 @@ Controller::Controller() : m_gameWindow(std::unique_ptr<Window>(new Window))
     };
 
     for (auto &prototype : shaderProgramPrototypes) {
-        m_shaderPrograms.push_back(new ShaderProgram(prototype));
+        m_shaderPrograms.push_back(std::make_shared<ShaderProgram>(prototype));
         Log::logger().info("Loaded shaderprogram \"{}\"", prototype.name);
     }
 
-    m_postProcessFrameBuffer = new FrameBuffer(m_gameWindow->getWindowWidth(), m_gameWindow->getWindowHeight(),
-                                               getShaderProgramByName("postProcessingProgram"));
+    m_postProcessFrameBuffer =
+        std::make_shared<FrameBuffer>(m_gameWindow->getWindowWidth(), m_gameWindow->getWindowHeight(),
+                                      getShaderProgramByName("postProcessingProgram").get());
 
-    m_scene = new Scene(m_shaderPrograms);
+    m_scene = std::make_shared<Scene>(m_shaderPrograms);
 }
 
 Controller::~Controller()
 {
-    for (auto program : m_shaderPrograms) {
-        delete program;
-    }
+    // for (auto program : m_shaderPrograms) {
+    //     delete program;
+    // }
 
-    delete m_scene;
+    // delete m_scene;
     delete m_camera;
-    delete m_postProcessFrameBuffer;
+    // delete m_postProcessFrameBuffer;
     delete m_gameEventHandler;
 }
 
 void Controller::run()
 {
-    updateExposure(getShaderProgramByName("postProcessingProgram"));
+    updateExposure(*getShaderProgramByName("postProcessingProgram"));
 
-    ModelEntity *lightSource = m_scene->getEntityByName("light");
+    auto lightSource = m_scene->getEntityByName("light");
     lightSource->setScale(0.1f);
     lightSource->setRotation(glm::vec3(0.f));
     lightSource->setPosition(glm::vec3(-2.f, 1.5f, 2.f));
@@ -91,15 +92,15 @@ void Controller::run()
         // --- Render and buffer swap ---
 
         // Calc shadows
-        static bool firstRun = true;
         getShaderProgramByName("defaultProgram")->bind();
         getShaderProgramByName("defaultProgram")->setUniform("b_drawShadows", (int)drawShadows);
         getShaderProgramByName("defaultProgram")->unbind();
-        if (drawShadows || firstRun) {
-            firstRun = false;
-            m_scene->calculateShadows(getShaderProgramByName("directionalShadowDepthProgram"),
-                                      getShaderProgramByName("pointShadowDepthProgram"));
-        }
+        // static bool firstRun = true;
+        // if (drawShadows || firstRun) {
+        //     firstRun = false;
+        //     m_scene->calculateShadows(getShaderProgramByName("directionalShadowDepthProgram"),
+        //                               getShaderProgramByName("pointShadowDepthProgram"));
+        // }
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -160,19 +161,20 @@ void Controller::updateWindowDimensions()
     m_postProcessFrameBuffer->changeDimensions(m_gameWindow->getWindowWidth(), m_gameWindow->getWindowHeight());
 }
 
-void Controller::updateExposure(ShaderProgram *shaderProgram)
+void Controller::updateExposure(ShaderProgram &shaderProgram)
 {
-    shaderProgram->bind();
-    shaderProgram->setUniform("u_exposure", m_exposure);
-    shaderProgram->unbind();
+    shaderProgram.bind();
+    shaderProgram.setUniform("u_exposure", m_exposure);
+    shaderProgram.unbind();
 }
 
-ShaderProgram *Controller::getShaderProgramByName(const std::string &name)
+std::shared_ptr<ShaderProgram> Controller::getShaderProgramByName(const std::string &name)
 {
     return getShaderProgramByName(name, m_shaderPrograms);
 }
 
-ShaderProgram *Controller::getShaderProgramByName(const std::string &name, std::vector<ShaderProgram *> shaderPrograms)
+std::shared_ptr<ShaderProgram>
+Controller::getShaderProgramByName(const std::string &name, std::vector<std::shared_ptr<ShaderProgram>> shaderPrograms)
 {
     for (auto program : shaderPrograms) {
         if (program->getUniqueName() == name) {
@@ -180,7 +182,7 @@ ShaderProgram *Controller::getShaderProgramByName(const std::string &name, std::
         }
     }
     Log::logger().critical("Shaderprogram could not be found by name \"{}\"", name);
-    return nullptr;
+    return {};
 }
 
 void Controller::setMaxFps(uint16_t fps)

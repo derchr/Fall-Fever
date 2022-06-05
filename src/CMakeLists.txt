@@ -38,4 +38,4 @@ target_link_libraries(
     spdlog
 )
 
-target_compile_options(Fall-Fever PRIVATE -Wall -Wextra -pedantic)
+target_compile_options(Fall-Fever PRIVATE -Wall -Wextra -pedantic -fno-exceptions)

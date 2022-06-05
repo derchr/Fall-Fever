@@ -27,22 +27,8 @@ const std::string &Entity::getUniqueName() const
     return m_uniqueName;
 }
 
-void Entity::setParent(Entity *parent)
-{
-    m_parent = parent;
-}
-
-void Entity::addChild(Entity *child)
-{
-    m_children.push_back(child);
-}
-
 void Entity::translate(glm::vec3 vector)
 {
-    for (auto &child : m_children) {
-        child->translate(vector);
-    }
-
     m_position += vector;
 
     updateModelMatrix();
@@ -50,10 +36,6 @@ void Entity::translate(glm::vec3 vector)
 
 void Entity::rotate(glm::vec3 axis, float radians)
 {
-    for (auto &child : m_children) {
-        child->rotate(axis, radians);
-    }
-
     glm::quat rotation = glm::angleAxis(radians, axis);
     m_quaternion = rotation * m_quaternion;
 
@@ -62,40 +44,24 @@ void Entity::rotate(glm::vec3 axis, float radians)
 
 void Entity::setPosition(glm::vec3 position)
 {
-    for (auto &child : m_children) {
-        child->setPosition(child->getPosition() - m_position + position);
-    }
-
     m_position = position;
     updateModelMatrix();
 }
 
 void Entity::setRotation(glm::vec3 eulerAngles)
 {
-    for (auto &child : m_children) {
-        child->setRotation(eulerAngles);
-    }
-
     m_quaternion = glm::quat(eulerAngles);
     updateModelMatrix();
 }
 
 void Entity::setRotation(glm::vec3 axis, float radians)
 {
-    for (auto &child : m_children) {
-        child->setRotation(axis, radians);
-    }
-
     m_quaternion = glm::angleAxis(radians, axis);
     updateModelMatrix();
 }
 
 void Entity::setScale(float scale)
 {
-    for (auto &child : m_children) {
-        child->setScale(scale);
-    }
-
     m_scale = scale;
     updateModelMatrix();
 }
@@ -137,10 +103,6 @@ ModelEntity::ModelEntity(Prototype prototype, const Model *model, ShaderProgram 
 
 void ModelEntity::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition)
 {
-    for (auto &child : m_children)
-        if (auto childModel = dynamic_cast<ModelEntity *>(child))
-            childModel->draw(viewProjMatrix, viewPosition);
-
     m_shaderProgram->bind();
 
     glm::mat4 modelViewProj = viewProjMatrix * m_modelMatrix;
@@ -161,10 +123,6 @@ void ModelEntity::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition)
 
 void ModelEntity::drawDirectionalShadows(glm::mat4 viewProjMatrix, ShaderProgram *shaderProgram)
 {
-    for (auto &child : m_children)
-        if (auto childModel = dynamic_cast<ModelEntity *>(child))
-            childModel->drawDirectionalShadows(viewProjMatrix, shaderProgram);
-
     shaderProgram->bind();
 
     glm::mat4 modelViewProj = viewProjMatrix * m_modelMatrix;
@@ -178,10 +136,6 @@ void ModelEntity::drawDirectionalShadows(glm::mat4 viewProjMatrix, ShaderProgram
 
 void ModelEntity::drawPointShadows(ShaderProgram *shaderProgram)
 {
-    for (auto &child : m_children)
-        if (auto childModel = dynamic_cast<ModelEntity *>(child))
-            childModel->drawPointShadows(shaderProgram);
-
     shaderProgram->bind();
 
     shaderProgram->setUniform("u_modelMatrix", m_modelMatrix);
