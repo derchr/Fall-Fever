@@ -2,7 +2,6 @@ add_executable(Fall-Fever
     main.cpp
     Controller.cpp
     Window.cpp
-    EventHandler.cpp
     ShaderProgram.cpp
     VertexArray.cpp
     Camera.cpp

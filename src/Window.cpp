@@ -80,12 +80,14 @@ Window::Window()
 Window::~Window()
 {
     glfwDestroyWindow(m_window);
-    glfwTerminate();
 }
 
 bool Window::isWindowResized()
 {
-    int new_width, new_height, new_posx, new_posy;
+    int new_width{};
+    int new_height{};
+    int new_posx{};
+    int new_posy{};
     glfwGetFramebufferSize(m_window, &new_width, &new_height);
     glfwGetWindowPos(m_window, &new_posx, &new_posy);
 
@@ -106,29 +108,6 @@ void Window::setCatchedCursor(bool value)
         glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     } else {
         glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-    }
-}
-
-void Window::handleWindowActionMap(WindowActionMap &windowActionMap)
-{
-    if (windowActionMap.at(WindowAction::WireFrameToggle)) {
-        windowActionMap[WindowAction::WireFrameToggle] = false;
-        m_wireFrameMode = !m_wireFrameMode;
-        if (m_wireFrameMode) {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        } else {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        }
-    }
-
-    if (windowActionMap.at(WindowAction::MouseCatchToggle)) {
-        windowActionMap[WindowAction::MouseCatchToggle] = false;
-        m_mouseCatched = !m_mouseCatched;
-        setCatchedCursor(m_mouseCatched);
-    }
-
-    if (windowActionMap.at(WindowAction::WindowShouldClose)) {
-        glfwSetWindowShouldClose(m_window, true);
     }
 }
 
@@ -163,9 +142,4 @@ int Window::getWindowHeight()
 float Window::getWindowAspectRatio()
 {
     return (float)m_width / (float)m_height;
-}
-
-bool Window::getMouseIsCatched()
-{
-    return m_mouseCatched;
 }

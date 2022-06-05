@@ -1,7 +1,5 @@
 #pragma once
 
-#include "definitions/eventActions.h"
-
 #include <glm/glm.hpp>
 
 class Camera
@@ -12,8 +10,8 @@ public:
 
     void updateVPM();
     void updateAspectRatio(float aspectRatio);
-    void updatePositionFromKeyboardInput(const CameraActionMap &cameraActionMap, float deltaTime);
-    void updateDirectionFromMouseInput(const CameraMouseActionMap &cameraMouseActionMap);
+    // void updatePositionFromKeyboardInput(const CameraActionMap &cameraActionMap, float deltaTime);
+    // void updateDirectionFromMouseInput(const CameraMouseActionMap &cameraMouseActionMap);
 
     void translate(glm::vec3 translateVector);
 

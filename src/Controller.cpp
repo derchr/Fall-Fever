@@ -1,7 +1,6 @@
 #include "Controller.h"
 #include "Camera.h"
 #include "Entity.h"
-#include "EventHandler.h"
 #include "Helper.h"
 #include "Light.h"
 #include "Scene.h"
@@ -19,12 +18,10 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-Controller::Controller() : m_gameWindow(std::unique_ptr<Window>(new Window))
+Controller::Controller()
+    : m_gameWindow(std::make_shared<Window>()),
+      m_camera(std::make_shared<Camera>(90.0f, m_gameWindow->getWindowAspectRatio()))
 {
-    m_gameEventHandler = new EventHandler(m_gameWindow->getGLFWwindow());
-
-    m_camera = new Camera(90.0f, m_gameWindow->getWindowAspectRatio());
-
     std::array shaderProgramPrototypes{
         ShaderProgram::Prototype{"defaultProgram", "data/shaders/basic.vert", "data/shaders/basic.frag", ""},
         ShaderProgram::Prototype{"lightProgram", "data/shaders/light.vert", "data/shaders/light.frag", ""},
@@ -47,18 +44,6 @@ Controller::Controller() : m_gameWindow(std::unique_ptr<Window>(new Window))
                                       getShaderProgramByName("postProcessingProgram").get());
 
     m_scene = std::make_shared<Scene>(m_shaderPrograms);
-}
-
-Controller::~Controller()
-{
-    // for (auto program : m_shaderPrograms) {
-    //     delete program;
-    // }
-
-    // delete m_scene;
-    delete m_camera;
-    // delete m_postProcessFrameBuffer;
-    delete m_gameEventHandler;
 }
 
 void Controller::run()
@@ -125,14 +110,7 @@ void Controller::run()
         }
 
         // --- Check events, handle input ---
-        m_gameEventHandler->handleEvents();
-
-        m_camera->updatePositionFromKeyboardInput(m_gameEventHandler->getCameraActionMap(), m_deltaTime);
-        if (m_gameWindow->getMouseIsCatched()) {
-            m_camera->updateDirectionFromMouseInput(m_gameEventHandler->getCameraMouseActionMap());
-        }
-
-        m_gameWindow->handleWindowActionMap(m_gameEventHandler->getWindowActionMap());
+        glfwPollEvents();
     }
 }
 
@@ -143,7 +121,7 @@ void Controller::limit_framerate()
 
     lastTime = glfwGetTime() - startingTime;
 
-    double frameTime = 1 / (double)m_MAX_FPS;
+    double frameTime = 1 / (double)MAX_FPS;
     if (frameTime > lastTime) {
         Helper::sleep((frameTime - lastTime) * 1000000);
     }
@@ -156,7 +134,7 @@ void Controller::limit_framerate()
 void Controller::updateWindowDimensions()
 {
     m_camera->updateAspectRatio(m_gameWindow->getWindowAspectRatio());
-    m_gameEventHandler->setFirstMouseInput(1);
+    // m_gameEventHandler->setFirstMouseInput(1);
 
     m_postProcessFrameBuffer->changeDimensions(m_gameWindow->getWindowWidth(), m_gameWindow->getWindowHeight());
 }
@@ -183,9 +161,4 @@ Controller::getShaderProgramByName(const std::string &name, std::vector<std::sha
     }
     Log::logger().critical("Shaderprogram could not be found by name \"{}\"", name);
     return {};
-}
-
-void Controller::setMaxFps(uint16_t fps)
-{
-    m_MAX_FPS = fps;
 }

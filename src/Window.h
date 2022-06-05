@@ -1,9 +1,5 @@
 #pragma once
 
-#include "definitions/eventActions.h"
-
-#include <memory>
-
 class GLFWwindow;
 
 class Window
@@ -17,12 +13,9 @@ public:
     int getWindowWidth();
     int getWindowHeight();
     float getWindowAspectRatio();
-    bool getMouseIsCatched();
 
     bool isWindowResized();
     void updateWindowDimensions();
-
-    void handleWindowActionMap(WindowActionMap &windowActionMap);
 
 private:
     static void glfw_error_callback(int error, const char *description);

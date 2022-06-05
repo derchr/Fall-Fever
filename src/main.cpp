@@ -1,8 +1,9 @@
+#include <GLFW/glfw3.h>
 #include <iostream>
 
 #include "Controller.h"
 
-int main(int argc, char **argv)
+auto main(int argc, char **argv) -> int
 {
     // Suppress warning about unused variable
     (void)argc;
@@ -12,17 +13,12 @@ int main(int argc, char **argv)
     std::cout << "[Debug Mode]" << std::endl;
 #endif
 
-    // Create controller
-    Controller controller;
-
-    const char *fps_env = std::getenv("MAXFPS");
-    if (fps_env) {
-        uint16_t maxfps = std::stoul(fps_env);
-        controller.setMaxFps(maxfps);
-        std::cout << "[Warning] Default max FPS overridden with " << maxfps << " by environment." << std::endl;
+    {
+        // Create controller
+        Controller controller;
+        controller.run();
     }
 
-    controller.run();
-
+    glfwTerminate();
     return 0;
 }
