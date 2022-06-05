@@ -26,7 +26,7 @@ public:
 
 private:
     void limit_framerate();
-    void updateWindowDimensions();
+    void update_window_dimensions();
 
     std::shared_ptr<Window> m_gameWindow;
     std::shared_ptr<Scene> m_scene;
@@ -38,7 +38,7 @@ private:
     std::shared_ptr<FrameBuffer> m_postProcessFrameBuffer;
 
     static constexpr unsigned MAX_FPS = 60;
-    double m_deltaTime;
 
-    float m_exposure = 1.0f;
+    double m_deltaTime{};
+    float m_exposure = 1.0;
 };

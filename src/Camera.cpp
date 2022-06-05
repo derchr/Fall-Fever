@@ -1,12 +1,12 @@
 #include "Camera.h"
 
+#include <GLFW/glfw3.h>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-Camera::Camera(float fov, float aspectRatio)
+Camera::Camera(float fov, float aspectRatio) : m_fov(fov)
 {
-    this->m_fov = fov;
-    m_viewMatrix = glm::mat4(1.0f);
+    m_viewMatrix = glm::mat4(1.);
     updateAspectRatio(aspectRatio);
     updateVPM();
 }
@@ -19,105 +19,107 @@ void Camera::updateVPM()
 void Camera::updateAspectRatio(float aspectRatio)
 {
     // m_projectionMatrix = glm::ortho(-2.0f, 2.0f, -2.0f, 2.0f, -10.f, 100.0f);
-    m_projectionMatrix = glm::perspective(m_fov / 2.0f, aspectRatio, 0.1f, 1000.0f);
+    m_projectionMatrix = glm::perspective(m_fov / 2.F, aspectRatio, .1F, 1000.F);
     updateVPM();
 }
 
 void Camera::translate(glm::vec3 translateVector)
 {
     m_position += translateVector;
-    m_viewMatrix = glm::translate(m_viewMatrix, translateVector * -1.0f);
+    m_viewMatrix = glm::translate(m_viewMatrix, translateVector * -1.F);
 }
 
 void Camera::lookAtTarget(glm::vec3 target)
 {
-    m_viewMatrix = glm::lookAt(m_position, target, m_upVec);
+    m_viewMatrix = glm::lookAt(m_position, target, UP_VEC);
 }
 
 void Camera::lookForward()
 {
-    m_viewMatrix = glm::lookAt(m_position, m_position + m_frontVec, m_upVec);
+    m_viewMatrix = glm::lookAt(m_position, m_position + m_front_vec, UP_VEC);
 }
 
-// void Camera::updatePositionFromKeyboardInput(const CameraActionMap &cameraActionMap, float deltaTime)
-// {
-//     glm::vec3 frontVecWithoutY = glm::vec3(m_frontVec.x, 0.0f, m_frontVec.z);
+void Camera::updatePositionFromKeyboardInput(KeyInput const &key_input, float deltaTime)
+{
+    glm::vec3 frontVecWithoutY = glm::vec3(m_front_vec.x, 0., m_front_vec.z);
+    glm::vec3 deltaPos = glm::vec3(0., 0., 0.);
 
-//     glm::vec3 deltaPos = glm::vec3(0.0f, 0.0f, 0.0f);
+    for (auto const &[key, pressed] : key_input) {
+        if (key == GLFW_KEY_W && pressed) {
+            deltaPos += SPEED * deltaTime * glm::normalize(frontVecWithoutY);
+        }
+        if (key == GLFW_KEY_S && pressed) {
+            deltaPos -= SPEED * deltaTime * glm::normalize(frontVecWithoutY);
+        }
+        if (key == GLFW_KEY_A && pressed) {
+            deltaPos -= SPEED * deltaTime * glm::normalize(glm::cross(m_front_vec, UP_VEC));
+        }
+        if (key == GLFW_KEY_D && pressed) {
+            deltaPos += SPEED * deltaTime * glm::normalize(glm::cross(m_front_vec, UP_VEC));
+        }
+        if (key == GLFW_KEY_SPACE && pressed) {
+            deltaPos += SPEED * deltaTime * UP_VEC;
+        }
+        if (key == GLFW_KEY_LEFT_SHIFT && pressed) {
+            deltaPos -= SPEED * deltaTime * UP_VEC;
+        }
+    }
+    m_position += deltaPos;
+}
 
-//     if (cameraActionMap.at(CameraAction::Forward)) {
-//         deltaPos += m_speed * deltaTime * glm::normalize(frontVecWithoutY);
-//     }
-//     if (cameraActionMap.at(CameraAction::Backward)) {
-//         deltaPos -= m_speed * deltaTime * glm::normalize(frontVecWithoutY);
-//     }
-//     if (cameraActionMap.at(CameraAction::Left)) {
-//         deltaPos -= m_speed * deltaTime * glm::normalize(glm::cross(m_frontVec, m_upVec));
-//     }
-//     if (cameraActionMap.at(CameraAction::Right)) {
-//         deltaPos += m_speed * deltaTime * glm::normalize(glm::cross(m_frontVec, m_upVec));
-//     }
-//     if (cameraActionMap.at(CameraAction::Up)) {
-//         deltaPos += m_speed * deltaTime * m_upVec;
-//     }
-//     if (cameraActionMap.at(CameraAction::Down)) {
-//         deltaPos -= m_speed * deltaTime * m_upVec;
-//     }
+void Camera::updateDirectionFromMouseInput(MouseCursorInput const &mouse_cursor_input)
+{
+    auto [deltaX, deltaY] = mouse_cursor_input;
 
-//     m_position += deltaPos;
-// }
+    if (deltaX == 0 && deltaY == 0) {
+        return;
+    }
 
-// void Camera::updateDirectionFromMouseInput(const CameraMouseActionMap &cameraMouseActionMap)
-// {
+    m_yaw += deltaX;
+    m_pitch += deltaY;
 
-//     if (cameraMouseActionMap.at(CameraMouseAction::DeltaX) == 0 &&
-//         cameraMouseActionMap.at(CameraMouseAction::DeltaY) == 0) {
-//         return;
-//     }
+    static constexpr float CLIP = 89.;
 
-//     m_yaw += cameraMouseActionMap.at(CameraMouseAction::DeltaX);
-//     m_pitch += cameraMouseActionMap.at(CameraMouseAction::DeltaY);
+    if (m_pitch > CLIP) {
+        m_pitch = CLIP;
+    }
+    if (m_pitch < -CLIP) {
+        m_pitch = -CLIP;
+    }
 
-//     if (m_pitch > 89.0f) {
-//         m_pitch = 89.0f;
-//     }
-//     if (m_pitch < -89.0f) {
-//         m_pitch = -89.0f;
-//     }
-
-//     glm::vec3 direction;
-//     direction.x = cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
-//     direction.y = sin(glm::radians(m_pitch));
-//     direction.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
-//     m_frontVec = glm::normalize(direction);
-// }
+    glm::vec3 direction;
+    direction.x = std::cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
+    direction.y = std::sin(glm::radians(m_pitch));
+    direction.z = std::sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
+    m_front_vec = glm::normalize(direction);
+}
 
 void Camera::setPosition(glm::vec3 position)
 {
     this->m_position = position;
 }
 
-glm::mat4 Camera::getView()
+auto Camera::getView() const -> glm::mat4
 {
     return m_viewMatrix;
 }
 
-glm::mat4 Camera::getProj()
+auto Camera::getProj() const -> glm::mat4
 {
     return m_projectionMatrix;
 }
 
-glm::mat4 Camera::getViewProj()
+auto Camera::getViewProj() const -> glm::mat4
 {
     return m_viewProjectionMatrix;
 }
 
-glm::vec3 Camera::getPosition()
+auto Camera::getPosition() const -> glm::vec3
 {
     return m_position;
 }
 
-glm::vec3 Camera::getDirection()
+auto Camera::getDirection() const -> glm::vec3
 {
-    return m_frontVec;
+    return m_front_vec;
 }

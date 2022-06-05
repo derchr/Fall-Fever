@@ -19,8 +19,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 Controller::Controller()
-    : m_gameWindow(std::make_shared<Window>()),
-      m_camera(std::make_shared<Camera>(90.0f, m_gameWindow->getWindowAspectRatio()))
+    : m_gameWindow(std::make_shared<Window>()), m_camera(std::make_shared<Camera>(90., m_gameWindow->aspectRatio()))
 {
     std::array shaderProgramPrototypes{
         ShaderProgram::Prototype{"defaultProgram", "data/shaders/basic.vert", "data/shaders/basic.frag", ""},
@@ -39,9 +38,9 @@ Controller::Controller()
         Log::logger().info("Loaded shaderprogram \"{}\"", prototype.name);
     }
 
-    m_postProcessFrameBuffer =
-        std::make_shared<FrameBuffer>(m_gameWindow->getWindowWidth(), m_gameWindow->getWindowHeight(),
-                                      getShaderProgramByName("postProcessingProgram").get());
+    auto dimensions = m_gameWindow->dimensions();
+    m_postProcessFrameBuffer = std::make_shared<FrameBuffer>(dimensions.first, dimensions.second,
+                                                             getShaderProgramByName("postProcessingProgram").get());
 
     m_scene = std::make_shared<Scene>(m_shaderPrograms);
 }
@@ -51,42 +50,29 @@ void Controller::run()
     updateExposure(*getShaderProgramByName("postProcessingProgram"));
 
     auto lightSource = m_scene->getEntityByName("light");
-    lightSource->setScale(0.1f);
-    lightSource->setRotation(glm::vec3(0.f));
-    lightSource->setPosition(glm::vec3(-2.f, 1.5f, 2.f));
+    lightSource->setScale(.1);
+    lightSource->setRotation(glm::vec3(0.));
+    lightSource->setPosition(glm::vec3(-2., 1.5, 2.));
 
-    m_camera->translate(glm::vec3(0.0f, 1.5f, 5.0f));
+    m_camera->translate(glm::vec3(0., 1.5, 5.));
 
-    bool drawShadows = false;
-    float intensity = 7.5;
+    static constexpr float INTENSITY = 7.5;
     glm::vec3 lightColor{1., 1., 1.};
 
     // This is the game loop
-    while (!glfwWindowShouldClose(m_gameWindow->getGLFWwindow())) {
+    while (!glfwWindowShouldClose(m_gameWindow->glfw_window().get())) {
 
         // --- Timing ---
         limit_framerate();
 
         // --- Update game ---
-        m_scene->updatePointLight(0, true, m_scene->getEntityByName("light")->getPosition(), lightColor, intensity);
+        m_scene->updatePointLight(0, true, m_scene->getEntityByName("light")->getPosition(), lightColor, INTENSITY);
         m_scene->updateDirectionalLight(true, m_scene->getDirectionalLight()->getDirection(), lightColor);
         getShaderProgramByName("lightProgram")->bind();
         getShaderProgramByName("lightProgram")->setUniform("v_lightColor", glm::vec3{1., 1., 1.} * 100.0f);
         getShaderProgramByName("lightProgram")->unbind();
 
         // --- Render and buffer swap ---
-
-        // Calc shadows
-        getShaderProgramByName("defaultProgram")->bind();
-        getShaderProgramByName("defaultProgram")->setUniform("b_drawShadows", (int)drawShadows);
-        getShaderProgramByName("defaultProgram")->unbind();
-        // static bool firstRun = true;
-        // if (drawShadows || firstRun) {
-        //     firstRun = false;
-        //     m_scene->calculateShadows(getShaderProgramByName("directionalShadowDepthProgram"),
-        //                               getShaderProgramByName("pointShadowDepthProgram"));
-        // }
-
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         m_postProcessFrameBuffer->bind();
@@ -101,16 +87,27 @@ void Controller::run()
         m_postProcessFrameBuffer->unbind();
         m_postProcessFrameBuffer->drawOnEntireScreen();
 
-        glfwSwapBuffers(m_gameWindow->getGLFWwindow());
+        glfwSwapBuffers(m_gameWindow->glfw_window().get());
 
         // Update window size
-        if (m_gameWindow->isWindowResized()) {
-            m_gameWindow->updateWindowDimensions();
-            updateWindowDimensions();
+        if (m_gameWindow->dimensions_changed()) {
+            m_gameWindow->update_dimensions();
+            update_window_dimensions();
         }
 
         // --- Check events, handle input ---
+        m_gameWindow->clear_mouse_cursor_input();
         glfwPollEvents();
+
+        auto const &key_input = m_gameWindow->key_input();
+        auto const &mouse_cursor_input = m_gameWindow->mouse_cursor_input();
+        auto const &mouse_button_input = m_gameWindow->mouse_button_input();
+
+        m_camera->updatePositionFromKeyboardInput(key_input, (float)m_deltaTime);
+
+        if (m_gameWindow->cursor_catched()) {
+            m_camera->updateDirectionFromMouseInput(mouse_cursor_input);
+        }
     }
 }
 
@@ -131,12 +128,13 @@ void Controller::limit_framerate()
     startingTime = glfwGetTime();
 }
 
-void Controller::updateWindowDimensions()
+void Controller::update_window_dimensions()
 {
-    m_camera->updateAspectRatio(m_gameWindow->getWindowAspectRatio());
+    m_camera->updateAspectRatio(m_gameWindow->aspectRatio());
     // m_gameEventHandler->setFirstMouseInput(1);
 
-    m_postProcessFrameBuffer->changeDimensions(m_gameWindow->getWindowWidth(), m_gameWindow->getWindowHeight());
+    auto dimensions = m_gameWindow->dimensions();
+    m_postProcessFrameBuffer->changeDimensions(dimensions.first, dimensions.second);
 }
 
 void Controller::updateExposure(ShaderProgram &shaderProgram)
