@@ -1,27 +1,16 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.24)
+
+project(
+    Fall-Fever
+    VERSION 0.1.0
+    DESCRIPTION "A fruit collecting game."
+    LANGUAGES C CXX
+)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-project(Fall-Fever)
-
-if(WIN32)
-    set(GLFW3_ROOT "${PROJECT_SOURCE_DIR}/glfw")
-    include_directories(${PROJECT_SOURCE_DIR}/glfw/include)
-endif()
-
-list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
-
-set(OpenGL_GL_PREFERENCE "GLVND")
-
-find_package(GLFW3 REQUIRED)
-find_package(OpenGL REQUIRED)
-#find_package(Freetype REQUIRED) Will be used in the future
-
-# Specify the C++ standard
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
+find_package(glfw3 REQUIRED)
+find_package(glm REQUIRED)
 
 # Colored output with Ninja
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
@@ -32,7 +21,3 @@ endif()
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/lib)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src)
-
-if(NOT WIN32)
-    add_subdirectory(${PROJECT_SOURCE_DIR}/tools)
-endif()

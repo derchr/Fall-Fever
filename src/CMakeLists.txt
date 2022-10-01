@@ -1,4 +1,4 @@
-add_executable(Fall-Fever
+add_library(fever_engine
     main.cpp
     Controller.cpp
     Window.cpp
@@ -17,23 +17,24 @@ add_executable(Fall-Fever
     resources/Model.cpp
     resources/CubeMap.cpp
     util/Log.cpp
-    # imgui/EntityWindow.cpp
-    # imgui/GeneralInfoWindow.cpp
-    # imgui/Handler.cpp
-    # imgui/Window.cpp
 )
 
+target_compile_features(fever_engine PUBLIC cxx_std_20)
+
 target_link_libraries(
-    Fall-Fever PRIVATE 
+    fever_engine PUBLIC 
     glad
     glm
     stb
-    ${GLFW3_LIBRARY}
-    ${OPENGL_LIBRARIES}
-    ${FREETYPE_LIBRARIES}
+    glfw
+    glm
     imgui
     pthread
     spdlog
 )
 
-target_compile_options(Fall-Fever PRIVATE -Wall -Wextra -pedantic -fno-exceptions)
+add_executable(Fall-Fever
+    main.cpp
+)
+
+target_link_libraries(Fall-Fever PRIVATE fever_engine)
