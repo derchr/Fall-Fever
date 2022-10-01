@@ -1,9 +1,0 @@
-add_library(
-    jsoncpp STATIC
-    json_reader.cpp
-    json_value.cpp
-    json_valueiterator.inl
-    json_writer.cpp
-)
-
-target_include_directories(jsoncpp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

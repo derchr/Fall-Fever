@@ -22,7 +22,7 @@ public:
     static std::shared_ptr<ShaderProgram>
     getShaderProgramByName(const std::string &name, std::vector<std::shared_ptr<ShaderProgram>> shaderPrograms);
 
-    void updateExposure(ShaderProgram &shaderProgram);
+    void updateExposure(ShaderProgram &shaderProgram) const;
 
 private:
     void limit_framerate();

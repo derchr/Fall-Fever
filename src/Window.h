@@ -15,7 +15,7 @@ class Window
 public:
     Window();
 
-    [[nodiscard]] auto glfw_window() -> std::shared_ptr<GLFWwindow> { return m_glfw_window; }
+    [[nodiscard]] auto glfw_window() -> GLFWwindow & { return *m_glfw_window; }
     [[nodiscard]] auto dimensions() const -> std::pair<unsigned, unsigned>;
     [[nodiscard]] auto dimensions_changed() const -> bool;
     [[nodiscard]] auto aspectRatio() const -> float;

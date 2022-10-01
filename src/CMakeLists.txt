@@ -28,7 +28,6 @@ target_link_libraries(
     glad
     glm
     stb
-    jsoncpp
     ${GLFW3_LIBRARY}
     ${OPENGL_LIBRARIES}
     ${FREETYPE_LIBRARIES}

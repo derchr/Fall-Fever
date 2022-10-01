@@ -5,11 +5,7 @@
 #include "Light.h"
 #include "Scene.h"
 #include "ShaderProgram.h"
-#include "VertexArray.h"
 #include "Window.h"
-#include "resources/Model.h"
-#include "resources/ResourceHandler.h"
-#include "resources/Texture.h"
 #include "util/Log.h"
 
 #include <GLFW/glfw3.h>
@@ -60,7 +56,7 @@ void Controller::run()
     glm::vec3 lightColor{1., 1., 1.};
 
     // This is the game loop
-    while (!glfwWindowShouldClose(m_gameWindow->glfw_window().get())) {
+    while (glfwWindowShouldClose(&m_gameWindow->glfw_window()) == GLFW_FALSE) {
 
         // --- Timing ---
         limit_framerate();
@@ -69,7 +65,7 @@ void Controller::run()
         m_scene->updatePointLight(0, true, m_scene->getEntityByName("light")->getPosition(), lightColor, INTENSITY);
         m_scene->updateDirectionalLight(true, m_scene->getDirectionalLight()->getDirection(), lightColor);
         getShaderProgramByName("lightProgram")->bind();
-        getShaderProgramByName("lightProgram")->setUniform("v_lightColor", glm::vec3{1., 1., 1.} * 100.0f);
+        getShaderProgramByName("lightProgram")->setUniform("v_lightColor", glm::vec3{1., 1., 1.} * 100.0F);
         getShaderProgramByName("lightProgram")->unbind();
 
         // --- Render and buffer swap ---
@@ -87,7 +83,7 @@ void Controller::run()
         m_postProcessFrameBuffer->unbind();
         m_postProcessFrameBuffer->drawOnEntireScreen();
 
-        glfwSwapBuffers(m_gameWindow->glfw_window().get());
+        glfwSwapBuffers(&m_gameWindow->glfw_window());
 
         // Update window size
         if (m_gameWindow->dimensions_changed()) {
@@ -101,7 +97,7 @@ void Controller::run()
 
         auto const &key_input = m_gameWindow->key_input();
         auto const &mouse_cursor_input = m_gameWindow->mouse_cursor_input();
-        auto const &mouse_button_input = m_gameWindow->mouse_button_input();
+        // auto const &mouse_button_input = m_gameWindow->mouse_button_input();
 
         m_camera->updatePositionFromKeyboardInput(key_input, (float)m_deltaTime);
 
@@ -137,7 +133,7 @@ void Controller::update_window_dimensions()
     m_postProcessFrameBuffer->changeDimensions(dimensions.first, dimensions.second);
 }
 
-void Controller::updateExposure(ShaderProgram &shaderProgram)
+void Controller::updateExposure(ShaderProgram &shaderProgram) const
 {
     shaderProgram.bind();
     shaderProgram.setUniform("u_exposure", m_exposure);
