@@ -2,7 +2,7 @@
 
 #include <cstdint>
 #include <filesystem>
-#include <glad/glad.h>
+#include <glad/gl.h>
 #include <string>
 
 using ResourceId = uint64_t;

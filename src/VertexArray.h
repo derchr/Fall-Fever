@@ -2,7 +2,7 @@
 
 #include "definitions/models.h"
 
-#include <glad/glad.h>
+#include <glad/gl.h>
 #include <vector>
 
 class VertexArray

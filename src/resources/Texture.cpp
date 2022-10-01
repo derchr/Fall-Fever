@@ -2,6 +2,9 @@
 #include "../ShaderProgram.h"
 #include "../util/Log.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb/stb_image.h>
+
 Texture::Texture(const TextureDescriptor &descriptor)
     : AbstractTexture(descriptor.path), m_textureType(descriptor.textureType)
 {

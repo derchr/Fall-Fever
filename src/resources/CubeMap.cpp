@@ -2,7 +2,7 @@
 #include "../ShaderProgram.h"
 #include "../util/Log.h"
 
-#include <glad/glad.h>
+#include <glad/gl.h>
 
 TextureCubeMap::TextureCubeMap(const TextureCubeMapDescriptor &descriptor) : AbstractCubeMap(descriptor.path)
 {

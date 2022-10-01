@@ -4,8 +4,8 @@
 #include "Resource.h"
 #include "TextureTypes.h"
 
-#include <stb/stb_image.h>
 #include <string>
+#include <stb/stb_image.h>
 
 class ShaderProgram;
 

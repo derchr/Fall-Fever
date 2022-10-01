@@ -11,6 +11,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(glfw3 REQUIRED)
 find_package(glm REQUIRED)
+find_package(spdlog REQUIRED)
 
 # Colored output with Ninja
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")

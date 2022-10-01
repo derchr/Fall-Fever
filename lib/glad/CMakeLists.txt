@@ -1,10 +1,7 @@
-add_library(
-    glad STATIC
-    glad.c
+add_library(glad
+    src/gl.c
 )
 
-target_include_directories(glad PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(glad PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-if(UNIX)
-    target_link_libraries(glad dl)
-endif()
+target_link_libraries(glad ${CMAKE_DL_LIBS})

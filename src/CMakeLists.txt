@@ -20,15 +20,15 @@ add_library(fever_engine
 )
 
 target_compile_features(fever_engine PUBLIC cxx_std_20)
+target_compile_definitions(fever_engine PRIVATE SPDLOG_FMT_EXTERNAL)
 
 target_link_libraries(
     fever_engine PUBLIC 
     glad
     glm
-    stb
     glfw
     glm
-    imgui
+    fmt
     pthread
     spdlog
 )

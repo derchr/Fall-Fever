@@ -4,6 +4,7 @@
 #include "definitions/window.h"
 #include "util/Log.h"
 
+#include <glad/gl.h>
 #include <GLFW/glfw3.h>
 
 Window::Window()
@@ -44,7 +45,7 @@ Window::Window()
     glfwMakeContextCurrent(m_glfw_window.get());
 
     // Initialize GLAD
-    if (gladLoadGLLoader((GLADloadproc)glfwGetProcAddress) == 0) {
+    if (gladLoadGL(glfwGetProcAddress) == 0) {
         Log::logger().critical("Failed to initialize GLAD");
         std::terminate();
     }
