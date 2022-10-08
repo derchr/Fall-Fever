@@ -35,7 +35,7 @@ private:
     static void glfw_error_callback(int error, const char *description);
     static void framebuffer_size_callback(GLFWwindow *glfw_window, int width, int height);
 
-    static constexpr float MOUSE_SENSITIVITY = 0.15;
+    static constexpr float MOUSE_SENSITIVITY = 0.15f;
 
     void set_catched_cursor(bool value);
 
@@ -46,10 +46,8 @@ private:
     MouseButtonInput m_mouse_button_input;
     MouseCursorInput m_mouse_cursor_input;
 
-    int m_posX{};
-    int m_posY{};
-    int m_width{};
-    int m_height{};
+    uint32_t m_width{};
+    uint32_t m_height{};
     double m_last_cursor_pos_x = 0.0;
     double m_last_cursor_pos_y = 0.0;
 

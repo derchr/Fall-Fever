@@ -1,6 +1,7 @@
 #include "Model.h"
 #include "../util/Log.h"
 #include "ResourceHandler.h"
+#include "Texture.h"
 
 #include <fstream>
 #include <future>
@@ -63,12 +64,12 @@ void Model::loadModel(const std::string &pathToModel)
     std::vector<std::string> textureSources;
     for (unsigned int i = 0; i < numTextures; i++) {
         std::string currentTextureSource;
-        for (unsigned int i = 0; i < 128; i++) {
+        for (unsigned int k = 0; k < 128; k++) {
             uint8_t currentChar;
             input.read((char *)&currentChar, sizeof(uint8_t));
 
             if (currentChar) {
-                currentTextureSource.push_back(currentChar);
+                currentTextureSource.push_back(static_cast<char>(currentChar));
             }
         }
         textureSources.push_back(currentTextureSource);
@@ -82,7 +83,7 @@ void Model::loadModel(const std::string &pathToModel)
         for (unsigned int i = 0; i < numTextures; i++) {
             std::string texturePath = m_workingPath + '/' + textureSources[i].c_str();
 
-            auto loadModel = [=, &mutex]() {
+            auto loadModel = [=, this, &mutex]() {
                 ResourceId texture = ResourceHandler::instance().registerResource<Texture>(
                     TextureDescriptor{texturePath, textureTypes[i]});
 

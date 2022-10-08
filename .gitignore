@@ -6,3 +6,4 @@ res/textures
 .kdev4
 .cache
 imgui.ini
+CMakeUserPresets.json

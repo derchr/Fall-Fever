@@ -9,7 +9,16 @@ Texture::Texture(const TextureDescriptor &descriptor)
     : AbstractTexture(descriptor.path), m_textureType(descriptor.textureType)
 {
     stbi_set_flip_vertically_on_load(1);
-    m_textureBuffer = stbi_load(resourcePath().c_str(), &m_textureWidth, &m_textureHeight, &m_numComponents, 0);
+
+    int textureWidth{};
+    int textureHeight{};
+    int numComponents{};
+
+    m_textureBuffer = stbi_load(resourcePath().c_str(), &textureWidth, &textureHeight, &numComponents, 0);
+
+    m_textureWidth = static_cast<unsigned>(textureWidth);
+    m_textureHeight = static_cast<unsigned>(textureHeight);
+    m_numComponents = static_cast<unsigned>(numComponents);
 
     if (!m_textureBuffer)
         Log::logger().warn("Texture {} could not be loaded", resourcePath().string());
@@ -48,8 +57,8 @@ void Texture::initialize()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, m_textureWidth, m_textureHeight, 0, dataFormat, GL_UNSIGNED_BYTE,
-                 m_textureBuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, static_cast<GLint>(internalFormat), static_cast<GLsizei>(m_textureWidth),
+                 static_cast<GLsizei>(m_textureHeight), 0, dataFormat, GL_UNSIGNED_BYTE, m_textureBuffer);
     glGenerateMipmap(GL_TEXTURE_2D);
 
     glBindTexture(GL_TEXTURE_2D, 0);

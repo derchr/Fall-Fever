@@ -13,7 +13,6 @@ public:
         std::string name;
         std::string vertexPath;
         std::string fragmentPath;
-        std::string geometryPath;
     };
 
     ShaderProgram(Prototype prototype);

@@ -18,8 +18,8 @@ class Entity
 public:
     struct Prototype
     {
-        Prototype(const std::string &name, glm::vec3 position, glm::vec3 rotation, float scale)
-            : name(name), position(position), rotation(rotation), scale(scale)
+        Prototype(const std::string &_name, glm::vec3 _position, glm::vec3 _rotation, float _scale)
+            : name(_name), position(_position), rotation(_rotation), scale(_scale)
         {}
         virtual ~Prototype() = default;
 
@@ -66,17 +66,16 @@ class ModelEntity : public Entity
 public:
     struct Prototype : public Entity::Prototype
     {
-        Prototype(const std::string &name, glm::vec3 position, glm::vec3 rotation, float scale,
-                  const std::string &modelName, const std::string &shaderProgramName)
-            : Entity::Prototype(name, position, rotation, scale), modelName(modelName),
-              shaderProgramName(shaderProgramName)
+        Prototype(const std::string &_name, glm::vec3 _position, glm::vec3 _rotation, float _scale,
+                  std::string _modelName, std::string _shaderProgramName)
+            : Entity::Prototype(_name, _position, _rotation, _scale), modelName(std::move(_modelName)),
+              shaderProgramName(std::move(_shaderProgramName))
         {}
         std::string modelName;
         std::string shaderProgramName;
     };
 
     ModelEntity(Prototype prototype, const Model *model, ShaderProgram *shaderProgram);
-    ~ModelEntity() = default;
 
     void draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition);
     void drawDirectionalShadows(glm::mat4 viewProjMatrix, ShaderProgram *p_shaderProgram);

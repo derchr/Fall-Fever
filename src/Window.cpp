@@ -1,11 +1,10 @@
 #include "Window.h"
 #include "Helper.h"
-#include "ShaderProgram.h"
 #include "definitions/window.h"
 #include "util/Log.h"
 
-#include <glad/gl.h>
 #include <GLFW/glfw3.h>
+#include <glad/gl.h>
 
 Window::Window()
 {
@@ -29,8 +28,9 @@ Window::Window()
     glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
 #endif
 
-    m_glfw_window = std::shared_ptr<GLFWwindow>(glfwCreateWindow(m_width, m_height, "OpenGL", nullptr, nullptr),
-                                                [](GLFWwindow *window) { glfwDestroyWindow(window); });
+    m_glfw_window = std::shared_ptr<GLFWwindow>(
+        glfwCreateWindow(static_cast<int>(m_width), static_cast<int>(m_height), "OpenGL", nullptr, nullptr),
+        [](GLFWwindow *window) { glfwDestroyWindow(window); });
     if (!m_glfw_window) {
         Log::logger().critical("Failed to create window");
     }
@@ -38,8 +38,13 @@ Window::Window()
     // Wait for window to maximize (in case)
     // Helper::sleep(1000);
 
-    glfwGetWindowPos(m_glfw_window.get(), &m_posX, &m_posY);
-    glfwGetWindowSize(m_glfw_window.get(), &m_width, &m_height);
+    int width{};
+    int height{};
+
+    glfwGetWindowSize(m_glfw_window.get(), &width, &height);
+
+    m_width = static_cast<uint32_t>(width);
+    m_height = static_cast<uint32_t>(height);
 
     // Create OpenGL context
     glfwMakeContextCurrent(m_glfw_window.get());
@@ -75,7 +80,7 @@ Window::Window()
 
     set_catched_cursor(m_mouse_catched);
 
-    glViewport(0, 0, m_width, m_height);
+    glViewport(0, 0, static_cast<GLsizei>(m_width), static_cast<GLsizei>(m_height));
 
     glfwSetWindowUserPointer(m_glfw_window.get(), this);
     glfwSetKeyCallback(m_glfw_window.get(), key_callback);
@@ -96,15 +101,20 @@ auto Window::dimensions_changed() const -> bool
     glfwGetFramebufferSize(m_glfw_window.get(), &new_width, &new_height);
     glfwGetWindowPos(m_glfw_window.get(), &new_posx, &new_posy);
 
-    return !(new_width == m_width && new_height == m_height && new_posx == m_posX && new_posy == m_posY);
+    return !(static_cast<uint32_t>(new_width) == m_width && static_cast<uint32_t>(new_height) == m_height);
 }
 
 void Window::update_dimensions()
 {
-    glfwGetFramebufferSize(m_glfw_window.get(), &m_width, &m_height);
-    glfwGetWindowPos(m_glfw_window.get(), &m_posX, &m_posY);
+    int width{};
+    int height{};
 
-    glViewport(0, 0, m_width, m_height);
+    glfwGetFramebufferSize(m_glfw_window.get(), &width, &height);
+
+    m_width = static_cast<uint32_t>(width);
+    m_height = static_cast<uint32_t>(height);
+
+    glViewport(0, 0, width, height);
 }
 
 void Window::set_catched_cursor(bool value)
@@ -173,7 +183,8 @@ void Window::mouse_cursor_callback(GLFWwindow *glfw_window, double xpos, double 
     window.m_last_cursor_pos_y = ypos;
 
     // Check if this is the first VALID mouse event after window being resized
-    if (window.m_first_mouse_input && !(deltaCursorPosX == 0 && deltaCursorPosY == 0)) {
+    if (window.m_first_mouse_input && !(std::abs(deltaCursorPosX) < std::numeric_limits<double>::epsilon() &&
+                                        std::abs(deltaCursorPosY) < std::numeric_limits<double>::epsilon())) {
         window.m_first_mouse_input = false;
         deltaCursorPosX = 0.0;
         deltaCursorPosY = 0.0;

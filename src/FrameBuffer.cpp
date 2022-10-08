@@ -8,7 +8,8 @@
 #include <cstddef>
 
 AbstractFrameBuffer::~AbstractFrameBuffer()
-{}
+{
+}
 
 void AbstractFrameBuffer::bind() const
 {
@@ -66,7 +67,7 @@ void FrameBuffer::drawOnEntireScreen() const
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
 
-    glPolygonMode(GL_FRONT_AND_BACK, wireframe);
+    glPolygonMode(GL_FRONT_AND_BACK, static_cast<GLenum>(wireframe));
     m_shaderProgram->unbind();
 }
 
@@ -88,13 +89,15 @@ void FrameBuffer::generateTextures(uint32_t width, uint32_t height)
     glGenRenderbuffers(1, &m_depthStencilBuffer);
 
     glBindTexture(GL_TEXTURE_2D, m_colorBuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, static_cast<GLsizei>(width), static_cast<GLsizei>(height), 0, GL_RGBA,
+                 GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_colorBuffer, 0);
 
     glBindRenderbuffer(GL_RENDERBUFFER, m_depthStencilBuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, static_cast<GLsizei>(width),
+                          static_cast<GLsizei>(height));
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_depthStencilBuffer);
 
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -114,7 +117,8 @@ void FrameBuffer::setExposureCorrection(bool exposureCorrection) const
 }
 
 AbstractDepthMap::~AbstractDepthMap()
-{}
+{
+}
 
 DepthMap::DepthMap(int RESOLUTION)
 {
@@ -171,7 +175,8 @@ DepthMapCube::DepthMapCube(int resolution)
 }
 
 DepthMapCube::~DepthMapCube()
-{}
+{
+}
 
 GLuint DepthMapCube::getCubeMapTextureId()
 {

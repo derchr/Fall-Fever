@@ -20,11 +20,19 @@ TextureCubeMap::TextureCubeMap(const TextureCubeMapDescriptor &descriptor) : Abs
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-    int i = 0;
+    std::size_t i = 0;
     for (const auto &faceName : FACE_NAMES) {
         std::string texturePath = descriptor.path + faceName;
 
-        auto textureBuffer = stbi_load(texturePath.c_str(), &m_textureWidth, &m_textureHeight, &m_numComponents, 0);
+        int textureWidth{};
+        int textureHeight{};
+        int numComponents{};
+
+        auto textureBuffer = stbi_load(texturePath.c_str(), &textureWidth, &textureHeight, &numComponents, 0);
+
+        m_textureWidth = static_cast<unsigned>(textureWidth);
+        m_textureHeight = static_cast<unsigned>(textureHeight);
+        m_numComponents = static_cast<unsigned>(numComponents);
 
         if (!textureBuffer) {
             Log::logger().warn("CubeMap texture {} could not be loaded", texturePath);
@@ -53,7 +61,7 @@ void TextureCubeMap::initialize()
 
     int i = 0;
     for (auto &textureBuffer : m_textureBuffers) {
-        GLenum internalFormat;
+        GLint internalFormat;
         GLenum dataFormat;
 
         switch (m_numComponents) {
@@ -71,8 +79,9 @@ void TextureCubeMap::initialize()
             break;
         }
 
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, m_textureWidth, m_textureHeight, 0,
-                     dataFormat, GL_UNSIGNED_BYTE, textureBuffer);
+        glTexImage2D(static_cast<GLenum>(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i), 0, internalFormat,
+                     static_cast<GLsizei>(m_textureWidth), static_cast<GLsizei>(m_textureHeight), 0, dataFormat,
+                     GL_UNSIGNED_BYTE, textureBuffer);
 
         stbi_image_free(textureBuffer);
         i++;
@@ -111,8 +120,8 @@ InternalCubeMap::InternalCubeMap(unsigned int resolution) : AbstractCubeMap("int
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
     for (unsigned int i = 0; i < static_cast<int>(CubeMapFace::CUBEMAP_FACES_NUM_ITEMS); i++) {
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT24, resolution, resolution, 0,
-                     GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT24, static_cast<GLsizei>(resolution),
+                     static_cast<GLsizei>(resolution), 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     }
 
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);

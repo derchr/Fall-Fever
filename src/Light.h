@@ -14,8 +14,8 @@ class Light : public Entity
 public:
     struct Prototype
     {
-        Prototype(const std::string &name, const std::string &parent, glm::vec3 color, float intensity)
-            : name(name), parent(parent), color(color), intensity(intensity)
+        Prototype(const std::string &_name, const std::string &_parent, glm::vec3 _color, float _intensity)
+            : name(_name), parent(_parent), color(_color), intensity(_intensity)
         {}
         virtual ~Prototype() = default;
 
@@ -57,9 +57,9 @@ class PointLight : public Light
 public:
     struct Prototype : public Light::Prototype
     {
-        Prototype(const std::string &name, const std::string &parent, glm::vec3 position, glm::vec3 color,
-                  float intensity)
-            : Light::Prototype(name, parent, color, intensity), position(position)
+        Prototype(const std::string &_name, const std::string &_parent, glm::vec3 _position, glm::vec3 _color,
+                  float _intensity)
+            : Light::Prototype(_name, _parent, _color, _intensity), position(_position)
         {}
         glm::vec3 position;
     };
@@ -83,8 +83,8 @@ class DirectionalLight : public Light
 public:
     struct Prototype : public Light::Prototype
     {
-        Prototype(const std::string &name, glm::vec3 direction, glm::vec3 color, float intensity)
-            : Light::Prototype(name, "", color, intensity), direction(direction)
+        Prototype(const std::string &_name, glm::vec3 _direction, glm::vec3 _color, float _intensity)
+            : Light::Prototype(_name, "", _color, _intensity), direction(_direction)
         {}
         glm::vec3 direction;
     };

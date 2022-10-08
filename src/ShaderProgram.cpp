@@ -11,25 +11,18 @@ ShaderProgram::ShaderProgram(Prototype prototype) : m_uniqueName(prototype.name)
 
     m_shaderProgramId = glCreateProgram();
     GLuint vs = compile(vertexShaderSource, GL_VERTEX_SHADER);
-    GLuint gs;
     GLuint fs = compile(fragmentShaderSource, GL_FRAGMENT_SHADER);
 
     glAttachShader(m_shaderProgramId, vs);
     glAttachShader(m_shaderProgramId, fs);
-
-    if (!prototype.geometryPath.empty()) {
-        std::string geometryShaderSource = parse(prototype.geometryPath.c_str());
-        gs = compile(geometryShaderSource, GL_GEOMETRY_SHADER);
-        glAttachShader(m_shaderProgramId, gs);
-    }
 
     glLinkProgram(m_shaderProgramId);
 
     GLint isLinked = 0;
     glGetProgramiv(m_shaderProgramId, GL_LINK_STATUS, &isLinked);
     if (!isLinked)
-        Log::logger().critical("Failed to link shaderProgram \"{}\", \"{}\", \"{}\"", prototype.vertexPath,
-                               prototype.geometryPath, prototype.fragmentPath);
+        Log::logger().critical("Failed to link shaderProgram \"{}\", \"{}\"", prototype.vertexPath,
+                               prototype.fragmentPath);
 
 #ifdef _RELEASE
     glDetachShader(program, vs);
@@ -37,11 +30,6 @@ ShaderProgram::ShaderProgram(Prototype prototype) : m_uniqueName(prototype.name)
 
     glDeleteShader(vs);
     glDeleteShader(fs);
-
-    if (!prototype.geometryPath.empty()) {
-        glDetachShader(program, gs);
-        glDeleteShader(gs);
-    }
 #endif
 }
 
@@ -87,7 +75,7 @@ GLuint ShaderProgram::compile(const std::string &shaderSource, GLenum type)
     if (result != GL_TRUE) {
         int length;
         glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &length);
-        char *message = new char[length];
+        char *message = new char[static_cast<unsigned>(length)];
         glGetShaderInfoLog(shaderId, length, &length, message);
         Log::logger().error("Shader compilation failed: {}", message);
         delete[] message;

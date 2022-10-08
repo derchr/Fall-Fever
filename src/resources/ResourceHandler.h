@@ -8,13 +8,13 @@
 class ResourceHandler
 {
 public:
-    static ResourceHandler &instance();
+    static auto instance() -> ResourceHandler &;
 
     template <typename T, typename... Param>
-    ResourceId registerResource(Param const &...param);
+    auto registerResource(Param const &...param) -> ResourceId;
 
-    const std::shared_ptr<Resource> resource(ResourceId id) const;
-    const std::shared_ptr<Resource> resource(const std::string &name) const;
+    [[nodiscard]] auto resource(ResourceId resourceId) const -> std::shared_ptr<Resource>;
+    [[nodiscard]] auto resource(const std::string &name) const -> std::shared_ptr<Resource>;
 
 private:
     ResourceHandler() = default;

@@ -18,7 +18,6 @@ void Camera::updateVPM()
 
 void Camera::updateAspectRatio(float aspectRatio)
 {
-    // m_projectionMatrix = glm::ortho(-2.0f, 2.0f, -2.0f, 2.0f, -10.f, 100.0f);
     m_projectionMatrix = glm::perspective(m_fov / 2.F, aspectRatio, .1F, 1000.F);
     updateVPM();
 }
@@ -71,12 +70,12 @@ void Camera::updateDirectionFromMouseInput(MouseCursorInput const &mouse_cursor_
 {
     auto [deltaX, deltaY] = mouse_cursor_input;
 
-    if (deltaX == 0 && deltaY == 0) {
+    if (std::abs(deltaX) < std::numeric_limits<double>::epsilon() && std::abs(deltaY) < std::numeric_limits<double>::epsilon()) {
         return;
     }
 
-    m_yaw += deltaX;
-    m_pitch += deltaY;
+    m_yaw += static_cast<float>(deltaX);
+    m_pitch += static_cast<float>(deltaY);
 
     static constexpr float CLIP = 89.;
 
@@ -88,9 +87,9 @@ void Camera::updateDirectionFromMouseInput(MouseCursorInput const &mouse_cursor_
     }
 
     glm::vec3 direction;
-    direction.x = std::cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
+    direction.x = std::cos(glm::radians(m_yaw)) * std::cos(glm::radians(m_pitch));
     direction.y = std::sin(glm::radians(m_pitch));
-    direction.z = std::sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
+    direction.z = std::sin(glm::radians(m_yaw)) * std::cos(glm::radians(m_pitch));
     m_front_vec = glm::normalize(direction);
 }
 

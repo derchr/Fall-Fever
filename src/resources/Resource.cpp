@@ -3,38 +3,38 @@
 
 ResourceId Resource::s_idCounter = 0;
 
-Resource::Resource(const std::filesystem::path &path) : m_id(s_idCounter++), m_path(path)
+Resource::Resource(std::filesystem::path path) : m_id(s_idCounter++), m_path(std::move(path))
 {
     Log::logger().info("Resource \"{}\" with id {} created", m_path.string(), m_id);
 }
 
-ResourceId Resource::id() const
+auto Resource::id() const -> ResourceId
 {
     return m_id;
 }
 
-bool Resource::isInitialized() const
+auto Resource::isInitialized() const -> bool
 {
     return m_initialized;
 }
 
-const std::filesystem::path &Resource::resourcePath() const
+auto Resource::resourcePath() const -> const std::filesystem::path &
 {
     return m_path;
 }
 
-GLuint GlResource::glId() const
+auto GlResource::glId() const -> GLuint
 {
     return m_glId;
 }
 
-NamedResource::NamedResource(const std::string &name) : m_name(name)
-{}
+NamedResource::NamedResource(std::string name) : m_name(std::move(name))
+{
+}
 
-const std::string &NamedResource::name() const
+auto NamedResource::name() const -> const std::string &
 {
     return m_name;
 }
 
-NamedResource::~NamedResource()
-{}
+NamedResource::~NamedResource() = default;

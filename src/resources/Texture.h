@@ -1,8 +1,7 @@
 #pragma once
 
 #include "AbstractTexture.h"
-#include "Resource.h"
-#include "TextureTypes.h"
+#include "TextureType.h"
 
 #include <string>
 #include <stb/stb_image.h>

@@ -5,15 +5,17 @@
 #include "resources/Texture.h"
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, std::vector<ResourceId> textures)
-    : m_preInitializationVertexData{vertices, indices}, m_numElements(indices.size()), m_textures(textures)
-{}
+    : m_preInitializationVertexData{vertices, indices}, m_numElements(static_cast<unsigned>(indices.size())),
+      m_textures(textures)
+{
+}
 
 void Mesh::initializeOnGPU()
 {
-    m_vertexArray =
-        new VertexArray(static_cast<void *>(m_preInitializationVertexData.vertices.data()),
-                        static_cast<void *>(m_preInitializationVertexData.indices.data()),
-                        m_preInitializationVertexData.vertices.size(), m_preInitializationVertexData.indices.size());
+    m_vertexArray = new VertexArray(static_cast<void *>(m_preInitializationVertexData.vertices.data()),
+                                    static_cast<void *>(m_preInitializationVertexData.indices.data()),
+                                    static_cast<unsigned>(m_preInitializationVertexData.vertices.size()),
+                                    static_cast<unsigned>(m_preInitializationVertexData.indices.size()));
 }
 
 Mesh::~Mesh()
@@ -26,12 +28,12 @@ void Mesh::draw(ShaderProgram *shaderProgram)
     uint8_t typeNumberCount[static_cast<int>(TextureType::TEXTURE_TYPE_NUM_ITEMS)]{0};
     glBindTexture(GL_TEXTURE_2D, 0);
     // Bind all textures in order to its texture unit
-    int i = 0;
+    std::size_t i = 0;
     for (auto it : m_textures) {
         auto texture = std::static_pointer_cast<Texture>(ResourceHandler::instance().resource(it));
         TextureType currentTextureType = texture->textureType();
 
-        texture->bind(i, shaderProgram, typeNumberCount[static_cast<int>(currentTextureType)]);
+        texture->bind(static_cast<uint8_t>(i), shaderProgram, typeNumberCount[static_cast<int>(currentTextureType)]);
 
         typeNumberCount[static_cast<int>(currentTextureType)] += 1;
 
@@ -40,7 +42,7 @@ void Mesh::draw(ShaderProgram *shaderProgram)
 
     // Draw elements
     m_vertexArray->bind();
-    glDrawElements(GL_TRIANGLES, m_numElements, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_numElements), GL_UNSIGNED_INT, 0);
     m_vertexArray->unbind();
 
     // Unbind all textures
@@ -53,7 +55,7 @@ void Mesh::draw(ShaderProgram *shaderProgram)
 void Mesh::drawWithoutTextures()
 {
     m_vertexArray->bind();
-    glDrawElements(GL_TRIANGLES, m_numElements, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_numElements), GL_UNSIGNED_INT, 0);
     m_vertexArray->unbind();
 }
 

@@ -8,13 +8,13 @@
 
 ResourceHandler ResourceHandler::s_instance;
 
-ResourceHandler &ResourceHandler::instance()
+auto ResourceHandler::instance() -> ResourceHandler &
 {
     return s_instance;
 }
 
 template <typename T, typename... Param>
-ResourceId ResourceHandler::registerResource(Param const &...param)
+auto ResourceHandler::registerResource(Param const &...param) -> ResourceId
 {
     auto resource = std::make_shared<T>(param...);
     m_resources.emplace(resource->id(), resource);
@@ -26,26 +26,27 @@ template ResourceId ResourceHandler::registerResource<TextureCubeMap>(TextureCub
 template ResourceId ResourceHandler::registerResource<InternalCubeMap>(int const &);
 template ResourceId ResourceHandler::registerResource<Model>(ModelDescriptor const &);
 
-const std::shared_ptr<Resource> ResourceHandler::resource(const ResourceId id) const
+auto ResourceHandler::resource(const ResourceId resourceId) const -> std::shared_ptr<Resource>
 {
-    auto it = m_resources.find(id);
+    auto resourceIt = m_resources.find(resourceId);
 
-    if (it != m_resources.end()) {
-        auto resource = it->second;
+    if (resourceIt != m_resources.end()) {
+        auto resource = resourceIt->second;
 
-        if (!resource->isInitialized())
+        if (!resource->isInitialized()) {
             resource->initialize();
+        }
 
         return resource;
     }
 
-    Log::logger().warn("Could not find resource with id {}", id);
-    return std::shared_ptr<Resource>();
+    Log::logger().warn("Could not find resource with id {}", resourceId);
+    return {};
 }
 
-const std::shared_ptr<Resource> ResourceHandler::resource(const std::string &name) const
+auto ResourceHandler::resource(const std::string &name) const -> std::shared_ptr<Resource>
 {
-    auto it = std::find_if(m_resources.begin(), m_resources.end(), [&name](const auto &resource) {
+    auto resourceIt = std::find_if(m_resources.begin(), m_resources.end(), [&name](const auto &resource) {
         if (auto namedResource = std::dynamic_pointer_cast<NamedResource>(resource.second)) {
             return namedResource->name() == name;
         }
@@ -53,15 +54,16 @@ const std::shared_ptr<Resource> ResourceHandler::resource(const std::string &nam
         return false;
     });
 
-    if (it != m_resources.end()) {
-        auto resource = it->second;
+    if (resourceIt != m_resources.end()) {
+        auto resource = resourceIt->second;
 
-        if (!resource->isInitialized())
+        if (!resource->isInitialized()) {
             resource->initialize();
+        }
 
         return resource;
     }
 
     Log::logger().warn("Could not find resource with unique name \"{}\"", name);
-    return std::shared_ptr<Resource>();
+    return {};
 }

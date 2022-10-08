@@ -2,7 +2,7 @@
 
 #include "VertexArray.h"
 #include "definitions/models.h"
-#include "resources/Texture.h"
+#include "resources/Resource.h"
 
 #include <vector>
 
@@ -19,7 +19,7 @@ public:
     void draw(ShaderProgram *shaderProgram);
     void drawWithoutTextures();
 
-    VertexArray *getVertexArray();
+    auto getVertexArray() -> VertexArray *;
 
 private:
     struct PreInitializationVertexData

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "definitions/models.h"
-
 #include <glad/gl.h>
 #include <vector>
 
@@ -13,8 +11,6 @@ public:
 
     void bind();
     void unbind();
-
-    static std::vector<Vertex> createVertices(double *vertices, uint32_t numVertices, float *textureCoordinates);
 
 private:
     GLuint m_VAO;

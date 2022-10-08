@@ -9,7 +9,7 @@ public:
     {}
 
 protected:
-    int32_t m_textureWidth;
-    int32_t m_textureHeight;
-    int32_t m_numComponents;
+    uint32_t m_textureWidth;
+    uint32_t m_textureHeight;
+    uint32_t m_numComponents;
 };

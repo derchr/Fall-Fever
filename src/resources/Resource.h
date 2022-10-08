@@ -10,17 +10,17 @@ using ResourceId = uint64_t;
 class Resource
 {
 public:
-    Resource(const std::filesystem::path &path);
+    Resource(std::filesystem::path path);
     Resource(const Resource &other) = delete;
     Resource(Resource &&other) = delete;
-    Resource &operator=(const Resource &other) = delete;
-    Resource &operator=(Resource &&other) = delete;
+    auto operator=(const Resource &other) -> Resource & = delete;
+    auto operator=(Resource &&other) -> Resource & = delete;
 
-    ResourceId id() const;
-    const std::filesystem::path &resourcePath() const;
+    [[nodiscard]] auto id() const -> ResourceId;
+    [[nodiscard]] auto resourcePath() const -> const std::filesystem::path &;
 
 protected:
-    bool isInitialized() const;
+    [[nodiscard]] auto isInitialized() const -> bool;
     virtual void initialize() = 0;
 
     bool m_initialized = false;
@@ -40,7 +40,7 @@ public:
     // virtual ~GlResource() = 0; TODO!!
     virtual void unbind() const = 0;
 
-    GLuint glId() const;
+    auto glId() const -> GLuint;
 
 protected:
     GLuint m_glId;
@@ -49,11 +49,11 @@ protected:
 class NamedResource
 {
 public:
-    NamedResource(const std::string &name);
+    NamedResource(std::string name);
     virtual ~NamedResource() = 0;
 
-    const std::string &name() const;
+    [[nodiscard]] auto name() const -> const std::string &;
 
-protected:
-    std::string m_name;
+private:
+    const std::string m_name;
 };
