@@ -1,7 +1,7 @@
+#include "Controller.h"
+
 #include <GLFW/glfw3.h>
 #include <iostream>
-
-#include "Controller.h"
 
 auto main(int argc, char **argv) -> int
 {
@@ -9,7 +9,7 @@ auto main(int argc, char **argv) -> int
     (void)argc;
     (void)argv;
 
-#ifdef _DEBUG
+#ifndef NDEBUG
     std::cout << "[Debug Mode]" << std::endl;
 #endif
 

@@ -8,7 +8,7 @@ public:
     static spdlog::logger &logger();
 
 private:
-    Log();
+    Log() noexcept;
 
     static Log s_instance;
 

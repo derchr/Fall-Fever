@@ -31,6 +31,8 @@ ShaderProgram::ShaderProgram(Prototype prototype) : m_uniqueName(prototype.name)
     glDeleteShader(vs);
     glDeleteShader(fs);
 #endif
+
+    Log::logger().info("Loaded shaderprogram \"{}\"", prototype.name);
 }
 
 ShaderProgram::~ShaderProgram()

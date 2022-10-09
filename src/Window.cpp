@@ -20,7 +20,7 @@ Window::Window()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-#ifdef _DEBUG
+#ifndef NDEBUG
     glfwSetErrorCallback(glfw_error_callback);
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 #else
@@ -55,8 +55,8 @@ Window::Window()
         std::terminate();
     }
 
-#ifdef _DEBUG
-    Log::logger().debug("OpenGL version: {}", glGetString(GL_VERSION));
+#ifndef NDEBUG
+    Log::logger().debug("OpenGL version: {}", reinterpret_cast<const char *>(glGetString(GL_VERSION)));
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback(Helper::gl_debug_callback, nullptr);
 
@@ -95,11 +95,8 @@ auto Window::dimensions_changed() const -> bool
 {
     int new_width{};
     int new_height{};
-    int new_posx{};
-    int new_posy{};
 
     glfwGetFramebufferSize(m_glfw_window.get(), &new_width, &new_height);
-    glfwGetWindowPos(m_glfw_window.get(), &new_posx, &new_posy);
 
     return !(static_cast<uint32_t>(new_width) == m_width && static_cast<uint32_t>(new_height) == m_height);
 }
@@ -131,7 +128,7 @@ void Window::set_catched_cursor(bool value)
 // GLFW error function
 void Window::glfw_error_callback(int error, const char *description)
 {
-    Log::logger().warn("GLFW [%d]: %s\n", error, description);
+    Log::logger().warn("GLFW [{:d}]: {:s}\n", error, description);
 }
 
 // This function is called when the window gets resized (currently not used)

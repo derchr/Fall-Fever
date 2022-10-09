@@ -8,7 +8,7 @@ add_library(fever_engine
     Mesh.cpp
     Entity.cpp
     Light.cpp
-    Scene.cpp
+    # Scene.cpp
     FrameBuffer.cpp
     Helper.cpp
     resources/Resource.cpp

@@ -22,7 +22,7 @@ protected:
 class FrameBuffer : public AbstractFrameBuffer
 {
 public:
-    FrameBuffer(uint32_t width, uint32_t height, ShaderProgram *shaderProgram);
+    FrameBuffer(uint32_t width, uint32_t height, ShaderProgram &shaderProgram);
     ~FrameBuffer();
 
     void drawOnEntireScreen() const;
@@ -39,7 +39,7 @@ private:
     GLuint m_colorBuffer;
     GLuint m_depthStencilBuffer;
 
-    ShaderProgram *m_shaderProgram;
+    ShaderProgram &m_shaderProgram;
 };
 
 class AbstractDepthMap : public AbstractFrameBuffer

@@ -4,12 +4,12 @@
 
 Log Log::s_instance;
 
-Log::Log()
+Log::Log() noexcept
 {
     m_logger = spdlog::stdout_color_mt("Core");
     m_logger->set_pattern("[%H:%M:%S.%e] [%n] [%^%l%$] %v");
 
-#ifdef _DEBUG
+#ifndef NDEBUG
     m_logger->set_level(spdlog::level::debug);
 #else
     m_logger->set_level(spdlog::level::warn);

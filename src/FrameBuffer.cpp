@@ -26,7 +26,7 @@ GLuint AbstractFrameBuffer::getFBO() const
     return m_FBO;
 }
 
-FrameBuffer::FrameBuffer(uint32_t width, uint32_t height, ShaderProgram *shaderProgram) : m_shaderProgram(shaderProgram)
+FrameBuffer::FrameBuffer(uint32_t width, uint32_t height, ShaderProgram &shaderProgram) : m_shaderProgram(shaderProgram)
 {
     glGenFramebuffers(1, &m_FBO);
 
@@ -53,11 +53,11 @@ void FrameBuffer::drawOnEntireScreen() const
     glGetIntegerv(GL_POLYGON_MODE, &wireframe);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-    m_shaderProgram->bind();
+    m_shaderProgram.bind();
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, getTextureId());
 
-    GLint location = glGetUniformLocation(m_shaderProgram->getShaderProgramId(), "u_texture");
+    GLint location = glGetUniformLocation(m_shaderProgram.getShaderProgramId(), "u_texture");
     glUniform1i(location, 0);
 
     // A VAO is necessary although no data is stored in it
@@ -68,7 +68,7 @@ void FrameBuffer::drawOnEntireScreen() const
     glBindVertexArray(0);
 
     glPolygonMode(GL_FRONT_AND_BACK, static_cast<GLenum>(wireframe));
-    m_shaderProgram->unbind();
+    m_shaderProgram.unbind();
 }
 
 void FrameBuffer::changeDimensions(uint32_t width, uint32_t height)
@@ -111,9 +111,9 @@ void FrameBuffer::generateTextures(uint32_t width, uint32_t height)
 
 void FrameBuffer::setExposureCorrection(bool exposureCorrection) const
 {
-    m_shaderProgram->bind();
-    m_shaderProgram->setUniform("u_exposureCorrection", exposureCorrection);
-    m_shaderProgram->unbind();
+    m_shaderProgram.bind();
+    m_shaderProgram.setUniform("u_exposureCorrection", exposureCorrection);
+    m_shaderProgram.unbind();
 }
 
 AbstractDepthMap::~AbstractDepthMap()
