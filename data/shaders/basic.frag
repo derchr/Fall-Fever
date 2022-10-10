@@ -111,7 +111,7 @@ void main() {
     //fragmentColor += spotLightContribution(u_spotLight, normal, v_fragmentPositionTangent, viewDir);
 
     f_color = vec4(fragmentColor, 1.0f);
-
+    f_color = vec4(0.95f, 0.16f, 0.33f, 1.0f);
 }
 
 vec3 directionalLightContribution(DirectionalLight light, vec3 normal, vec3 viewDir) {

@@ -6,30 +6,19 @@
 #include <string>
 #include <vector>
 
-struct ModelDescriptor
-{
-    std::string name;
-    std::string path;
-};
-
-class Model : public Resource, public NamedResource
+class Model
 {
 public:
-    Model(const ModelDescriptor &descriptor);
+    Model(std::string_view name, std::vector<Mesh> meshes);
 
-    void draw(ShaderProgram *shaderProgram) const;
+    void draw(ShaderProgram const &shaderProgram) const;
     void drawWithoutTextures() const;
 
-    Mesh *getMesh(unsigned int index) const; // TODO...
-
-protected:
-    void initialize() override;
+    auto getMesh(unsigned int index) -> Mesh *; // TODO...
 
 private:
-    void loadModel(const std::string &pathToModel);
-
-    std::vector<Mesh *> m_meshes;
+    std::vector<Mesh> m_meshes;
     std::vector<ResourceId> m_textures;
 
-    std::string m_workingPath;
+    std::string m_name;
 };

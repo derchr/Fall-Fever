@@ -2,7 +2,6 @@
 #include "../ShaderProgram.h"
 #include "../util/Log.h"
 
-#define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
 Texture::Texture(const TextureDescriptor &descriptor)
@@ -20,16 +19,17 @@ Texture::Texture(const TextureDescriptor &descriptor)
     m_textureHeight = static_cast<unsigned>(textureHeight);
     m_numComponents = static_cast<unsigned>(numComponents);
 
-    if (!m_textureBuffer)
+    if (m_textureBuffer == nullptr) {
         Log::logger().warn("Texture {} could not be loaded", resourcePath().string());
+    }
 }
 
 void Texture::initialize()
 {
     m_initialized = true;
 
-    GLenum internalFormat;
-    GLenum dataFormat;
+    GLenum internalFormat{};
+    GLenum dataFormat{};
 
     switch (m_numComponents) {
     case 1:
@@ -52,7 +52,7 @@ void Texture::initialize()
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -2.0f);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -2.0F);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -66,12 +66,12 @@ void Texture::initialize()
     stbi_image_free(m_textureBuffer);
 }
 
-TextureType Texture::textureType() const
+auto Texture::textureType() const -> TextureType
 {
     return m_textureType;
 }
 
-void Texture::bind(uint8_t textureUnit, ShaderProgram *shaderProgram, uint8_t textureTypeNum) const
+void Texture::bind(uint8_t textureUnit, ShaderProgram const &shaderProgram, uint8_t textureTypeNum) const
 {
     std::string uniformName = "texture_";
 
@@ -99,7 +99,7 @@ void Texture::bind(uint8_t textureUnit, ShaderProgram *shaderProgram, uint8_t te
     // Add u_material as we store textures in a struct
     uniformName = "u_material." + uniformName;
 
-    shaderProgram->setUniform(uniformName.c_str(), textureUnit);
+    shaderProgram.setUniform(uniformName, textureUnit);
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_2D, m_glId);
 }

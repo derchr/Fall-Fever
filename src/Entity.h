@@ -20,7 +20,8 @@ public:
     {
         Prototype(const std::string &_name, glm::vec3 _position, glm::vec3 _rotation, float _scale)
             : name(_name), position(_position), rotation(_rotation), scale(_scale)
-        {}
+        {
+        }
         virtual ~Prototype() = default;
 
         std::string name;
@@ -30,7 +31,7 @@ public:
     };
 
     Entity(const std::string &name);
-    virtual ~Entity() = 0;
+    virtual ~Entity() = default;
 
     uint32_t getId() const;
     const std::string &getUniqueName() const;
@@ -64,26 +65,15 @@ protected:
 class ModelEntity : public Entity
 {
 public:
-    struct Prototype : public Entity::Prototype
-    {
-        Prototype(const std::string &_name, glm::vec3 _position, glm::vec3 _rotation, float _scale,
-                  std::string _modelName, std::string _shaderProgramName)
-            : Entity::Prototype(_name, _position, _rotation, _scale), modelName(std::move(_modelName)),
-              shaderProgramName(std::move(_shaderProgramName))
-        {}
-        std::string modelName;
-        std::string shaderProgramName;
-    };
+    ModelEntity(Entity::Prototype prototype, Model const &model, ShaderProgram const &shaderProgram);
 
-    ModelEntity(Prototype prototype, const Model *model, ShaderProgram *shaderProgram);
-
-    void draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition);
-    void drawDirectionalShadows(glm::mat4 viewProjMatrix, ShaderProgram *p_shaderProgram);
-    void drawPointShadows(ShaderProgram *p_shaderProgram);
+    void draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition) const;
+    void drawDirectionalShadows(glm::mat4 viewProjMatrix, ShaderProgram *p_shaderProgram) const;
+    void drawPointShadows(ShaderProgram *p_shaderProgram) const;
 
 private:
-    const Model *m_model;
-    ShaderProgram *m_shaderProgram;
+    Model const &m_model;
+    ShaderProgram const &m_shaderProgram;
 };
 
 class Skybox

@@ -12,10 +12,8 @@
 uint32_t Entity::s_idCounter = 0;
 
 Entity::Entity(const std::string &name) : m_id(s_idCounter++), m_uniqueName(name)
-{}
-
-Entity::~Entity()
-{}
+{
+}
 
 uint32_t Entity::getId() const
 {
@@ -93,7 +91,7 @@ glm::mat4 Entity::getModelMatrix() const
     return m_modelMatrix;
 }
 
-ModelEntity::ModelEntity(Prototype prototype, const Model *model, ShaderProgram *shaderProgram)
+ModelEntity::ModelEntity(Entity::Prototype prototype, Model const &model, ShaderProgram const &shaderProgram)
     : Entity(prototype.name), m_model(model), m_shaderProgram(shaderProgram)
 {
     setPosition(prototype.position);
@@ -101,27 +99,27 @@ ModelEntity::ModelEntity(Prototype prototype, const Model *model, ShaderProgram 
     setScale(prototype.scale);
 }
 
-void ModelEntity::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition)
+void ModelEntity::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition) const
 {
-    m_shaderProgram->bind();
+    m_shaderProgram.bind();
 
     glm::mat4 modelViewProj = viewProjMatrix * m_modelMatrix;
-    m_shaderProgram->setUniform("u_modelViewProjMatrix", modelViewProj);
-    m_shaderProgram->setUniform("u_modelMatrix", m_modelMatrix);
+    m_shaderProgram.setUniform("u_modelViewProjMatrix", modelViewProj);
+    m_shaderProgram.setUniform("u_modelMatrix", m_modelMatrix);
 
     glm::mat3 normalMatrix = glm::mat3(m_modelMatrix);
     normalMatrix = glm::transpose(glm::inverse(normalMatrix));
-    m_shaderProgram->setUniform("u_normalMatrix", normalMatrix);
+    m_shaderProgram.setUniform("u_normalMatrix", normalMatrix);
 
-    m_shaderProgram->setUniform("u_viewPosition", viewPosition);
+    m_shaderProgram.setUniform("u_viewPosition", viewPosition);
 
     // Draw the model
-    m_model->draw(m_shaderProgram);
+    m_model.draw(m_shaderProgram);
 
-    m_shaderProgram->unbind();
+    m_shaderProgram.unbind();
 }
 
-void ModelEntity::drawDirectionalShadows(glm::mat4 viewProjMatrix, ShaderProgram *shaderProgram)
+void ModelEntity::drawDirectionalShadows(glm::mat4 viewProjMatrix, ShaderProgram *shaderProgram) const
 {
     shaderProgram->bind();
 
@@ -129,19 +127,19 @@ void ModelEntity::drawDirectionalShadows(glm::mat4 viewProjMatrix, ShaderProgram
     shaderProgram->setUniform("u_modelViewProjMatrix", modelViewProj);
 
     // Draw the model
-    m_model->drawWithoutTextures();
+    m_model.drawWithoutTextures();
 
     shaderProgram->unbind();
 }
 
-void ModelEntity::drawPointShadows(ShaderProgram *shaderProgram)
+void ModelEntity::drawPointShadows(ShaderProgram *shaderProgram) const
 {
     shaderProgram->bind();
 
     shaderProgram->setUniform("u_modelMatrix", m_modelMatrix);
 
     // Draw the model
-    m_model->drawWithoutTextures();
+    m_model.drawWithoutTextures();
 
     shaderProgram->unbind();
 }

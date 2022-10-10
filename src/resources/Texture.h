@@ -3,8 +3,8 @@
 #include "AbstractTexture.h"
 #include "TextureType.h"
 
-#include <string>
 #include <stb/stb_image.h>
+#include <string>
 
 class ShaderProgram;
 
@@ -19,9 +19,9 @@ class Texture : public AbstractTexture
 public:
     Texture(const TextureDescriptor &descriptor);
 
-    TextureType textureType() const;
+    [[nodiscard]] auto textureType() const -> TextureType;
 
-    void bind(uint8_t textureUnit, ShaderProgram *shaderProgram, uint8_t textureTypeNum) const;
+    void bind(uint8_t textureUnit, ShaderProgram const &shaderProgram, uint8_t textureTypeNum) const;
     void unbind() const override;
 
 protected:

@@ -5,8 +5,8 @@
 class AbstractTexture : public Resource, public GlResource
 {
 public:
-    AbstractTexture(const std::string &path) : Resource(path)
-    {}
+    AbstractTexture(const std::string &path) : Resource(path) {}
+    virtual ~AbstractTexture() = default;
 
 protected:
     uint32_t m_textureWidth;

@@ -31,6 +31,7 @@ target_link_libraries(
     fmt
     pthread
     spdlog
+    tinygltf
 )
 
 add_executable(Fall-Fever

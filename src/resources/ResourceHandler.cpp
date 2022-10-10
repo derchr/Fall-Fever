@@ -1,7 +1,6 @@
 #include "ResourceHandler.h"
 #include "../util/Log.h"
 #include "CubeMap.h"
-#include "Model.h"
 #include "Texture.h"
 
 #include <algorithm>
@@ -24,7 +23,6 @@ auto ResourceHandler::registerResource(Param const &...param) -> ResourceId
 template ResourceId ResourceHandler::registerResource<Texture>(TextureDescriptor const &);
 template ResourceId ResourceHandler::registerResource<TextureCubeMap>(TextureCubeMapDescriptor const &);
 template ResourceId ResourceHandler::registerResource<InternalCubeMap>(int const &);
-template ResourceId ResourceHandler::registerResource<Model>(ModelDescriptor const &);
 
 auto ResourceHandler::resource(const ResourceId resourceId) const -> std::shared_ptr<Resource>
 {

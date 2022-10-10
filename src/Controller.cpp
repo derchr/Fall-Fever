@@ -1,12 +1,12 @@
 #include "Controller.h"
 #include "Camera.h"
-#include "Entity.h"
 #include "FrameBuffer.h"
 #include "Helper.h"
-#include "Light.h"
-#include "Scene.h"
+#include "Mesh.h"
 #include "ShaderProgram.h"
 #include "Window.h"
+#include "definitions/attribute_locations.h"
+#include "resources/Model.h"
 #include "util/Log.h"
 
 #include <GLFW/glfw3.h>
@@ -21,6 +21,73 @@ Controller::Controller()
       m_postProcessFrameBuffer(m_gameWindow->dimensions().first, m_gameWindow->dimensions().second,
                                postProcessingProgram)
 {
+    tinygltf::TinyGLTF loader;
+
+    std::string err;
+    std::string warn;
+    bool ret = loader.LoadASCIIFromFile(&m_model, &err, &warn, "glTF/ABeautifulGame.gltf");
+    // bool ret = loader.LoadASCIIFromFile(&m_model, &err, &warn, "minimal.gltf");
+
+    if (!warn.empty()) {
+        Log::logger().warn("{}", warn);
+    }
+
+    if (!err.empty()) {
+        Log::logger().error("{}", err);
+    }
+
+    if (!ret) {
+        Log::logger().error("Failed to parse glTF");
+    }
+
+    defaultProgram.bind();
+    AttributeLocations locations{};
+
+    locations.position = glGetAttribLocation(defaultProgram.getShaderProgramId(), "a_position");
+    locations.normal = glGetAttribLocation(defaultProgram.getShaderProgramId(), "a_normal");
+    locations.uv = glGetAttribLocation(defaultProgram.getShaderProgramId(), "a_texCoord");
+
+    ShaderProgram::unbind();
+
+    std::vector<Model> models;
+    for (auto const &mesh : m_model.meshes) {
+        std::vector<Mesh> meshes;
+        for (auto const &primitive : mesh.primitives) {
+            meshes.emplace_back(Mesh({primitive, m_model, locations}, {}));
+        }
+        models.emplace_back(Model(mesh.name, std::move(meshes)));
+    }
+    m_models = std::move(models);
+
+    std::vector<ModelEntity> entities;
+    for (auto const &node : m_model.nodes) {
+        ModelEntity entity(Entity::Prototype(node.name, {}, {}, 1.0F), m_models[static_cast<unsigned>(node.mesh)],
+                           defaultProgram);
+
+        if (!node.translation.empty()) {
+            entity.setPosition(glm::vec3(node.translation[0], node.translation[1], node.translation[2]));
+        }
+
+        if (!node.rotation.empty()) {
+            entity.setRotation(
+                glm::eulerAngles(glm::quat(node.rotation[3], node.rotation[0], node.rotation[1], node.rotation[2])));
+        }
+
+        if (!node.scale.empty()) {
+            entity.setScale(node.scale[0]);
+        }
+
+        entities.push_back(std::move(entity));
+
+        for (auto const &child : node.children) {
+            if (!node.translation.empty()) {
+                entities[child].translate(glm::vec3(node.translation[0], node.translation[1], node.translation[2]));
+            }
+        }
+
+        Log::logger().info("Load node {}.", node.name);
+    }
+    m_entities = std::move(entities);
 }
 
 void Controller::run()
@@ -29,7 +96,7 @@ void Controller::run()
 
     m_camera->translate(glm::vec3(0., 1.5, 5.));
 
-    Log::logger().info("Startup complete.");
+    Log::logger().info("Startup complete. Enter game loop.");
 
     // This is the game loop
     while (glfwWindowShouldClose(&m_gameWindow->glfw_window()) == GLFW_FALSE) {
@@ -40,7 +107,7 @@ void Controller::run()
         // --- Update game ---
         lightProgram.bind();
         lightProgram.setUniform("v_lightColor", glm::vec3{1., 1., 1.} * 100.0F);
-        lightProgram.unbind();
+        ShaderProgram::unbind();
 
         // --- Render and buffer swap ---
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -50,6 +117,13 @@ void Controller::run()
 
         m_camera->lookForward();
         m_camera->updateVPM();
+
+        // Draw scene
+        defaultProgram.bind();
+        for (auto const &entity : m_entities) {
+            entity.draw(m_camera->getViewProj(), m_camera->getPosition());
+        }
+        ShaderProgram::unbind();
 
         m_postProcessFrameBuffer.unbind();
         m_postProcessFrameBuffer.drawOnEntireScreen();
@@ -68,7 +142,6 @@ void Controller::run()
 
         auto const &key_input = m_gameWindow->key_input();
         auto const &mouse_cursor_input = m_gameWindow->mouse_cursor_input();
-        // auto const &mouse_button_input = m_gameWindow->mouse_button_input();
 
         m_camera->updatePositionFromKeyboardInput(key_input, (float)m_deltaTime);
 

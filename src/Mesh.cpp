@@ -1,65 +1,57 @@
 #include "Mesh.h"
+
 #include "ShaderProgram.h"
 #include "VertexArray.h"
 #include "resources/ResourceHandler.h"
 #include "resources/Texture.h"
+#include <utility>
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, std::vector<ResourceId> textures)
-    : m_preInitializationVertexData{vertices, indices}, m_numElements(static_cast<unsigned>(indices.size())),
-      m_textures(textures)
+Mesh::Mesh(VertexArray vertexArray, std::vector<ResourceId> textures)
+    : m_vertexArray(std::move(vertexArray)), m_textures(std::move(textures))
 {
 }
 
-void Mesh::initializeOnGPU()
+void Mesh::draw(ShaderProgram const &shaderProgram) const
 {
-    m_vertexArray = new VertexArray(static_cast<void *>(m_preInitializationVertexData.vertices.data()),
-                                    static_cast<void *>(m_preInitializationVertexData.indices.data()),
-                                    static_cast<unsigned>(m_preInitializationVertexData.vertices.size()),
-                                    static_cast<unsigned>(m_preInitializationVertexData.indices.size()));
-}
+    std::array<uint8_t, static_cast<std::size_t>(TextureType::TEXTURE_TYPE_NUM_ITEMS)> typeNumberCount{};
 
-Mesh::~Mesh()
-{
-    delete m_vertexArray;
-}
-
-void Mesh::draw(ShaderProgram *shaderProgram)
-{
-    uint8_t typeNumberCount[static_cast<int>(TextureType::TEXTURE_TYPE_NUM_ITEMS)]{0};
     glBindTexture(GL_TEXTURE_2D, 0);
     // Bind all textures in order to its texture unit
-    std::size_t i = 0;
-    for (auto it : m_textures) {
-        auto texture = std::static_pointer_cast<Texture>(ResourceHandler::instance().resource(it));
+    std::size_t textureNum = 0;
+    for (auto textureIt : m_textures) {
+        auto texture = std::static_pointer_cast<Texture>(ResourceHandler::instance().resource(textureIt));
         TextureType currentTextureType = texture->textureType();
 
-        texture->bind(static_cast<uint8_t>(i), shaderProgram, typeNumberCount[static_cast<int>(currentTextureType)]);
+        texture->bind(static_cast<uint8_t>(textureNum), shaderProgram,
+                      typeNumberCount.at(static_cast<std::size_t>(currentTextureType)));
 
-        typeNumberCount[static_cast<int>(currentTextureType)] += 1;
+        typeNumberCount.at(static_cast<std::size_t>(currentTextureType)) += 1;
 
-        i++;
+        textureNum++;
     }
 
     // Draw elements
-    m_vertexArray->bind();
-    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_numElements), GL_UNSIGNED_INT, 0);
-    m_vertexArray->unbind();
+    m_vertexArray.bind();
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_vertexArray.indicesCount()),
+                   static_cast<GLenum>(m_vertexArray.indicesType()), nullptr);
+    VertexArray::unbind();
 
     // Unbind all textures
-    for (auto it : m_textures) {
-        auto texture = std::static_pointer_cast<Texture>(ResourceHandler::instance().resource(it));
+    for (auto textureIt : m_textures) {
+        auto texture = std::static_pointer_cast<Texture>(ResourceHandler::instance().resource(textureIt));
         texture->unbind();
     }
 }
 
-void Mesh::drawWithoutTextures()
+void Mesh::drawWithoutTextures() const
 {
-    m_vertexArray->bind();
-    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_numElements), GL_UNSIGNED_INT, 0);
-    m_vertexArray->unbind();
+    m_vertexArray.bind();
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_vertexArray.indicesCount()),
+                   static_cast<GLenum>(m_vertexArray.indicesType()), nullptr);
+    VertexArray::unbind();
 }
 
-VertexArray *Mesh::getVertexArray()
+auto Mesh::getVertexArray() -> VertexArray *
 {
-    return m_vertexArray;
+    return &m_vertexArray;
 }

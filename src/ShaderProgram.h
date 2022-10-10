@@ -1,7 +1,9 @@
 #pragma once
 
+#include <filesystem>
 #include <glad/gl.h>
 #include <glm/glm.hpp>
+#include <optional>
 #include <string>
 #include <unordered_map>
 
@@ -16,13 +18,13 @@ public:
     };
 
     ShaderProgram(Prototype prototype);
-
     ~ShaderProgram();
 
-    void bind();
-    void unbind();
+    void bind() const;
+    static void unbind();
 
-    GLint retrieveUniformLocation(const std::string &name) const;
+    auto retrieveUniformLocation(std::string_view uniform_name) const -> GLint;
+
     // May be rewritten...
     void setUniform(const std::string &name, bool value) const;
     void setUniform(const std::string &name, int value) const;
@@ -32,14 +34,12 @@ public:
     void setUniform(const std::string &name, glm::mat3 matrix) const;
     void setUniform(const std::string &name, glm::mat4 matrix) const;
 
-    GLuint getShaderProgramId();
-    const std::string &getUniqueName();
+    auto getShaderProgramId() const -> GLuint;
 
 private:
-    std::string parse(const std::string &filename);
-    GLuint compile(const std::string &shaderSource, GLenum type);
+    static auto parse(const std::filesystem::path &path) -> std::optional<std::string>;
+    static auto compile(const std::string &shaderSource, GLenum type) -> GLuint;
 
     GLuint m_shaderProgramId;
-    std::string m_uniqueName;
     mutable std::unordered_map<std::string, GLint> m_uniformLocationCache;
 };

@@ -1,28 +1,28 @@
 #include "ShaderProgram.h"
 #include "util/Log.h"
 
+#include <fmt/format.h>
 #include <fstream>
 #include <glm/gtc/type_ptr.hpp>
 
-ShaderProgram::ShaderProgram(Prototype prototype) : m_uniqueName(prototype.name)
+ShaderProgram::ShaderProgram(Prototype prototype) : m_shaderProgramId(glCreateProgram())
 {
-    std::string vertexShaderSource = parse(prototype.vertexPath.c_str());
-    std::string fragmentShaderSource = parse(prototype.fragmentPath.c_str());
+    std::string vertexShaderSource = parse(prototype.vertexPath).value();
+    std::string fragmentShaderSource = parse(prototype.fragmentPath).value();
 
-    m_shaderProgramId = glCreateProgram();
-    GLuint vs = compile(vertexShaderSource, GL_VERTEX_SHADER);
-    GLuint fs = compile(fragmentShaderSource, GL_FRAGMENT_SHADER);
+    GLuint vertexShader = compile(vertexShaderSource, GL_VERTEX_SHADER);
+    GLuint fragmentShader = compile(fragmentShaderSource, GL_FRAGMENT_SHADER);
 
-    glAttachShader(m_shaderProgramId, vs);
-    glAttachShader(m_shaderProgramId, fs);
+    glAttachShader(m_shaderProgramId, vertexShader);
+    glAttachShader(m_shaderProgramId, fragmentShader);
 
     glLinkProgram(m_shaderProgramId);
 
     GLint isLinked = 0;
     glGetProgramiv(m_shaderProgramId, GL_LINK_STATUS, &isLinked);
-    if (!isLinked)
-        Log::logger().critical("Failed to link shaderProgram \"{}\", \"{}\"", prototype.vertexPath,
-                               prototype.fragmentPath);
+    if (isLinked == 0) {
+        Log::logger().warn(R"(Failed to link shaderProgram "{}", "{}")", prototype.vertexPath, prototype.fragmentPath);
+    }
 
 #ifdef _RELEASE
     glDetachShader(program, vs);
@@ -32,7 +32,7 @@ ShaderProgram::ShaderProgram(Prototype prototype) : m_uniqueName(prototype.name)
     glDeleteShader(fs);
 #endif
 
-    Log::logger().info("Loaded shaderprogram \"{}\"", prototype.name);
+    Log::logger().info(R"(Loaded shaderprogram "{}")", prototype.name);
 }
 
 ShaderProgram::~ShaderProgram()
@@ -40,7 +40,7 @@ ShaderProgram::~ShaderProgram()
     glDeleteProgram(m_shaderProgramId);
 }
 
-void ShaderProgram::bind()
+void ShaderProgram::bind() const
 {
     glUseProgram(m_shaderProgramId);
 }
@@ -50,14 +50,14 @@ void ShaderProgram::unbind()
     glUseProgram(0);
 }
 
-std::string ShaderProgram::parse(const std::string &filename)
+auto ShaderProgram::parse(const std::filesystem::path &path) -> std::optional<std::string>
 {
     std::fstream shaderfile;
-    shaderfile.open(filename, std::ios::in);
+    shaderfile.open(path, std::ios::in);
 
     if (!shaderfile.is_open()) {
-        Log::logger().critical("Shader \"{}\" not found", filename);
-        exit(-1);
+        Log::logger().warn("Shader \"{}\" not found", path.c_str());
+        return {};
     }
 
     std::string contents((std::istreambuf_iterator<char>(shaderfile)), (std::istreambuf_iterator<char>()));
@@ -65,34 +65,40 @@ std::string ShaderProgram::parse(const std::string &filename)
     return contents;
 }
 
-GLuint ShaderProgram::compile(const std::string &shaderSource, GLenum type)
+auto ShaderProgram::compile(const std::string &shaderSource, GLenum type) -> GLuint
 {
     GLuint shaderId = glCreateShader(type);
     const char *src = shaderSource.c_str();
-    glShaderSource(shaderId, 1, &src, 0);
+    glShaderSource(shaderId, 1, &src, nullptr);
     glCompileShader(shaderId);
 
-    int result;
+    int result{};
     glGetShaderiv(shaderId, GL_COMPILE_STATUS, &result);
+
     if (result != GL_TRUE) {
-        int length;
+        int length{};
         glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &length);
-        char *message = new char[static_cast<unsigned>(length)];
-        glGetShaderInfoLog(shaderId, length, &length, message);
+
+        std::string message;
+        message.reserve(static_cast<unsigned>(length));
+
+        glGetShaderInfoLog(shaderId, length, &length, message.data());
         Log::logger().error("Shader compilation failed: {}", message);
-        delete[] message;
+
         return 0;
     }
+
     return shaderId;
 }
 
-GLint ShaderProgram::retrieveUniformLocation(const std::string &name) const
+auto ShaderProgram::retrieveUniformLocation(std::string_view uniform_name) const -> GLint
 {
-    if (m_uniformLocationCache.find(name) != m_uniformLocationCache.end())
-        return m_uniformLocationCache[name];
+    if (m_uniformLocationCache.find(uniform_name.data()) != m_uniformLocationCache.end()) {
+        return m_uniformLocationCache[uniform_name.data()];
+    }
 
-    GLint location = glGetUniformLocation(m_shaderProgramId, name.c_str());
-    m_uniformLocationCache[name] = location;
+    GLint location = glGetUniformLocation(m_shaderProgramId, uniform_name.data());
+    m_uniformLocationCache[uniform_name.data()] = location;
 
     return location;
 }
@@ -139,12 +145,7 @@ void ShaderProgram::setUniform(const std::string &name, glm::mat4 matrix) const
     glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
 }
 
-GLuint ShaderProgram::getShaderProgramId()
+auto ShaderProgram::getShaderProgramId() const -> GLuint
 {
     return m_shaderProgramId;
-}
-
-const std::string &ShaderProgram::getUniqueName()
-{
-    return m_uniqueName;
 }

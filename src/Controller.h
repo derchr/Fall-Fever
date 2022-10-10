@@ -2,9 +2,13 @@
 
 #include "FrameBuffer.h"
 #include "ShaderProgram.h"
+#include "VertexArray.h"
+#include "resources/Model.h"
+#include "Entity.h"
 
 #include <glm/glm.hpp>
 #include <memory>
+#include <tiny_gltf.h>
 #include <vector>
 
 class Window;
@@ -38,6 +42,11 @@ private:
     FrameBuffer m_postProcessFrameBuffer;
 
     static constexpr unsigned MAX_FPS = 60;
+
+    tinygltf::Model m_model;
+
+    std::vector<ModelEntity> m_entities;
+    std::vector<Model> m_models;
 
     double m_deltaTime{};
     float m_exposure = 1.0;
