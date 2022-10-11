@@ -25,7 +25,7 @@ Controller::Controller()
 
     std::string err;
     std::string warn;
-    bool ret = loader.LoadASCIIFromFile(&m_model, &err, &warn, "glTF/ABeautifulGame.gltf");
+    bool ret = loader.LoadASCIIFromFile(&m_model, &err, &warn, "glTF/DamagedHelmet.gltf");
     // bool ret = loader.LoadASCIIFromFile(&m_model, &err, &warn, "minimal.gltf");
 
     if (!warn.empty()) {

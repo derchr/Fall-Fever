@@ -8,6 +8,9 @@
 
 Window::Window()
 {
+    // Hint Wayland preference to GLFW
+    glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_WAYLAND);
+
     // Initialize GLFW
     if (glfwInit() == 0) {
         std::terminate();
@@ -31,6 +34,7 @@ Window::Window()
     m_glfw_window = std::shared_ptr<GLFWwindow>(
         glfwCreateWindow(static_cast<int>(m_width), static_cast<int>(m_height), "OpenGL", nullptr, nullptr),
         [](GLFWwindow *window) { glfwDestroyWindow(window); });
+
     if (!m_glfw_window) {
         Log::logger().critical("Failed to create window");
     }
@@ -56,7 +60,7 @@ Window::Window()
     }
 
 #ifndef NDEBUG
-    Log::logger().debug("OpenGL version: {}", reinterpret_cast<const char *>(glGetString(GL_VERSION)));
+    Log::logger().debug("OpenGL version: {}", reinterpret_cast<const char *>(glGetString(GL_VERSION))); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback(Helper::gl_debug_callback, nullptr);
 
@@ -138,8 +142,9 @@ void Window::framebuffer_size_callback(GLFWwindow *window, int width, int height
     glViewport(0, 0, width, height);
 }
 
-void Window::key_callback(GLFWwindow *glfw_window, int key, int scancode, int action,
-                          int mods) // NOLINT(bugprone-easily-swappable-parameters)
+// NOLINTBEGIN(bugprone-easily-swappable-parameters)
+void Window::key_callback(GLFWwindow *glfw_window, int key, int scancode, int action, int mods)
+// NOLINTEND(bugprone-easily-swappable-parameters)
 {
     (void)mods;
     (void)scancode;
@@ -157,9 +162,10 @@ void Window::key_callback(GLFWwindow *glfw_window, int key, int scancode, int ac
         window.m_key_input[key] = (action == GLFW_PRESS);
     }
 }
-
+// NOLINTBEGIN(bugprone-easily-swappable-parameters)
 void Window::mouse_button_callback(GLFWwindow *glfw_window, int button, int action,
                                    int mods) // NOLINT(bugprone-easily-swappable-parameters)
+// NOLINTEND(bugprone-easily-swappable-parameters)
 {
     (void)mods;
     (void)button;
