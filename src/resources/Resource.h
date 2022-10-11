@@ -18,13 +18,7 @@ public:
 
     [[nodiscard]] auto id() const -> ResourceId;
     [[nodiscard]] auto resourcePath() const -> const std::filesystem::path &;
-
-protected:
-    [[nodiscard]] auto isInitialized() const -> bool;
-    virtual void initialize() = 0;
-
-    bool m_initialized = false;
-
+    
 private:
     ResourceId m_id;
     static ResourceId s_idCounter;

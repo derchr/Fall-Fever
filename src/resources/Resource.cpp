@@ -13,11 +13,6 @@ auto Resource::id() const -> ResourceId
     return m_id;
 }
 
-auto Resource::isInitialized() const -> bool
-{
-    return m_initialized;
-}
-
 auto Resource::resourcePath() const -> const std::filesystem::path &
 {
     return m_path;

@@ -2,6 +2,7 @@
 #include "Camera.h"
 #include "FrameBuffer.h"
 #include "Helper.h"
+#include "Light.h"
 #include "Mesh.h"
 #include "ShaderProgram.h"
 #include "Window.h"
@@ -25,8 +26,9 @@ Controller::Controller()
 
     std::string err;
     std::string warn;
-    bool ret = loader.LoadASCIIFromFile(&m_model, &err, &warn, "glTF/DamagedHelmet.gltf");
-    // bool ret = loader.LoadASCIIFromFile(&m_model, &err, &warn, "minimal.gltf");
+    // bool ret = loader.LoadASCIIFromFile(&m_model, &err, &warn, "WaterBottle/glTF/WaterBottle.gltf");
+    // bool ret = loader.LoadASCIIFromFile(&m_model, &err, &warn, "Lantern/glTF/Lantern.gltf");
+    bool ret = loader.LoadASCIIFromFile(&m_model, &err, &warn, "glTF/ABeautifulGame.gltf");
 
     if (!warn.empty()) {
         Log::logger().warn("{}", warn);
@@ -49,11 +51,25 @@ Controller::Controller()
 
     ShaderProgram::unbind();
 
+    std::vector<Texture> textures;
+    for (auto const &texture : m_model.textures) {
+        textures.emplace_back(texture, m_model.images);
+    }
+    m_textures = std::move(textures);
+
     std::vector<Model> models;
     for (auto const &mesh : m_model.meshes) {
         std::vector<Mesh> meshes;
         for (auto const &primitive : mesh.primitives) {
-            meshes.emplace_back(Mesh({primitive, m_model, locations}, {}));
+            auto const &material = m_model.materials.at(primitive.material);
+            auto baseColorTexture = material.pbrMetallicRoughness.baseColorTexture;
+            std::vector<std::reference_wrapper<const Texture>> textures;
+
+            if (baseColorTexture.index != -1) {
+                textures.push_back(m_textures.at(baseColorTexture.index));
+            }
+
+            meshes.emplace_back(Mesh({primitive, m_model, locations}, textures));
         }
         models.emplace_back(Model(mesh.name, std::move(meshes)));
     }
@@ -61,6 +77,10 @@ Controller::Controller()
 
     std::vector<ModelEntity> entities;
     for (auto const &node : m_model.nodes) {
+        if (node.mesh == -1) {
+            continue;
+        }
+
         ModelEntity entity(Entity::Prototype(node.name, {}, {}, 1.0F), m_models[static_cast<unsigned>(node.mesh)],
                            defaultProgram);
 
@@ -84,8 +104,6 @@ Controller::Controller()
                 entities[child].translate(glm::vec3(node.translation[0], node.translation[1], node.translation[2]));
             }
         }
-
-        Log::logger().info("Load node {}.", node.name);
     }
     m_entities = std::move(entities);
 }
@@ -95,12 +113,13 @@ void Controller::run()
     updateExposure(postProcessingProgram);
 
     m_camera->translate(glm::vec3(0., 1.5, 5.));
+    DirectionalLight light(DirectionalLight::Prototype("", glm::vec3(-0.2, -1.0, -0.3), glm::vec3(1.0f), 10.f),
+                           &defaultProgram);
 
     Log::logger().info("Startup complete. Enter game loop.");
 
     // This is the game loop
     while (glfwWindowShouldClose(&m_gameWindow->glfw_window()) == GLFW_FALSE) {
-
         // --- Timing ---
         limit_framerate();
 

@@ -41,20 +41,10 @@ class TextureCubeMap : public AbstractCubeMap
 {
 public:
     TextureCubeMap(const TextureCubeMapDescriptor &descriptor);
-
-protected:
-    void initialize() override;
-
-private:
-    std::vector<stbi_uc *> m_textureBuffers;
 };
 
 class InternalCubeMap : public AbstractCubeMap
 {
 public:
     InternalCubeMap(unsigned int resolution);
-
-protected:
-    void initialize() override
-    {}
 };

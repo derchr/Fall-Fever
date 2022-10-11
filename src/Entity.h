@@ -22,7 +22,6 @@ public:
             : name(_name), position(_position), rotation(_rotation), scale(_scale)
         {
         }
-        virtual ~Prototype() = default;
 
         std::string name;
         glm::vec3 position;

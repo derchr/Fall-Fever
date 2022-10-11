@@ -5,6 +5,7 @@
 #include "VertexArray.h"
 #include "resources/Model.h"
 #include "Entity.h"
+#include "resources/Texture.h"
 
 #include <glm/glm.hpp>
 #include <memory>
@@ -47,6 +48,7 @@ private:
 
     std::vector<ModelEntity> m_entities;
     std::vector<Model> m_models;
+    std::vector<Texture> m_textures;
 
     double m_deltaTime{};
     float m_exposure = 1.0;

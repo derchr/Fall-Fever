@@ -1,6 +1,7 @@
 #pragma once
 
-#include "resources/CubeMap.h"
+#include "resources/Resource.h"
+
 #include <glad/gl.h>
 
 class ShaderProgram;

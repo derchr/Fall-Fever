@@ -13,7 +13,8 @@ Light::Light(const std::string &name, glm::vec3 color, float intensity, ShaderPr
 }
 
 Light::~Light()
-{}
+{
+}
 
 glm::vec3 Light::getColor()
 {
@@ -45,7 +46,8 @@ void Light::setActive(bool active)
 
 PointLight::PointLight(Prototype prototype, ShaderProgram *shaderProgram)
     : Light(prototype.name, prototype.color, prototype.intensity, shaderProgram), m_position(prototype.position)
-{}
+{
+}
 
 void PointLight::update()
 {
@@ -78,7 +80,9 @@ void PointLight::setPosition(glm::vec3 position)
 
 DirectionalLight::DirectionalLight(Prototype prototype, ShaderProgram *shaderProgram)
     : Light(prototype.name, prototype.color, prototype.intensity, shaderProgram), m_direction(prototype.direction)
-{}
+{
+    update();
+}
 
 void DirectionalLight::update()
 {

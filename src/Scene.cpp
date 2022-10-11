@@ -14,11 +14,6 @@
 Scene::Scene(std::vector<std::shared_ptr<ShaderProgram>> shaderPrograms)
     : m_shaderProgram(*Controller::getShaderProgramByName("defaultProgram", shaderPrograms))
 {
-    // This will be removed in future when gloss maps are implemented
-    m_shaderProgram.bind();
-    m_shaderProgram.setUniform("u_material.shininess", 100.0f);
-    m_shaderProgram.unbind();
-
     std::array modelDescriptors{
         ModelDescriptor{"fallback", "data/res/models/fallback.ffo"},
         ModelDescriptor{"backpack", "data/res/models/backpack.ffo"},

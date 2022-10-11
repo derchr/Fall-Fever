@@ -14,7 +14,6 @@ public:
     auto registerResource(Param const &...param) -> ResourceId;
 
     [[nodiscard]] auto resource(ResourceId resourceId) const -> std::shared_ptr<Resource>;
-    [[nodiscard]] auto resource(const std::string &name) const -> std::shared_ptr<Resource>;
 
 private:
     ResourceHandler() = default;
