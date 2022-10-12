@@ -18,7 +18,7 @@ void Camera::updateVPM()
 
 void Camera::updateAspectRatio(float aspectRatio)
 {
-    m_projectionMatrix = glm::perspective(m_fov / 2.F, aspectRatio, .1F, 1000.F);
+    m_projectionMatrix = glm::perspective(m_fov / 2.F, aspectRatio, .01F, 1000.F);
     updateVPM();
 }
 

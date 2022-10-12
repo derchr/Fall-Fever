@@ -26,11 +26,11 @@ Controller::Controller()
 
     std::string err;
     std::string warn;
-    bool ret = loader.LoadASCIIFromFile(&m_model, &err, &warn, "WaterBottle/glTF/WaterBottle.gltf");
+    // bool ret = loader.LoadASCIIFromFile(&m_model, &err, &warn, "WaterBottle/glTF/WaterBottle.gltf");
     // bool ret = loader.LoadASCIIFromFile(&m_model, &err, &warn, "Duck/glTF/Duck.gltf");
     // bool ret = loader.LoadASCIIFromFile(&m_model, &err, &warn, "Lantern/glTF/Lantern.gltf");
     // bool ret = loader.LoadBinaryFromFile(&m_model, &err, &warn, "Camera.glb");
-    // bool ret = loader.LoadBinaryFromFile(&m_model, &err, &warn, "ABeautifulGame/ABeautifulGame.glb");
+    bool ret = loader.LoadBinaryFromFile(&m_model, &err, &warn, "ABeautifulGame/ABeautifulGame.glb");
 
     if (!warn.empty()) {
         Log::logger().warn("{}", warn);

@@ -1,5 +1,6 @@
 #include "VertexArray.h"
 #include "definitions/models.h"
+#include "util/Log.h"
 
 #include <cstddef>
 #include <vector>
@@ -11,11 +12,17 @@ VertexArray::VertexArray(tinygltf::Primitive const &primitive, tinygltf::Model c
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
+    if (!primitive.attributes.contains("TANGENT") || !primitive.attributes.contains("NORMAL")) {
+        Log::logger().critical("glTF scene has to include tangent and normal components!");
+        exit(-1);
+    }
+
     int position_accessor_id = primitive.attributes.at("POSITION");
     int normal_accessor_id = primitive.attributes.at("NORMAL");
     int uv_accessor_id = primitive.attributes.at("TEXCOORD_0");
     int tangent_accessor_id = primitive.attributes.at("TANGENT");
     int indices_accessor_id = primitive.indices;
+
 
     auto const &position_accessor = model.accessors.at(position_accessor_id);
     auto const &normal_accessor = model.accessors.at(normal_accessor_id);
@@ -126,8 +133,8 @@ VertexArray::VertexArray(tinygltf::Primitive const &primitive, tinygltf::Model c
     {
         glGenBuffers(1, &tangentVbo);
         glBindBuffer(GL_ARRAY_BUFFER, tangentVbo);
-        glBufferData(GL_ARRAY_BUFFER, tangent_buffer_view.byteLength, tangent_buffer.data.data() + tangent_buffer_view.byteOffset,
-                     GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, tangent_buffer_view.byteLength,
+                     tangent_buffer.data.data() + tangent_buffer_view.byteOffset, GL_STATIC_DRAW);
 
         int size = 1;
         if (tangent_accessor.type == TINYGLTF_TYPE_SCALAR) {
