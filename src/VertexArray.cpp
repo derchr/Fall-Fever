@@ -14,26 +14,31 @@ VertexArray::VertexArray(tinygltf::Primitive const &primitive, tinygltf::Model c
     int position_accessor_id = primitive.attributes.at("POSITION");
     int normal_accessor_id = primitive.attributes.at("NORMAL");
     int uv_accessor_id = primitive.attributes.at("TEXCOORD_0");
+    int tangent_accessor_id = primitive.attributes.at("TANGENT");
     int indices_accessor_id = primitive.indices;
 
     auto const &position_accessor = model.accessors.at(position_accessor_id);
     auto const &normal_accessor = model.accessors.at(normal_accessor_id);
     auto const &uv_accessor = model.accessors.at(uv_accessor_id);
+    auto const &tangent_accessor = model.accessors.at(tangent_accessor_id);
     auto const &indices_accessor = model.accessors.at(indices_accessor_id);
 
     int position_buffer_view_id = model.accessors[position_accessor_id].bufferView;
     int normal_buffer_view_id = model.accessors[normal_accessor_id].bufferView;
     int uv_buffer_view_id = model.accessors[uv_accessor_id].bufferView;
+    int tangent_buffer_view_id = model.accessors[tangent_accessor_id].bufferView;
     int indices_buffer_view_id = model.accessors[indices_accessor_id].bufferView;
 
     auto const &position_buffer_view = model.bufferViews.at(position_buffer_view_id);
     auto const &normal_buffer_view = model.bufferViews.at(normal_buffer_view_id);
     auto const &uv_buffer_view = model.bufferViews.at(uv_buffer_view_id);
+    auto const &tangent_buffer_view = model.bufferViews.at(tangent_buffer_view_id);
     auto const &indices_buffer_view = model.bufferViews.at(indices_buffer_view_id);
 
     auto const &position_buffer = model.buffers.at(position_buffer_view.buffer);
     auto const &normal_buffer = model.buffers.at(normal_buffer_view.buffer);
     auto const &uv_buffer = model.buffers.at(uv_buffer_view.buffer);
+    auto const &tangent_buffer = model.buffers.at(tangent_buffer_view.buffer);
     auto const &indices_buffer = model.buffers.at(indices_buffer_view.buffer);
 
     GLuint positionVbo{};
@@ -94,8 +99,8 @@ VertexArray::VertexArray(tinygltf::Primitive const &primitive, tinygltf::Model c
     {
         glGenBuffers(1, &uvVbo);
         glBindBuffer(GL_ARRAY_BUFFER, uvVbo);
-        glBufferData(GL_ARRAY_BUFFER, uv_buffer_view.byteLength,
-                     uv_buffer.data.data() + uv_buffer_view.byteOffset, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, uv_buffer_view.byteLength, uv_buffer.data.data() + uv_buffer_view.byteOffset,
+                     GL_STATIC_DRAW);
 
         int size = 1;
         if (uv_accessor.type == TINYGLTF_TYPE_SCALAR) {
@@ -117,6 +122,33 @@ VertexArray::VertexArray(tinygltf::Primitive const &primitive, tinygltf::Model c
                               (void *)uv_accessor.byteOffset);
     }
 
+    GLuint tangentVbo{};
+    {
+        glGenBuffers(1, &tangentVbo);
+        glBindBuffer(GL_ARRAY_BUFFER, tangentVbo);
+        glBufferData(GL_ARRAY_BUFFER, tangent_buffer_view.byteLength, tangent_buffer.data.data() + tangent_buffer_view.byteOffset,
+                     GL_STATIC_DRAW);
+
+        int size = 1;
+        if (tangent_accessor.type == TINYGLTF_TYPE_SCALAR) {
+            size = 1;
+        } else if (tangent_accessor.type == TINYGLTF_TYPE_VEC2) {
+            size = 2;
+        } else if (tangent_accessor.type == TINYGLTF_TYPE_VEC3) {
+            size = 3;
+        } else if (tangent_accessor.type == TINYGLTF_TYPE_VEC4) {
+            size = 4;
+        } else {
+            assert(0);
+        }
+
+        int tangent_byte_stride = tangent_accessor.ByteStride(tangent_buffer_view);
+        glEnableVertexAttribArray(locations.tangent);
+        glVertexAttribPointer(locations.tangent, size, tangent_accessor.componentType,
+                              tangent_accessor.normalized ? GL_TRUE : GL_FALSE, tangent_byte_stride,
+                              (void *)tangent_accessor.byteOffset);
+    }
+
     GLuint ebo{};
     glGenBuffers(1, &ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
@@ -130,6 +162,7 @@ VertexArray::VertexArray(tinygltf::Primitive const &primitive, tinygltf::Model c
     m_positionVbo = positionVbo;
     m_normalVbo = normalVbo;
     m_uvVbo = uvVbo;
+    m_tangentVbo = tangentVbo;
     m_indicesCount = indices_accessor.count;
     m_indicesType = indices_accessor.componentType;
 }
@@ -141,6 +174,7 @@ VertexArray::~VertexArray()
     glDeleteBuffers(1, &m_positionVbo);
     glDeleteBuffers(1, &m_normalVbo);
     glDeleteBuffers(1, &m_uvVbo);
+    glDeleteBuffers(1, &m_tangentVbo);
     glDeleteBuffers(1, &m_ebo);
 }
 

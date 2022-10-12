@@ -17,6 +17,7 @@ public:
           m_positionVbo(other.m_positionVbo),
           m_normalVbo(other.m_normalVbo),
           m_uvVbo(other.m_uvVbo),
+          m_tangentVbo(other.m_tangentVbo),
           m_ebo(other.m_ebo)
     {
         other.m_ebo = 0;
@@ -24,6 +25,7 @@ public:
         other.m_positionVbo = 0;
         other.m_normalVbo = 0;
         other.m_uvVbo = 0;
+        other.m_tangentVbo = 0;
     }
 
     auto operator=(VertexArray &&other) noexcept -> VertexArray &
@@ -34,6 +36,7 @@ public:
         m_positionVbo = other.m_positionVbo;
         m_normalVbo = other.m_normalVbo;
         m_uvVbo = other.m_uvVbo;
+        m_tangentVbo = other.m_tangentVbo;
         m_ebo = other.m_ebo;
 
         other.m_ebo = 0;
@@ -41,6 +44,7 @@ public:
         other.m_positionVbo = 0;
         other.m_normalVbo = 0;
         other.m_uvVbo = 0;
+        other.m_tangentVbo = 0;
 
         return *this;
     }
@@ -65,5 +69,6 @@ private:
     GLuint m_positionVbo;
     GLuint m_normalVbo;
     GLuint m_uvVbo;
+    GLuint m_tangentVbo;
     GLuint m_ebo;
 };

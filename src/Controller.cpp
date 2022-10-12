@@ -26,9 +26,11 @@ Controller::Controller()
 
     std::string err;
     std::string warn;
-    // bool ret = loader.LoadASCIIFromFile(&m_model, &err, &warn, "WaterBottle/glTF/WaterBottle.gltf");
+    bool ret = loader.LoadASCIIFromFile(&m_model, &err, &warn, "WaterBottle/glTF/WaterBottle.gltf");
+    // bool ret = loader.LoadASCIIFromFile(&m_model, &err, &warn, "Duck/glTF/Duck.gltf");
     // bool ret = loader.LoadASCIIFromFile(&m_model, &err, &warn, "Lantern/glTF/Lantern.gltf");
-    bool ret = loader.LoadASCIIFromFile(&m_model, &err, &warn, "glTF/ABeautifulGame.gltf");
+    // bool ret = loader.LoadBinaryFromFile(&m_model, &err, &warn, "Camera.glb");
+    // bool ret = loader.LoadBinaryFromFile(&m_model, &err, &warn, "ABeautifulGame/ABeautifulGame.glb");
 
     if (!warn.empty()) {
         Log::logger().warn("{}", warn);
@@ -48,28 +50,34 @@ Controller::Controller()
     locations.position = glGetAttribLocation(defaultProgram.getShaderProgramId(), "a_position");
     locations.normal = glGetAttribLocation(defaultProgram.getShaderProgramId(), "a_normal");
     locations.uv = glGetAttribLocation(defaultProgram.getShaderProgramId(), "a_texCoord");
+    locations.tangent = glGetAttribLocation(defaultProgram.getShaderProgramId(), "a_tangent");
 
     ShaderProgram::unbind();
-
-    std::vector<Texture> textures;
-    for (auto const &texture : m_model.textures) {
-        textures.emplace_back(texture, m_model.images);
-    }
-    m_textures = std::move(textures);
 
     std::vector<Model> models;
     for (auto const &mesh : m_model.meshes) {
         std::vector<Mesh> meshes;
         for (auto const &primitive : mesh.primitives) {
             auto const &material = m_model.materials.at(primitive.material);
-            auto baseColorTexture = material.pbrMetallicRoughness.baseColorTexture;
-            std::vector<std::reference_wrapper<const Texture>> textures;
+            auto baseColorTexture = material.pbrMetallicRoughness.baseColorTexture.index;
+            auto normalTexture = material.normalTexture.index;
 
-            if (baseColorTexture.index != -1) {
-                textures.push_back(m_textures.at(baseColorTexture.index));
+            std::vector<std::reference_wrapper<const Texture>> primitive_textures;
+
+            // Check if texture already exists, if not load it.
+            if (baseColorTexture != -1 && !m_textures.contains(baseColorTexture)) {
+                auto const &gltf_texture = m_model.textures.at(baseColorTexture);
+                m_textures.emplace(baseColorTexture, Texture(gltf_texture, m_model.images, TextureType::Diffuse));
+                primitive_textures.push_back(m_textures.at(baseColorTexture));
             }
 
-            meshes.emplace_back(Mesh({primitive, m_model, locations}, textures));
+            if (normalTexture != -1 && !m_textures.contains(normalTexture)) {
+                auto const &gltf_texture = m_model.textures.at(normalTexture);
+                m_textures.emplace(normalTexture, Texture(gltf_texture, m_model.images, TextureType::Normal));
+                primitive_textures.push_back(m_textures.at(normalTexture));
+            }
+
+            meshes.emplace_back(Mesh({primitive, m_model, locations}, primitive_textures));
         }
         models.emplace_back(Model(mesh.name, std::move(meshes)));
     }
@@ -112,9 +120,14 @@ void Controller::run()
 {
     updateExposure(postProcessingProgram);
 
-    m_camera->translate(glm::vec3(0., 1.5, 5.));
-    DirectionalLight light(DirectionalLight::Prototype("", glm::vec3(-0.2, -1.0, -0.3), glm::vec3(1.0f), 10.f),
+    m_camera->translate(glm::vec3(0., .5, 2.));
+    DirectionalLight directional_light(
+        DirectionalLight::Prototype("", glm::vec3(-0.2, -1.0, -0.3), glm::vec3(1.0f), 5.f), &defaultProgram);
+    directional_light.setActive(true);
+
+    PointLight point_light(PointLight::Prototype("", "", glm::vec3(4.0, 1.0, 6.0), glm::vec3(1.0F), 3.0F),
                            &defaultProgram);
+    point_light.setActive(true);
 
     Log::logger().info("Startup complete. Enter game loop.");
 
@@ -124,9 +137,6 @@ void Controller::run()
         limit_framerate();
 
         // --- Update game ---
-        lightProgram.bind();
-        lightProgram.setUniform("v_lightColor", glm::vec3{1., 1., 1.} * 100.0F);
-        ShaderProgram::unbind();
 
         // --- Render and buffer swap ---
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

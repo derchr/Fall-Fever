@@ -11,6 +11,7 @@
 #include <memory>
 #include <tiny_gltf.h>
 #include <vector>
+#include <unordered_map>
 
 class Window;
 class Scene;
@@ -35,7 +36,6 @@ private:
     std::shared_ptr<Camera> m_camera;
 
     ShaderProgram defaultProgram{{"defaultProgram", "data/shaders/basic.vert", "data/shaders/basic.frag"}};
-    ShaderProgram lightProgram{{"lightProgram", "data/shaders/light.vert", "data/shaders/light.frag"}};
     ShaderProgram skyboxProgram{{"skyboxProgram", "data/shaders/skybox.vert", "data/shaders/skybox.frag"}};
     ShaderProgram postProcessingProgram{
         {"postProcessingProgram", "data/shaders/postprocessing.vert", "data/shaders/postprocessing.frag"}};
@@ -48,7 +48,7 @@ private:
 
     std::vector<ModelEntity> m_entities;
     std::vector<Model> m_models;
-    std::vector<Texture> m_textures;
+    std::unordered_map<unsigned, Texture> m_textures;
 
     double m_deltaTime{};
     float m_exposure = 1.0;

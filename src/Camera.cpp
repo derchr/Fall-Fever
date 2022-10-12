@@ -42,25 +42,30 @@ void Camera::updatePositionFromKeyboardInput(KeyInput const &key_input, float de
 {
     glm::vec3 frontVecWithoutY = glm::vec3(m_front_vec.x, 0., m_front_vec.z);
     glm::vec3 deltaPos = glm::vec3(0., 0., 0.);
+    float deltaFactor = SPEED * deltaTime * (m_accellerate ? 5.0 : 1.0);
+    m_accellerate = false;
 
     for (auto const &[key, pressed] : key_input) {
         if (key == GLFW_KEY_W && pressed) {
-            deltaPos += SPEED * deltaTime * glm::normalize(frontVecWithoutY);
+            deltaPos += deltaFactor * glm::normalize(frontVecWithoutY);
         }
         if (key == GLFW_KEY_S && pressed) {
-            deltaPos -= SPEED * deltaTime * glm::normalize(frontVecWithoutY);
+            deltaPos -= deltaFactor * glm::normalize(frontVecWithoutY);
         }
         if (key == GLFW_KEY_A && pressed) {
-            deltaPos -= SPEED * deltaTime * glm::normalize(glm::cross(m_front_vec, UP_VEC));
+            deltaPos -= deltaFactor * glm::normalize(glm::cross(m_front_vec, UP_VEC));
         }
         if (key == GLFW_KEY_D && pressed) {
-            deltaPos += SPEED * deltaTime * glm::normalize(glm::cross(m_front_vec, UP_VEC));
+            deltaPos += deltaFactor * glm::normalize(glm::cross(m_front_vec, UP_VEC));
         }
         if (key == GLFW_KEY_SPACE && pressed) {
-            deltaPos += SPEED * deltaTime * UP_VEC;
+            deltaPos += deltaFactor * UP_VEC;
         }
         if (key == GLFW_KEY_LEFT_SHIFT && pressed) {
-            deltaPos -= SPEED * deltaTime * UP_VEC;
+            deltaPos -= deltaFactor * UP_VEC;
+        }
+        if (key == GLFW_KEY_LEFT_ALT && pressed) {
+            m_accellerate = true;
         }
     }
     m_position += deltaPos;

@@ -1,8 +1,10 @@
 #include "Model.h"
 #include "Texture.h"
+#include "../util/Log.h"
 
 Model::Model(std::string_view name, std::vector<Mesh> meshes) : m_meshes(std::move(meshes)), m_name(name)
 {
+    Log::logger().trace(R"(Loaded model "{}".)", name);
 }
 
 void Model::draw(ShaderProgram const &shaderProgram) const

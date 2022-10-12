@@ -106,42 +106,12 @@ void ModelEntity::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition) const
     glm::mat4 modelViewProj = viewProjMatrix * m_modelMatrix;
     m_shaderProgram.setUniform("u_modelViewProjMatrix", modelViewProj);
     m_shaderProgram.setUniform("u_modelMatrix", m_modelMatrix);
-
-    glm::mat3 normalMatrix = glm::mat3(m_modelMatrix);
-    normalMatrix = glm::transpose(glm::inverse(normalMatrix));
-    m_shaderProgram.setUniform("u_normalMatrix", normalMatrix);
-
     m_shaderProgram.setUniform("u_viewPosition", viewPosition);
 
     // Draw the model
     m_model.draw(m_shaderProgram);
 
     m_shaderProgram.unbind();
-}
-
-void ModelEntity::drawDirectionalShadows(glm::mat4 viewProjMatrix, ShaderProgram *shaderProgram) const
-{
-    shaderProgram->bind();
-
-    glm::mat4 modelViewProj = viewProjMatrix * m_modelMatrix;
-    shaderProgram->setUniform("u_modelViewProjMatrix", modelViewProj);
-
-    // Draw the model
-    m_model.drawWithoutTextures();
-
-    shaderProgram->unbind();
-}
-
-void ModelEntity::drawPointShadows(ShaderProgram *shaderProgram) const
-{
-    shaderProgram->bind();
-
-    shaderProgram->setUniform("u_modelMatrix", m_modelMatrix);
-
-    // Draw the model
-    m_model.drawWithoutTextures();
-
-    shaderProgram->unbind();
 }
 
 Skybox::Skybox(Prototype prototype, Model *cubeModel, ShaderProgram *shaderProgram)

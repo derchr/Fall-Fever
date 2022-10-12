@@ -6,15 +6,12 @@
 uint32_t Light::s_idCounter = 0;
 
 Light::Light(const std::string &name, glm::vec3 color, float intensity, ShaderProgram *shaderProgram)
-    : Entity(name), m_shaderProgram(shaderProgram), m_intensity(intensity)
+    : Entity(name), m_shaderProgram(shaderProgram), m_intensity(intensity), m_lightColor(color * intensity)
 {
     m_id = s_idCounter++;
-    m_lightColor = color * intensity;
 }
 
-Light::~Light()
-{
-}
+Light::~Light() = default;
 
 glm::vec3 Light::getColor()
 {
@@ -47,6 +44,7 @@ void Light::setActive(bool active)
 PointLight::PointLight(Prototype prototype, ShaderProgram *shaderProgram)
     : Light(prototype.name, prototype.color, prototype.intensity, shaderProgram), m_position(prototype.position)
 {
+    update();
 }
 
 void PointLight::update()

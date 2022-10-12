@@ -4,9 +4,7 @@ layout(location = 0) out vec4 f_color;
 
 in vec3 v_normal;
 in vec2 v_texCoord;
-in vec3 v_fragmentPosition;
 in vec3 v_fragmentPositionTangent;
-in vec4 v_fragmentPositionDirectionalLightSpace;
 
 in vec3 v_lightDirectionTangent;
 in vec3 v_lightPositionTangent0;
@@ -62,6 +60,7 @@ void main()
 
     vec3 normal = texture(u_material.texture_normal, v_texCoord).rgb;
     normal = normalize(normal * 2.0 - 1.0);
+
     vec3 viewDir = normalize(v_viewPositionTangent - v_fragmentPositionTangent);
 
     fragmentColor += directionalLightContribution(u_directionalLight, normal, viewDir);
@@ -69,10 +68,7 @@ void main()
     for (int i = 0; i < NUM_POINT_LIGHTS; i++) {
         fragmentColor += pointLightContribution(u_pointLight[i], normal, v_fragmentPositionTangent, viewDir);
     }
-
-    // fragmentColor = (v_normal + 1.0f) * 0.5f;
-    fragmentColor = vec3(texture(u_material.texture_diffuse, v_texCoord));
-
+    
     f_color = vec4(fragmentColor, 1.0f);
 }
 
@@ -132,8 +128,7 @@ void computeShading(vec3 light_ambient, vec3 light_diffuse, vec3 light_specular,
 
     ambient = light_ambient * vec3(diffuseTex);
     diffuse = light_diffuse * diffuseShading * vec3(diffuseTex);
-    // specular = light_specular * specularShading * vec3(specularTex);
-    specular = vec3(0.0f);
+    specular = light_specular * specularShading * vec3(1.0f);//vec3(specularTex);
 }
 
 float computeAttenuation(vec3 lightPos, vec3 fragPos, float K_q)

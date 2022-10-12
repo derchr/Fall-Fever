@@ -9,7 +9,7 @@
 Window::Window()
 {
     // Hint Wayland preference to GLFW
-    glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_WAYLAND);
+    // glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_WAYLAND);
 
     // Initialize GLFW
     if (glfwInit() == 0) {
@@ -19,7 +19,7 @@ Window::Window()
     m_width = INIT_WINDOW_WIDTH;
     m_height = INIT_WINDOW_HEIGHT;
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
@@ -62,7 +62,7 @@ Window::Window()
 #ifndef NDEBUG
     Log::logger().debug("OpenGL version: {}", reinterpret_cast<const char *>(glGetString(GL_VERSION))); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-    glDebugMessageCallback(Helper::gl_debug_callback, nullptr);
+    glDebugMessageCallback(&Helper::gl_debug_callback, nullptr);
 
     // Disable mouse cursor
     m_mouse_catched = false;
@@ -90,9 +90,6 @@ Window::Window()
     glfwSetKeyCallback(m_glfw_window.get(), key_callback);
     glfwSetMouseButtonCallback(m_glfw_window.get(), mouse_button_callback);
     glfwSetCursorPosCallback(m_glfw_window.get(), mouse_cursor_callback);
-
-    // Tell GLFW which function to call when window is resized
-    // glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 }
 
 auto Window::dimensions_changed() const -> bool

@@ -32,7 +32,7 @@ ShaderProgram::ShaderProgram(Prototype prototype) : m_shaderProgramId(glCreatePr
     glDeleteShader(fs);
 #endif
 
-    Log::logger().info(R"(Loaded shaderprogram "{}")", prototype.name);
+    Log::logger().trace(R"(Loaded shaderprogram "{}".)", prototype.name);
 }
 
 ShaderProgram::~ShaderProgram()
@@ -98,7 +98,12 @@ auto ShaderProgram::retrieveUniformLocation(std::string_view uniform_name) const
     }
 
     GLint location = glGetUniformLocation(m_shaderProgramId, uniform_name.data());
-    m_uniformLocationCache[uniform_name.data()] = location;
+
+    if (location != -1) {
+        m_uniformLocationCache[uniform_name.data()] = location;
+    } else {
+        Log::logger().warn(R"(Uniform "{}" not found.)", uniform_name);
+    }
 
     return location;
 }

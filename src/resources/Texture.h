@@ -9,17 +9,10 @@
 
 class ShaderProgram;
 
-// struct TextureDescriptor
-// {
-//     std::string path;
-//     TextureType textureType;
-// };
-
 class Texture
 {
 public:
-    // Texture(const TextureDescriptor &descriptor);
-    Texture(tinygltf::Texture const &texture, std::span<tinygltf::Image> images);
+    Texture(tinygltf::Texture const &texture, std::span<tinygltf::Image> images, TextureType textureType);
 
     [[nodiscard]] auto textureType() const -> TextureType;
 

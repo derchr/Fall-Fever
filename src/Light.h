@@ -43,8 +43,7 @@ protected:
     uint32_t m_id;
     static uint32_t s_idCounter;
 
-    bool m_isActive;
-    bool m_shouldCastShadow = true;
+    bool m_isActive = true;
 
     float m_intensity;
 

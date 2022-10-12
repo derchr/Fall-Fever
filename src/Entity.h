@@ -67,8 +67,6 @@ public:
     ModelEntity(Entity::Prototype prototype, Model const &model, ShaderProgram const &shaderProgram);
 
     void draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition) const;
-    void drawDirectionalShadows(glm::mat4 viewProjMatrix, ShaderProgram *p_shaderProgram) const;
-    void drawPointShadows(ShaderProgram *p_shaderProgram) const;
 
 private:
     Model const &m_model;
