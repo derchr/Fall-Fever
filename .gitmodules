@@ -13,3 +13,6 @@
 [submodule "lib/glfw"]
 	path = lib/glfw
 	url = https://github.com/glfw/glfw.git
+[submodule "lib/fx-gltf"]
+	path = lib/fx-gltf
+	url = https://github.com/jessey-git/fx-gltf.git

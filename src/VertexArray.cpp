@@ -5,7 +5,25 @@
 #include <cstddef>
 #include <vector>
 
-VertexArray::VertexArray(tinygltf::Primitive const &primitive, tinygltf::Model const &model,
+static auto accessor_byte_size(fx::gltf::Accessor::Type accessor_type) -> std::size_t
+{
+    switch (accessor_type) {
+    case fx::gltf::Accessor::Type::Scalar:
+        return 1;
+    case fx::gltf::Accessor::Type::Vec2:
+        return 2;
+    case fx::gltf::Accessor::Type::Vec3:
+        return 3;
+    case fx::gltf::Accessor::Type::Vec4:
+        return 4;
+    default:
+        Log::logger().warn("Unexpected accessor type: {}", static_cast<int>(accessor_type));
+        return 0;
+    }
+}
+
+VertexArray::VertexArray(fx::gltf::Primitive const &primitive,
+                         fx::gltf::Document const &model,
                          AttributeLocations &locations)
 {
     GLuint vao{};
@@ -14,7 +32,7 @@ VertexArray::VertexArray(tinygltf::Primitive const &primitive, tinygltf::Model c
 
     if (!primitive.attributes.contains("TANGENT") || !primitive.attributes.contains("NORMAL")) {
         Log::logger().critical("glTF scene has to include tangent and normal components!");
-        exit(-1);
+        std::terminate();
     }
 
     int position_accessor_id = primitive.attributes.at("POSITION");
@@ -22,7 +40,6 @@ VertexArray::VertexArray(tinygltf::Primitive const &primitive, tinygltf::Model c
     int uv_accessor_id = primitive.attributes.at("TEXCOORD_0");
     int tangent_accessor_id = primitive.attributes.at("TANGENT");
     int indices_accessor_id = primitive.indices;
-
 
     auto const &position_accessor = model.accessors.at(position_accessor_id);
     auto const &normal_accessor = model.accessors.at(normal_accessor_id);
@@ -52,115 +69,85 @@ VertexArray::VertexArray(tinygltf::Primitive const &primitive, tinygltf::Model c
     {
         glGenBuffers(1, &positionVbo);
         glBindBuffer(GL_ARRAY_BUFFER, positionVbo);
-        glBufferData(GL_ARRAY_BUFFER, position_buffer_view.byteLength,
-                     position_buffer.data.data() + position_buffer_view.byteOffset, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER,
+                     position_buffer_view.byteLength,
+                     position_buffer.data.data() + position_buffer_view.byteOffset,
+                     GL_STATIC_DRAW);
 
-        int size = 1;
-        if (position_accessor.type == TINYGLTF_TYPE_SCALAR) {
-            size = 1;
-        } else if (position_accessor.type == TINYGLTF_TYPE_VEC2) {
-            size = 2;
-        } else if (position_accessor.type == TINYGLTF_TYPE_VEC3) {
-            size = 3;
-        } else if (position_accessor.type == TINYGLTF_TYPE_VEC4) {
-            size = 4;
-        } else {
-            assert(0);
-        }
-
-        int position_byte_stride = position_accessor.ByteStride(position_buffer_view);
         glEnableVertexAttribArray(locations.position);
-        glVertexAttribPointer(locations.position, size, position_accessor.componentType,
-                              position_accessor.normalized ? GL_TRUE : GL_FALSE, position_byte_stride,
-                              (void *)position_accessor.byteOffset);
+        glVertexAttribPointer(locations.position,
+                              accessor_byte_size(position_accessor.type),
+                              static_cast<GLenum>(position_accessor.componentType),
+                              position_accessor.normalized ? GL_TRUE : GL_FALSE,
+                              position_buffer_view.byteStride,
+                              reinterpret_cast<void *>(position_accessor.byteOffset)); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast,
+                                                                                       // performance-no-int-to-ptr)
     }
 
     GLuint normalVbo{};
     {
         glGenBuffers(1, &normalVbo);
         glBindBuffer(GL_ARRAY_BUFFER, normalVbo);
-        glBufferData(GL_ARRAY_BUFFER, normal_buffer_view.byteLength,
-                     normal_buffer.data.data() + normal_buffer_view.byteOffset, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER,
+                     normal_buffer_view.byteLength,
+                     normal_buffer.data.data() + normal_buffer_view.byteOffset,
+                     GL_STATIC_DRAW);
 
-        int size = 1;
-        if (normal_accessor.type == TINYGLTF_TYPE_SCALAR) {
-            size = 1;
-        } else if (normal_accessor.type == TINYGLTF_TYPE_VEC2) {
-            size = 2;
-        } else if (normal_accessor.type == TINYGLTF_TYPE_VEC3) {
-            size = 3;
-        } else if (normal_accessor.type == TINYGLTF_TYPE_VEC4) {
-            size = 4;
-        } else {
-            assert(0);
-        }
-
-        int normal_byte_stride = normal_accessor.ByteStride(normal_buffer_view);
         glEnableVertexAttribArray(locations.normal);
-        glVertexAttribPointer(locations.normal, size, normal_accessor.componentType,
-                              normal_accessor.normalized ? GL_TRUE : GL_FALSE, normal_byte_stride,
-                              (void *)normal_accessor.byteOffset);
+        glVertexAttribPointer(locations.normal,
+                              accessor_byte_size(normal_accessor.type),
+                              static_cast<GLenum>(normal_accessor.componentType),
+                              normal_accessor.normalized ? GL_TRUE : GL_FALSE,
+                              normal_buffer_view.byteStride,
+                              reinterpret_cast<void *>(normal_accessor.byteOffset)); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast,
+                                                                                     // performance-no-int-to-ptr)
     }
 
     GLuint uvVbo{};
     {
         glGenBuffers(1, &uvVbo);
         glBindBuffer(GL_ARRAY_BUFFER, uvVbo);
-        glBufferData(GL_ARRAY_BUFFER, uv_buffer_view.byteLength, uv_buffer.data.data() + uv_buffer_view.byteOffset,
+        glBufferData(GL_ARRAY_BUFFER,
+                     uv_buffer_view.byteLength,
+                     uv_buffer.data.data() + uv_buffer_view.byteOffset,
                      GL_STATIC_DRAW);
 
-        int size = 1;
-        if (uv_accessor.type == TINYGLTF_TYPE_SCALAR) {
-            size = 1;
-        } else if (uv_accessor.type == TINYGLTF_TYPE_VEC2) {
-            size = 2;
-        } else if (uv_accessor.type == TINYGLTF_TYPE_VEC3) {
-            size = 3;
-        } else if (uv_accessor.type == TINYGLTF_TYPE_VEC4) {
-            size = 4;
-        } else {
-            assert(0);
-        }
-
-        int uv_byte_stride = uv_accessor.ByteStride(uv_buffer_view);
         glEnableVertexAttribArray(locations.uv);
-        glVertexAttribPointer(locations.uv, size, uv_accessor.componentType,
-                              uv_accessor.normalized ? GL_TRUE : GL_FALSE, uv_byte_stride,
-                              (void *)uv_accessor.byteOffset);
+        glVertexAttribPointer(locations.uv,
+                              accessor_byte_size(uv_accessor.type),
+                              static_cast<GLenum>(uv_accessor.componentType),
+                              uv_accessor.normalized ? GL_TRUE : GL_FALSE,
+                              uv_buffer_view.byteStride,
+                              reinterpret_cast<void *>(uv_accessor.byteOffset)); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast,
+                                                                                 // performance-no-int-to-ptr)
     }
 
     GLuint tangentVbo{};
     {
         glGenBuffers(1, &tangentVbo);
         glBindBuffer(GL_ARRAY_BUFFER, tangentVbo);
-        glBufferData(GL_ARRAY_BUFFER, tangent_buffer_view.byteLength,
-                     tangent_buffer.data.data() + tangent_buffer_view.byteOffset, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER,
+                     tangent_buffer_view.byteLength,
+                     tangent_buffer.data.data() + tangent_buffer_view.byteOffset,
+                     GL_STATIC_DRAW);
 
-        int size = 1;
-        if (tangent_accessor.type == TINYGLTF_TYPE_SCALAR) {
-            size = 1;
-        } else if (tangent_accessor.type == TINYGLTF_TYPE_VEC2) {
-            size = 2;
-        } else if (tangent_accessor.type == TINYGLTF_TYPE_VEC3) {
-            size = 3;
-        } else if (tangent_accessor.type == TINYGLTF_TYPE_VEC4) {
-            size = 4;
-        } else {
-            assert(0);
-        }
-
-        int tangent_byte_stride = tangent_accessor.ByteStride(tangent_buffer_view);
         glEnableVertexAttribArray(locations.tangent);
-        glVertexAttribPointer(locations.tangent, size, tangent_accessor.componentType,
-                              tangent_accessor.normalized ? GL_TRUE : GL_FALSE, tangent_byte_stride,
-                              (void *)tangent_accessor.byteOffset);
+        glVertexAttribPointer(locations.tangent,
+                              accessor_byte_size(tangent_accessor.type),
+                              static_cast<GLenum>(tangent_accessor.componentType),
+                              tangent_accessor.normalized ? GL_TRUE : GL_FALSE,
+                              tangent_buffer_view.byteStride,
+                              reinterpret_cast<void *>(tangent_accessor.byteOffset)); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast,
+                                                                                      // performance-no-int-to-ptr)
     }
 
     GLuint ebo{};
     glGenBuffers(1, &ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_buffer_view.byteLength,
-                 indices_buffer.data.data() + indices_buffer_view.byteOffset, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                 indices_buffer_view.byteLength,
+                 indices_buffer.data.data() + indices_buffer_view.byteOffset,
+                 GL_STATIC_DRAW);
 
     glBindVertexArray(0);
 

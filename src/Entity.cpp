@@ -2,9 +2,7 @@
 #include "Mesh.h"
 #include "ShaderProgram.h"
 #include "VertexArray.h"
-#include "resources/CubeMap.h"
 #include "resources/Model.h"
-#include "resources/ResourceHandler.h"
 
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -117,8 +115,8 @@ void ModelEntity::draw(glm::mat4 viewProjMatrix, glm::vec3 viewPosition) const
 Skybox::Skybox(Prototype prototype, Model *cubeModel, ShaderProgram *shaderProgram)
     : m_cubeModel(cubeModel), m_shaderProgram(shaderProgram), m_vertexArray(cubeModel->getMesh(0)->getVertexArray())
 {
-    m_cubeMap =
-        ResourceHandler::instance().registerResource<TextureCubeMap>(TextureCubeMapDescriptor{prototype.texturePath});
+    // m_cubeMap =
+    //     ResourceHandler::instance().registerResource<TextureCubeMap>(TextureCubeMapDescriptor{prototype.texturePath});
 }
 
 Skybox::~Skybox()
@@ -146,10 +144,10 @@ void Skybox::draw(glm::mat4 viewMatrix, glm::mat4 projectionMatrix)
 
     m_shaderProgram->setUniform("u_viewProjectionMatrix", viewProjectionMatrix);
 
-    auto cubeMap = std::static_pointer_cast<TextureCubeMap>(ResourceHandler::instance().resource(m_cubeMap));
-    cubeMap->bind(m_shaderProgram);
-    m_cubeModel->getMesh(0)->drawWithoutTextures();
-    cubeMap->unbind();
+    // auto cubeMap = std::static_pointer_cast<TextureCubeMap>(ResourceHandler::instance().resource(m_cubeMap));
+    // cubeMap->bind(m_shaderProgram);
+    // m_cubeModel->getMesh(0)->drawWithoutTextures();
+    // cubeMap->unbind();
 
     m_shaderProgram->unbind();
     glDepthMask(GL_TRUE);

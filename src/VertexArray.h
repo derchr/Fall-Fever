@@ -3,13 +3,13 @@
 #include "definitions/attribute_locations.h"
 
 #include <glad/gl.h>
-#include <tiny_gltf.h>
+#include <fx/gltf.h>
 #include <vector>
 
 class VertexArray final
 {
 public:
-    VertexArray(tinygltf::Primitive const &primitive, tinygltf::Model const &model, AttributeLocations &locations);
+    VertexArray(fx::gltf::Primitive const &primitive, fx::gltf::Document const &model, AttributeLocations &locations);
     VertexArray(VertexArray &&other) noexcept
         : m_indicesCount(other.m_indicesCount),
           m_indicesType(other.m_indicesType),
@@ -58,11 +58,11 @@ public:
     static void unbind();
 
     [[nodiscard]] auto indicesCount() const -> uint64_t { return m_indicesCount; }
-    [[nodiscard]] auto indicesType() const -> int { return m_indicesType; }
+    [[nodiscard]] auto indicesType() const -> fx::gltf::Accessor::ComponentType { return m_indicesType; }
 
 private:
     uint64_t m_indicesCount;
-    int m_indicesType;
+    fx::gltf::Accessor::ComponentType m_indicesType;
 
     GLuint m_vao;
 

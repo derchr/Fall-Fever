@@ -20,11 +20,11 @@ protected:
     GLuint m_FBO;
 };
 
-class FrameBuffer : public AbstractFrameBuffer
+class Framebuffer : public AbstractFrameBuffer
 {
 public:
-    FrameBuffer(uint32_t width, uint32_t height, ShaderProgram &shaderProgram);
-    ~FrameBuffer();
+    Framebuffer(uint32_t width, uint32_t height, ShaderProgram &shaderProgram);
+    ~Framebuffer();
 
     void drawOnEntireScreen() const;
 
@@ -41,35 +41,4 @@ private:
     GLuint m_depthStencilBuffer;
 
     ShaderProgram &m_shaderProgram;
-};
-
-class AbstractDepthMap : public AbstractFrameBuffer
-{
-public:
-    virtual ~AbstractDepthMap() = 0;
-};
-
-// FrameBuffer without color buffer. (Shadows)
-class DepthMap : public AbstractDepthMap
-{
-public:
-    DepthMap(int resolution);
-    ~DepthMap();
-
-    GLuint getDepthMap() const;
-
-private:
-    GLuint m_depthMap;
-};
-
-class DepthMapCube : public AbstractDepthMap
-{
-public:
-    DepthMapCube(int resolution);
-    ~DepthMapCube();
-
-    GLuint getCubeMapTextureId();
-
-private:
-    ResourceId m_cubeMap;
 };

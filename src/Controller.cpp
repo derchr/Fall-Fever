@@ -12,37 +12,23 @@
 
 #include <GLFW/glfw3.h>
 #include <array>
+#include <filesystem>
+#include <fx/gltf.h>
 #include <glad/gl.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 Controller::Controller()
     : m_gameWindow(std::make_shared<Window>()),
-      m_camera(std::make_shared<Camera>(90., m_gameWindow->aspectRatio())),
-      m_postProcessFrameBuffer(m_gameWindow->dimensions().first, m_gameWindow->dimensions().second,
-                               postProcessingProgram)
+      m_postProcessFrameBuffer(
+          m_gameWindow->dimensions().first, m_gameWindow->dimensions().second, postProcessingProgram)
 {
-    tinygltf::TinyGLTF loader;
+    // auto gltf = fx::gltf::LoadFromBinary("ABeautifulGame/ABeautifulGame.glb",
+    //                                      {.MaxFileSize = 512 * 1024 * 1024, .MaxBufferByteLength = 512 * 1024 *
+    //                                      1024});
 
-    std::string err;
-    std::string warn;
-    // bool ret = loader.LoadASCIIFromFile(&m_model, &err, &warn, "WaterBottle/glTF/WaterBottle.gltf");
-    // bool ret = loader.LoadASCIIFromFile(&m_model, &err, &warn, "Duck/glTF/Duck.gltf");
-    // bool ret = loader.LoadASCIIFromFile(&m_model, &err, &warn, "Lantern/glTF/Lantern.gltf");
-    // bool ret = loader.LoadBinaryFromFile(&m_model, &err, &warn, "Camera.glb");
-    bool ret = loader.LoadBinaryFromFile(&m_model, &err, &warn, "ABeautifulGame/ABeautifulGame.glb");
-
-    if (!warn.empty()) {
-        Log::logger().warn("{}", warn);
-    }
-
-    if (!err.empty()) {
-        Log::logger().error("{}", err);
-    }
-
-    if (!ret) {
-        Log::logger().error("Failed to parse glTF");
-    }
+    auto gltf_path = std::filesystem::path("Lantern/glTF/Lantern.gltf");
+    auto gltf = fx::gltf::LoadFromText(gltf_path);
 
     defaultProgram.bind();
     AttributeLocations locations{};
@@ -54,11 +40,22 @@ Controller::Controller()
 
     ShaderProgram::unbind();
 
+    if (!gltf.cameras.empty()) {
+        auto const &gltf_camera = gltf.cameras.at(0);
+
+        assert(gltf_camera.type == fx::gltf::Camera::Type::Perspective);
+        auto const &perspective = gltf_camera.perspective;
+
+        m_camera = std::make_shared<Camera>(perspective.yfov, perspective.aspectRatio);
+    } else {
+        m_camera = std::make_shared<Camera>(90., m_gameWindow->aspectRatio());
+    }
+
     std::vector<Model> models;
-    for (auto const &mesh : m_model.meshes) {
+    for (auto const &mesh : gltf.meshes) {
         std::vector<Mesh> meshes;
         for (auto const &primitive : mesh.primitives) {
-            auto const &material = m_model.materials.at(primitive.material);
+            auto const &material = gltf.materials.at(primitive.material);
             auto baseColorTexture = material.pbrMetallicRoughness.baseColorTexture.index;
             auto normalTexture = material.normalTexture.index;
 
@@ -66,31 +63,47 @@ Controller::Controller()
 
             // Check if texture already exists, if not load it.
             if (baseColorTexture != -1 && !m_textures.contains(baseColorTexture)) {
-                auto const &gltf_texture = m_model.textures.at(baseColorTexture);
-                m_textures.emplace(baseColorTexture, Texture(gltf_texture, m_model.images, TextureType::Diffuse));
-                primitive_textures.push_back(m_textures.at(baseColorTexture));
+                auto const &gltf_texture = gltf.textures.at(baseColorTexture);
+                m_textures.emplace(baseColorTexture,
+                                   Texture(gltf_texture,
+                                           gltf_path.parent_path(),
+                                           gltf.images,
+                                           gltf.bufferViews,
+                                           gltf.buffers,
+                                           gltf.samplers,
+                                           TextureType::Diffuse));
+
+                primitive_textures.emplace_back(m_textures.at(baseColorTexture));
             }
 
             if (normalTexture != -1 && !m_textures.contains(normalTexture)) {
-                auto const &gltf_texture = m_model.textures.at(normalTexture);
-                m_textures.emplace(normalTexture, Texture(gltf_texture, m_model.images, TextureType::Normal));
-                primitive_textures.push_back(m_textures.at(normalTexture));
+                auto const &gltf_texture = gltf.textures.at(normalTexture);
+                m_textures.emplace(normalTexture,
+                                   Texture(gltf_texture,
+                                           gltf_path.parent_path(),
+                                           gltf.images,
+                                           gltf.bufferViews,
+                                           gltf.buffers,
+                                           gltf.samplers,
+                                           TextureType::Normal));
+
+                primitive_textures.emplace_back(m_textures.at(normalTexture));
             }
 
-            meshes.emplace_back(Mesh({primitive, m_model, locations}, primitive_textures));
+            meshes.emplace_back(Mesh({primitive, gltf, locations}, primitive_textures));
         }
         models.emplace_back(Model(mesh.name, std::move(meshes)));
     }
     m_models = std::move(models);
 
     std::vector<ModelEntity> entities;
-    for (auto const &node : m_model.nodes) {
+    for (auto const &node : gltf.nodes) {
         if (node.mesh == -1) {
             continue;
         }
 
-        ModelEntity entity(Entity::Prototype(node.name, {}, {}, 1.0F), m_models[static_cast<unsigned>(node.mesh)],
-                           defaultProgram);
+        ModelEntity entity(
+            Entity::Prototype(node.name, {}, {}, 1.0F), m_models[static_cast<unsigned>(node.mesh)], defaultProgram);
 
         if (!node.translation.empty()) {
             entity.setPosition(glm::vec3(node.translation[0], node.translation[1], node.translation[2]));

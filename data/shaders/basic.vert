@@ -8,10 +8,10 @@ layout(location = 3) in vec4 a_tangent;
 out vec3 v_normal;
 out vec2 v_texCoord;
 
-out vec3 v_fragmentPositionTangent;
+out vec3 v_fragmentPosition;
 out vec4 v_fragmentPositionDirectionalLightSpace;
 
-out vec3 v_viewPositionTangent;
+out vec3 v_viewPosition;
 
 struct DirectionalLight
 {
@@ -20,7 +20,7 @@ struct DirectionalLight
     vec3 color;
 };
 uniform DirectionalLight u_directionalLight;
-out vec3 v_lightDirectionTangent;
+out vec3 v_lightDirection;
 
 struct PointLight
 {
@@ -30,7 +30,7 @@ struct PointLight
 };
 #define NUM_POINT_LIGHTS 1
 uniform PointLight u_pointLight[NUM_POINT_LIGHTS];
-out vec3 v_lightPositionTangent0;
+out vec3 v_lightPosition0;
 
 uniform vec3 u_viewPosition;
 
@@ -45,14 +45,14 @@ void main()
     vec3 N = normalize(vec3(u_modelMatrix * vec4(a_normal, 0.0f)));
     T = normalize(T - dot(T, N) * N);
     vec3 B = cross(N, T) * a_tangent.w;
-    mat3 TBN_transposed = transpose(mat3(T, B, N));
+    mat3 TBN = transpose(mat3(T, B, N));
 
-    v_lightDirectionTangent = TBN_transposed * u_directionalLight.direction;
-    v_lightPositionTangent0 = TBN_transposed * u_pointLight[0].position;
+    v_lightDirection = TBN * u_directionalLight.direction;
+    v_lightPosition0 = TBN * u_pointLight[0].position;
 
-    v_fragmentPositionTangent = TBN_transposed * vec3(u_modelMatrix * vec4(a_position, 1.0f));
-    v_viewPositionTangent = TBN_transposed * u_viewPosition; // seems like this is always 0 ?
+    v_fragmentPosition = TBN * vec3(u_modelMatrix * vec4(a_position, 1.0f));
+    v_viewPosition = TBN * u_viewPosition;
 
-    v_normal = a_normal;
+    v_normal = N;
     v_texCoord = a_texCoord;
 }

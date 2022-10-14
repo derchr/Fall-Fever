@@ -8,30 +8,29 @@ add_library(fever_engine
     Mesh.cpp
     Entity.cpp
     Light.cpp
-    # Scene.cpp
+    Scene.cpp
     FrameBuffer.cpp
     Helper.cpp
-    resources/Resource.cpp
-    resources/ResourceHandler.cpp
     resources/Texture.cpp
     resources/Model.cpp
-    resources/CubeMap.cpp
     util/Log.cpp
+    image.cpp
 )
 
 target_compile_features(fever_engine PUBLIC cxx_std_20)
 target_compile_definitions(fever_engine PRIVATE SPDLOG_FMT_EXTERNAL)
 
 target_link_libraries(
-    fever_engine PUBLIC 
+    fever_engine PUBLIC
     glad
     glm
     glfw
-    glm
+    EnTT::EnTT
     fmt
     pthread
     spdlog
-    tinygltf
+    fx-gltf::fx-gltf
+    stb
 )
 
 add_executable(Fall-Fever

@@ -4,12 +4,12 @@ layout(location = 0) out vec4 f_color;
 
 in vec3 v_normal;
 in vec2 v_texCoord;
-in vec3 v_fragmentPositionTangent;
+in vec3 v_fragmentPosition;
 
-in vec3 v_lightDirectionTangent;
-in vec3 v_lightPositionTangent0;
+in vec3 v_lightDirection;
+in vec3 v_lightPosition0;
 
-in vec3 v_viewPositionTangent;
+in vec3 v_viewPosition;
 
 struct Material
 {
@@ -61,12 +61,12 @@ void main()
     vec3 normal = texture(u_material.texture_normal, v_texCoord).rgb;
     normal = normalize(normal * 2.0 - 1.0);
 
-    vec3 viewDir = normalize(v_viewPositionTangent - v_fragmentPositionTangent);
+    vec3 viewDir = normalize(v_viewPosition - v_fragmentPosition);
 
     fragmentColor += directionalLightContribution(u_directionalLight, normal, viewDir);
 
     for (int i = 0; i < NUM_POINT_LIGHTS; i++) {
-        fragmentColor += pointLightContribution(u_pointLight[i], normal, v_fragmentPositionTangent, viewDir);
+        fragmentColor += pointLightContribution(u_pointLight[i], normal, v_fragmentPosition, viewDir);
     }
     
     f_color = vec4(fragmentColor, 1.0f);
@@ -78,7 +78,7 @@ vec3 directionalLightContribution(DirectionalLight light, vec3 normal, vec3 view
     if (!light.isActive)
         return vec3(0.0f);
 
-    vec3 lightDir = normalize(-v_lightDirectionTangent);
+    vec3 lightDir = normalize(-v_lightDirection);
 
     vec3 diffuseColor = light.color;
     vec3 specularColor = light.color * 0.5f;
@@ -96,7 +96,7 @@ vec3 pointLightContribution(PointLight light, vec3 normal, vec3 fragPos, vec3 vi
     if (!light.isActive)
         return vec3(0.0f);
 
-    vec3 lightDir = normalize(v_lightPositionTangent0 - fragPos);
+    vec3 lightDir = normalize(v_lightPosition0 - fragPos);
 
     vec3 diffuseColor = light.color;
     vec3 specularColor = light.color * 0.5f;
@@ -105,10 +105,10 @@ vec3 pointLightContribution(PointLight light, vec3 normal, vec3 fragPos, vec3 vi
     vec3 ambient, diffuse, specular;
     computeShading(ambientColor, diffuseColor, specularColor, lightDir, viewDir, normal, ambient, diffuse, specular);
 
-    float attenuation = computeAttenuation(v_lightPositionTangent0, fragPos, 0.032f);
-    // ambient *= attenuation;
-    // diffuse *= attenuation;
-    // specular *= attenuation;
+    float attenuation = computeAttenuation(v_lightPosition0, fragPos, 0.032f);
+    ambient *= attenuation;
+    diffuse *= attenuation;
+    specular *= attenuation;
 
     return ambient + diffuse + specular;
 }

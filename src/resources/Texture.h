@@ -2,17 +2,24 @@
 
 #include "TextureType.h"
 
+#include <filesystem>
+#include <fx/gltf.h>
 #include <glad/gl.h>
 #include <span>
 #include <string>
-#include <tiny_gltf.h>
 
 class ShaderProgram;
 
 class Texture
 {
 public:
-    Texture(tinygltf::Texture const &texture, std::span<tinygltf::Image> images, TextureType textureType);
+    Texture(fx::gltf::Texture const &texture,
+            std::filesystem::path const &working_directory,
+            std::span<fx::gltf::Image> images,
+            std::span<fx::gltf::BufferView> bufferViews,
+            std::span<fx::gltf::Buffer> buffers,
+            std::span<fx::gltf::Sampler> samplers,
+            TextureType textureType);
 
     [[nodiscard]] auto textureType() const -> TextureType;
 
