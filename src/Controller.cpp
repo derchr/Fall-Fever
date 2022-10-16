@@ -7,6 +7,7 @@
 #include "ShaderProgram.h"
 #include "Window.h"
 #include "definitions/attribute_locations.h"
+#include "gltf_loader.h"
 #include "resources/Model.h"
 #include "util/Log.h"
 
@@ -17,18 +18,37 @@
 #include <glad/gl.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <iostream>
+#include <utility>
+
+struct MyRes
+{
+    MyRes(std::filesystem::path const &path, int)
+    {
+        std::cout << "Path: " << std::filesystem::weakly_canonical(path) << std::endl;
+    };
+    int x = 0;
+};
+using namespace entt::literals;
 
 Controller::Controller()
     : m_gameWindow(std::make_shared<Window>()),
       m_postProcessFrameBuffer(
           m_gameWindow->dimensions().first, m_gameWindow->dimensions().second, postProcessingProgram)
 {
-    // auto gltf = fx::gltf::LoadFromBinary("ABeautifulGame/ABeautifulGame.glb",
-    //                                      {.MaxFileSize = 512 * 1024 * 1024, .MaxBufferByteLength = 512 * 1024 *
-    //                                      1024});
+    gltf_loader<fx::gltf::Document>()("Lantern/glTF-Binary/Lantern.glb");
 
-    auto gltf_path = std::filesystem::path("Lantern/glTF/Lantern.gltf");
-    auto gltf = fx::gltf::LoadFromText(gltf_path);
+    fx::gltf::ReadQuotas read_quotas{.MaxFileSize = 512 * 1024 * 1024, .MaxBufferByteLength = 512 * 1024 * 1024};
+
+    // auto gltf_path = std::filesystem::path("Lantern/glTF/Lantern.gltf");
+    auto gltf_path = std::filesystem::path("WaterBottle/glTF/WaterBottle.gltf");
+    auto gltf = [&]() {
+        if (gltf_path.extension() == ".gltf") {
+            return fx::gltf::LoadFromText(gltf_path, read_quotas);
+        }
+
+        return fx::gltf::LoadFromBinary(gltf_path, read_quotas);
+    }();
 
     defaultProgram.bind();
     AttributeLocations locations{};

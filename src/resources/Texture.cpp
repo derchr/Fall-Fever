@@ -2,7 +2,7 @@
 #include "../ShaderProgram.h"
 #include "../util/Log.h"
 
-#define STB_IMAGE_IMPLEMENTATION
+// #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 Texture::Texture(fx::gltf::Texture const &texture,
@@ -34,7 +34,7 @@ Texture::Texture(fx::gltf::Texture const &texture,
     int width{};
     int height{};
     int components{};
-    
+
     auto *stbi_image = [&]() {
         if (!image.uri.empty()) {
             auto image_path = working_directory / image.uri;
@@ -84,7 +84,7 @@ Texture::Texture(fx::gltf::Texture const &texture,
                  static_cast<GLsizei>(height),
                  0,
                  dataFormat,
-                 GL_UNSIGNED_BYTE, // read from bufferview?
+                 GL_UNSIGNED_BYTE,
                  stbi_image);
     glGenerateMipmap(GL_TEXTURE_2D);
 

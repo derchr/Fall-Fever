@@ -15,6 +15,7 @@ add_library(fever_engine
     resources/Model.cpp
     util/Log.cpp
     image.cpp
+    gltf_loader.cpp
 )
 
 target_compile_features(fever_engine PUBLIC cxx_std_20)
@@ -31,6 +32,7 @@ target_link_libraries(
     spdlog
     fx-gltf::fx-gltf
     stb
+    sail
 )
 
 add_executable(Fall-Fever

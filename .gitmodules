@@ -16,3 +16,6 @@
 [submodule "lib/fx-gltf"]
 	path = lib/fx-gltf
 	url = https://github.com/jessey-git/fx-gltf.git
+[submodule "lib/sail"]
+	path = lib/sail
+	url = https://github.com/HappySeaFox/sail.git
