@@ -3,26 +3,13 @@
 
 #include <algorithm>
 
-#ifdef __linux__
-#include <unistd.h>
-#endif
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
-void Helper::sleep(uint32_t us)
-{
-#ifdef __linux__
-    usleep(us);
-#endif
-#ifdef _WIN32
-    // I don't know why I have to divide by 2000 and not 1000 but this way it works even on Windows
-    Sleep(us / 2000);
-#endif
-}
-
-void Helper::gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
-                               const GLchar *message, const void *userParam)
+void Helper::gl_debug_callback(GLenum source,
+                               GLenum type,
+                               GLuint id,
+                               GLenum severity,
+                               GLsizei length,
+                               const GLchar *message,
+                               const void *userParam)
 {
     (void)length;
     (void)userParam;
@@ -128,7 +115,11 @@ void Helper::gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum sev
                             "Type: {}\n"
                             "ID: {}\n"
                             "Severity: {}\n",
-                            _message, _source, _type, id, _severity);
+                            _message,
+                            _source,
+                            _type,
+                            id,
+                            _severity);
 }
 
 Helper::Timer::Timer(const std::string &name) : m_name(name)

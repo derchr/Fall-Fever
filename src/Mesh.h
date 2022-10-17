@@ -7,10 +7,10 @@
 
 class ShaderProgram;
 
-class Mesh
+class Mesh_
 {
 public:
-    Mesh(VertexArray vertexArray, std::vector<std::reference_wrapper<const Texture>> textures);
+    Mesh_(VertexArray vertexArray, std::vector<std::reference_wrapper<const Texture>> textures);
 
     void draw(ShaderProgram const &shaderProgram) const;
     void drawWithoutTextures() const;

@@ -6,9 +6,12 @@
 #include <string>
 
 namespace Helper {
-void sleep(uint32_t us);
-
-void gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message,
+void gl_debug_callback(GLenum source,
+                       GLenum type,
+                       GLuint id,
+                       GLenum severity,
+                       GLsizei length,
+                       const GLchar *message,
                        const void *userParam);
 
 class Timer

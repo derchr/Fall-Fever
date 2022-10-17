@@ -13,35 +13,37 @@
 
 #include <GLFW/glfw3.h>
 #include <array>
+#include <chrono>
 #include <filesystem>
 #include <fx/gltf.h>
 #include <glad/gl.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
+#include <thread>
 #include <utility>
 
-struct MyRes
-{
-    MyRes(std::filesystem::path const &path, int)
-    {
-        std::cout << "Path: " << std::filesystem::weakly_canonical(path) << std::endl;
-    };
-    int x = 0;
-};
 using namespace entt::literals;
 
 Controller::Controller()
     : m_gameWindow(std::make_shared<Window>()),
-      m_postProcessFrameBuffer(
-          m_gameWindow->dimensions().first, m_gameWindow->dimensions().second, postProcessingProgram)
+      m_postProcessFrameBuffer(m_gameWindow->dimensions().first,
+                               m_gameWindow->dimensions().second,
+                               postProcessingProgram)
 {
-    gltf_loader<fx::gltf::Document>()("Lantern/glTF-Binary/Lantern.glb");
+    GltfLoader loader;
+    entt::resource_cache<Gltf, GltfLoader> gltf_resource_cache;
+    entt::resource<Gltf> gltf_document =
+        gltf_resource_cache
+            .load("Lantern/glTF-Binary/Lantern.glb"_hs, "Lantern/glTF-Binary/Lantern.glb")
+            .first->second;
 
-    fx::gltf::ReadQuotas read_quotas{.MaxFileSize = 512 * 1024 * 1024, .MaxBufferByteLength = 512 * 1024 * 1024};
+    fx::gltf::ReadQuotas read_quotas{.MaxFileSize = 512 * 1024 * 1024,
+                                     .MaxBufferByteLength = 512 * 1024 * 1024};
 
     // auto gltf_path = std::filesystem::path("Lantern/glTF/Lantern.gltf");
-    auto gltf_path = std::filesystem::path("WaterBottle/glTF/WaterBottle.gltf");
+    // auto gltf_path = std::filesystem::path("WaterBottle/glTF/WaterBottle.gltf");
+    auto gltf_path = std::filesystem::path("ABeautifulGame.glb");
     auto gltf = [&]() {
         if (gltf_path.extension() == ".gltf") {
             return fx::gltf::LoadFromText(gltf_path, read_quotas);
@@ -73,7 +75,7 @@ Controller::Controller()
 
     std::vector<Model> models;
     for (auto const &mesh : gltf.meshes) {
-        std::vector<Mesh> meshes;
+        std::vector<Mesh_> meshes;
         for (auto const &primitive : mesh.primitives) {
             auto const &material = gltf.materials.at(primitive.material);
             auto baseColorTexture = material.pbrMetallicRoughness.baseColorTexture.index;
@@ -110,7 +112,7 @@ Controller::Controller()
                 primitive_textures.emplace_back(m_textures.at(normalTexture));
             }
 
-            meshes.emplace_back(Mesh({primitive, gltf, locations}, primitive_textures));
+            meshes.emplace_back(Mesh_({primitive, gltf, locations}, primitive_textures));
         }
         models.emplace_back(Model(mesh.name, std::move(meshes)));
     }
@@ -122,16 +124,18 @@ Controller::Controller()
             continue;
         }
 
-        ModelEntity entity(
-            Entity::Prototype(node.name, {}, {}, 1.0F), m_models[static_cast<unsigned>(node.mesh)], defaultProgram);
+        ModelEntity entity(Entity::Prototype(node.name, {}, {}, 1.0F),
+                           m_models[static_cast<unsigned>(node.mesh)],
+                           defaultProgram);
 
         if (!node.translation.empty()) {
-            entity.setPosition(glm::vec3(node.translation[0], node.translation[1], node.translation[2]));
+            entity.setPosition(
+                glm::vec3(node.translation[0], node.translation[1], node.translation[2]));
         }
 
         if (!node.rotation.empty()) {
-            entity.setRotation(
-                glm::eulerAngles(glm::quat(node.rotation[3], node.rotation[0], node.rotation[1], node.rotation[2])));
+            entity.setRotation(glm::eulerAngles(
+                glm::quat(node.rotation[3], node.rotation[0], node.rotation[1], node.rotation[2])));
         }
 
         if (!node.scale.empty()) {
@@ -139,13 +143,17 @@ Controller::Controller()
         }
 
         entities.push_back(std::move(entity));
+    }
 
+    for (auto const &node : gltf.nodes) {
         for (auto const &child : node.children) {
             if (!node.translation.empty()) {
-                entities[child].translate(glm::vec3(node.translation[0], node.translation[1], node.translation[2]));
+                entities[child].translate(
+                    glm::vec3(node.translation[0], node.translation[1], node.translation[2]));
             }
         }
     }
+
     m_entities = std::move(entities);
 }
 
@@ -155,11 +163,13 @@ void Controller::run()
 
     m_camera->translate(glm::vec3(0., .5, 2.));
     DirectionalLight directional_light(
-        DirectionalLight::Prototype("", glm::vec3(-0.2, -1.0, -0.3), glm::vec3(1.0f), 5.f), &defaultProgram);
+        DirectionalLight::Prototype("", glm::vec3(-0.2, -1.0, -0.3), glm::vec3(1.0f), 5.f),
+        &defaultProgram);
     directional_light.setActive(true);
 
-    PointLight point_light(PointLight::Prototype("", "", glm::vec3(4.0, 1.0, 6.0), glm::vec3(1.0F), 3.0F),
-                           &defaultProgram);
+    PointLight point_light(
+        PointLight::Prototype("", "", glm::vec3(4.0, 1.0, 6.0), glm::vec3(1.0F), 3.0F),
+        &defaultProgram);
     point_light.setActive(true);
 
     Log::logger().info("Startup complete. Enter game loop.");
@@ -222,7 +232,10 @@ void Controller::limit_framerate()
 
     double frameTime = 1 / (double)MAX_FPS;
     if (frameTime > lastTime) {
-        Helper::sleep(static_cast<unsigned>(frameTime - lastTime) * 1000000);
+        static constexpr auto MICROSECONDS_PER_SECOND = 1'000'000;
+        auto sleep_time_us =
+            static_cast<unsigned>((frameTime - lastTime) * MICROSECONDS_PER_SECOND);
+        std::this_thread::sleep_for(std::chrono::microseconds(sleep_time_us));
     }
 
     m_deltaTime = glfwGetTime() - startingTime;

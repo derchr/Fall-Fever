@@ -2,7 +2,7 @@
 #include "Texture.h"
 #include "../util/Log.h"
 
-Model::Model(std::string_view name, std::vector<Mesh> meshes) : m_meshes(std::move(meshes)), m_name(name)
+Model::Model(std::string_view name, std::vector<Mesh_> meshes) : m_meshes(std::move(meshes)), m_name(name)
 {
     Log::logger().trace(R"(Loaded model "{}".)", name);
 }
@@ -23,7 +23,7 @@ void Model::drawWithoutTextures() const
     }
 }
 
-auto Model::getMesh(unsigned int index) -> Mesh *
+auto Model::getMesh(unsigned int index) -> Mesh_ *
 {
     return &m_meshes[index];
 }

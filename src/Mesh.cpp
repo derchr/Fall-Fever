@@ -5,12 +5,12 @@
 #include "resources/Texture.h"
 #include <utility>
 
-Mesh::Mesh(VertexArray vertexArray, std::vector<std::reference_wrapper<const Texture>> textures)
+Mesh_::Mesh_(VertexArray vertexArray, std::vector<std::reference_wrapper<const Texture>> textures)
     : m_vertexArray(std::move(vertexArray)), m_textures(std::move(textures))
 {
 }
 
-void Mesh::draw(ShaderProgram const &shaderProgram) const
+void Mesh_::draw(ShaderProgram const &shaderProgram) const
 {
     // Bind all textures in order to its texture unit
     std::size_t textureNum = 0;
@@ -31,7 +31,7 @@ void Mesh::draw(ShaderProgram const &shaderProgram) const
     }
 }
 
-void Mesh::drawWithoutTextures() const
+void Mesh_::drawWithoutTextures() const
 {
     m_vertexArray.bind();
 
@@ -41,7 +41,7 @@ void Mesh::drawWithoutTextures() const
     VertexArray::unbind();
 }
 
-auto Mesh::getVertexArray() -> VertexArray *
+auto Mesh_::getVertexArray() -> VertexArray *
 {
     return &m_vertexArray;
 }

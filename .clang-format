@@ -8,7 +8,7 @@ AlwaysBreakTemplateDeclarations: 'true'
 BreakBeforeBraces: Mozilla
 BinPackParameters: 'false'
 BinPackArguments: 'false'
-ColumnLimit: '120'
+ColumnLimit: '100'
 ConstructorInitializerAllOnOneLineOrOnePerLine: 'true'
 IndentWidth: '4'
 PointerAlignment: Right

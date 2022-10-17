@@ -24,13 +24,13 @@ target_compile_definitions(fever_engine PRIVATE SPDLOG_FMT_EXTERNAL)
 target_link_libraries(
     fever_engine PUBLIC
     glad
-    glm
     glfw
     EnTT::EnTT
     fmt
     pthread
     spdlog
     fx-gltf::fx-gltf
+    nlohmann_json::nlohmann_json
     stb
     sail
 )
