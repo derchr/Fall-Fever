@@ -31,13 +31,6 @@ Controller::Controller()
                                m_gameWindow->dimensions().second,
                                postProcessingProgram)
 {
-    GltfLoader loader;
-    entt::resource_cache<Gltf, GltfLoader> gltf_resource_cache;
-    entt::resource<Gltf> gltf_document =
-        gltf_resource_cache
-            .load("Lantern/glTF-Binary/Lantern.glb"_hs, "Lantern/glTF-Binary/Lantern.glb")
-            .first->second;
-
     fx::gltf::ReadQuotas read_quotas{.MaxFileSize = 512 * 1024 * 1024,
                                      .MaxBufferByteLength = 512 * 1024 * 1024};
 

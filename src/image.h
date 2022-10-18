@@ -43,7 +43,8 @@ struct Image
     std::vector<uint8_t> data;
     Sampler sampler;
 
-    struct Extent {
+    struct Extent
+    {
         unsigned int width;
         unsigned int height;
     } extent{};
@@ -55,7 +56,8 @@ struct Image
         RGBA8Uint,
     } dataFormat;
 
-    enum class ColorFormat {
+    enum class ColorFormat
+    {
         SRGB,
         RGB
     } colorFormat;
@@ -68,6 +70,19 @@ struct GpuImage
     static constexpr float LOD_BIAS = -2.0;
 
     GpuImage(Image const &image);
+
+    GpuImage(GpuImage const &) = delete;
+    auto operator=(GpuImage const &) -> GpuImage & = delete;
+
+    GpuImage(GpuImage &&other) noexcept : texture(other.texture) { other.texture = 0; }
+    auto operator=(GpuImage &&other) noexcept -> GpuImage &
+    {
+        texture = other.texture;
+        other.texture = 0;
+        return *this;
+    };
+
+    ~GpuImage() { glDeleteTextures(1, &texture); };
 
     GLuint texture{};
 };

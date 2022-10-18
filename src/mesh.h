@@ -1,9 +1,11 @@
 #pragma once
 
 #include <cstdint>
+#include <glad/gl.h>
 #include <map>
 #include <variant>
 #include <vector>
+#include <array>
 
 struct VertexAttributeData
 {
@@ -34,4 +36,25 @@ struct Mesh
 
     std::map<VertexAttributeId, VertexAttributeData> attributes;
     Indices indices;
+};
+
+struct GpuMesh
+{
+    GpuMesh(Mesh const &mesh);
+
+    GpuMesh(GpuMesh const &) = delete;
+    auto operator=(GpuMesh const &) -> GpuMesh & = delete;
+
+    GpuMesh(GpuMesh &&other) noexcept : vao(other.vao) { other.vao = 0; }
+    auto operator=(GpuMesh &&other) noexcept -> GpuMesh &
+    {
+        vao = other.vao;
+        other.vao = 0;
+        return *this;
+    };
+
+    ~GpuMesh() { glDeleteVertexArrays(1, &vao); };
+
+    // TODO: also store vertex buffers.
+    GLuint vao{};
 };

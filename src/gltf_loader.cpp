@@ -1,6 +1,8 @@
 #include "gltf_loader.h"
 #include "util/Log.h"
 
+#include <iterator>
+
 template <typename T>
 static auto create_vertex_attribute_data(std::span<uint8_t const> vertex_attribute_data)
     -> VertexAttributeData
@@ -89,6 +91,10 @@ static auto load_material(fx::gltf::Material const &material,
             load_texture(normal_texture, gltf, document_path, Image::ColorFormat::RGB, image_cache);
     }
 
+    if (material.name.empty()) {
+        Log::logger().warn("glTF material has no name.");
+    }
+
     entt::hashed_string material_hash(material.name.c_str());
     return material_cache
         .load(material_hash,
@@ -170,6 +176,16 @@ auto load_gltf_primitive(fx::gltf::Primitive const &gltf_primitive,
                          entt::resource_cache<Mesh> &mesh_cache) -> GltfPrimitive
 {
     // Load attributes
+    auto tangent_it =
+        std::find_if(gltf_primitive.attributes.cbegin(),
+                     gltf_primitive.attributes.cend(),
+                     [](auto const &attribute) { return attribute.first == "TANGENT"; });
+
+    if (tangent_it == gltf_primitive.attributes.cend()) {
+        Log::logger().critical("glTF scene has to include tangent and normal components!");
+        std::terminate();
+    }
+
     std::map<Mesh::VertexAttributeId, VertexAttributeData> attributes;
     for (auto const &attribute : gltf_primitive.attributes) {
         auto vertex_attribute_data = load_attribute(attribute.first, attribute.second, gltf);
@@ -214,7 +230,7 @@ auto load_gltf_primitive(fx::gltf::Primitive const &gltf_primitive,
         mesh_cache.load(mesh_hash, Mesh{.attributes = attributes, .indices = indices})
             .first->second;
 
-    // Get material by name
+    // Get material by hash
     auto const &gltf_material = gltf.materials.at(gltf_primitive.material);
     entt::hashed_string material_hash(gltf_material.name.c_str());
     entt::resource<Material> material = material_cache[material_hash];
@@ -262,6 +278,10 @@ auto GltfLoader::operator()(std::filesystem::path const &document_path) -> resul
                 gltf_primitive, gltf, document_path, primitive_count, material_cache, mesh_cache));
         }
 
+        if (gltf_mesh.name.empty()) {
+            Log::logger().warn("glTF mesh has no name.");
+        }
+
         entt::hashed_string gltf_mesh_hash(gltf_mesh.name.c_str());
         entt::resource<GltfMesh> gltf_mesh_resource =
             gltf_mesh_cache.load(gltf_mesh_hash, GltfMesh{.primitives = std::move(primitives)})
@@ -270,7 +290,96 @@ auto GltfLoader::operator()(std::filesystem::path const &document_path) -> resul
         gltf_meshes.push_back(gltf_mesh_resource);
     }
 
+    // Load nodes
+    std::unordered_map<std::size_t, entt::resource<GltfNode>> nodes_map;
+    nodes_map.reserve(gltf.nodes.size());
+    for (std::size_t i = 0; i < gltf.nodes.size(); ++i) {
+        auto const &node = gltf.nodes.at(i);
+
+        auto mesh = [this, &node, &gltf]() -> std::optional<entt::resource<GltfMesh>> {
+            if (node.mesh != -1) {
+                // Get mesh by hash
+                auto const &gltf_mesh = gltf.meshes.at(node.mesh);
+                entt::hashed_string mesh_hash(gltf_mesh.name.c_str());
+                entt::resource<GltfMesh> mesh = gltf_mesh_cache[mesh_hash];
+                return {mesh};
+            }
+
+            return {};
+        }();
+
+        glm::vec3 translation(node.translation[0], node.translation[1], node.translation[2]);
+        glm::quat rotation(node.rotation[3], node.rotation[0], node.rotation[1], node.rotation[2]);
+        glm::vec3 scale(node.scale[0], node.scale[1], node.scale[2]);
+
+        Transform transform{.translation = translation, .rotation = rotation, .scale = scale};
+
+        if (node.name.empty()) {
+            Log::logger().warn("glTF node has no name.");
+        }
+
+        entt::hashed_string node_hash(node.name.c_str());
+        entt::resource<GltfNode> node_resource =
+            gltf_node_cache
+                .load(node_hash,
+                      GltfNode{
+                          .name = node.name, .transform = transform, .mesh = mesh, .children = {}})
+                .first->second;
+
+        nodes_map.emplace(i, node_resource);
+    }
+
+    // Resolve child hierarchy
+    for (auto const &gltf_node : gltf.nodes) {
+        std::vector<entt::resource<GltfNode>> children;
+        for (int child_node_id : gltf_node.children) {
+            auto child_node = nodes_map.extract(child_node_id);
+            children.push_back(child_node.mapped());
+        }
+    }
+
+    std::vector<entt::resource<GltfNode>> nodes;
+    nodes.reserve(nodes_map.size());
+    for (auto const &node : nodes_map) {
+        nodes.push_back(node.second);
+    }
+
+    // Load scenes
+    std::vector<entt::resource<GltfScene>> scenes;
+    for (auto const &scene : gltf.scenes) {
+        // Get nodes by hash
+        std::vector<entt::resource<GltfNode>> nodes;
+        nodes.reserve(scene.nodes.size());
+
+        for (auto node_id : scene.nodes) {
+            auto const &node = gltf.nodes.at(node_id);
+            entt::hashed_string node_hash(node.name.c_str());
+            nodes.push_back(gltf_node_cache[node_hash]);
+        }
+
+        if (scene.name.empty()) {
+            Log::logger().warn("glTF scene has no name.");
+        }
+
+        entt::hashed_string scene_hash(scene.name.c_str());
+        entt::resource<GltfScene> scene_resource =
+            gltf_scene_cache.load(scene_hash, GltfScene{.nodes = std::move(nodes)}).first->second;
+        scenes.push_back(scene_resource);
+    }
+
+    // Default scene
+    entt::resource<GltfScene> default_scene = [&gltf, &scenes]() {
+        if (gltf.scene != -1) {
+            return scenes.at(gltf.scene);
+        }
+
+        return scenes.at(0);
+    }();
+
     return std::make_shared<Gltf>(Gltf{.materials = std::move(materials),
                                        .meshes = std::move(gltf_meshes),
+                                       .nodes = std::move(nodes),
+                                       .scenes = std::move(scenes),
+                                       .default_scene = default_scene,
                                        .document = std::move(gltf)});
 }

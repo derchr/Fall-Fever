@@ -15,6 +15,7 @@ add_library(fever_engine
     resources/Model.cpp
     util/Log.cpp
     image.cpp
+    mesh.cpp
     gltf_loader.cpp
 )
 
