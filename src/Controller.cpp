@@ -31,123 +31,124 @@ Controller::Controller()
                                m_gameWindow->dimensions().second,
                                postProcessingProgram)
 {
-    fx::gltf::ReadQuotas read_quotas{.MaxFileSize = 512 * 1024 * 1024,
-                                     .MaxBufferByteLength = 512 * 1024 * 1024};
+    // fx::gltf::ReadQuotas read_quotas{.MaxFileSize = 512 * 1024 * 1024,
+    //                                  .MaxBufferByteLength = 512 * 1024 * 1024};
 
-    // auto gltf_path = std::filesystem::path("Lantern/glTF/Lantern.gltf");
-    // auto gltf_path = std::filesystem::path("WaterBottle/glTF/WaterBottle.gltf");
-    auto gltf_path = std::filesystem::path("ABeautifulGame.glb");
-    auto gltf = [&]() {
-        if (gltf_path.extension() == ".gltf") {
-            return fx::gltf::LoadFromText(gltf_path, read_quotas);
-        }
+    // // auto gltf_path = std::filesystem::path("Lantern/glTF/Lantern.gltf");
+    // // auto gltf_path = std::filesystem::path("WaterBottle/glTF/WaterBottle.gltf");
+    // auto gltf_path = std::filesystem::path("ABeautifulGame.glb");
+    // auto gltf = [&]() {
+    //     if (gltf_path.extension() == ".gltf") {
+    //         return fx::gltf::LoadFromText(gltf_path, read_quotas);
+    //     }
 
-        return fx::gltf::LoadFromBinary(gltf_path, read_quotas);
-    }();
+    //     return fx::gltf::LoadFromBinary(gltf_path, read_quotas);
+    // }();
 
-    defaultProgram.bind();
-    AttributeLocations locations{};
+    // defaultProgram.bind();
+    // AttributeLocations locations{};
 
-    locations.position = glGetAttribLocation(defaultProgram.getShaderProgramId(), "a_position");
-    locations.normal = glGetAttribLocation(defaultProgram.getShaderProgramId(), "a_normal");
-    locations.uv = glGetAttribLocation(defaultProgram.getShaderProgramId(), "a_texCoord");
-    locations.tangent = glGetAttribLocation(defaultProgram.getShaderProgramId(), "a_tangent");
+    // locations.position = glGetAttribLocation(defaultProgram.getShaderProgramId(), "a_position");
+    // locations.normal = glGetAttribLocation(defaultProgram.getShaderProgramId(), "a_normal");
+    // locations.uv = glGetAttribLocation(defaultProgram.getShaderProgramId(), "a_texCoord");
+    // locations.tangent = glGetAttribLocation(defaultProgram.getShaderProgramId(), "a_tangent");
 
-    ShaderProgram::unbind();
+    // ShaderProgram::unbind();
 
-    if (!gltf.cameras.empty()) {
-        auto const &gltf_camera = gltf.cameras.at(0);
+    // if (!gltf.cameras.empty()) {
+    //     auto const &gltf_camera = gltf.cameras.at(0);
 
-        assert(gltf_camera.type == fx::gltf::Camera::Type::Perspective);
-        auto const &perspective = gltf_camera.perspective;
+    //     assert(gltf_camera.type == fx::gltf::Camera::Type::Perspective);
+    //     auto const &perspective = gltf_camera.perspective;
 
-        m_camera = std::make_shared<Camera>(perspective.yfov, perspective.aspectRatio);
-    } else {
-        m_camera = std::make_shared<Camera>(90., m_gameWindow->aspectRatio());
-    }
+    //     m_camera = std::make_shared<Camera>(perspective.yfov, perspective.aspectRatio);
+    // } else {
+    m_camera = std::make_shared<Camera>(90., m_gameWindow->aspectRatio());
+    // }
 
-    std::vector<Model> models;
-    for (auto const &mesh : gltf.meshes) {
-        std::vector<Mesh_> meshes;
-        for (auto const &primitive : mesh.primitives) {
-            auto const &material = gltf.materials.at(primitive.material);
-            auto baseColorTexture = material.pbrMetallicRoughness.baseColorTexture.index;
-            auto normalTexture = material.normalTexture.index;
+    // std::vector<Model> models;
+    // for (auto const &mesh : gltf.meshes) {
+    //     std::vector<Mesh_> meshes;
+    //     for (auto const &primitive : mesh.primitives) {
+    //         auto const &material = gltf.materials.at(primitive.material);
+    //         auto baseColorTexture = material.pbrMetallicRoughness.baseColorTexture.index;
+    //         auto normalTexture = material.normalTexture.index;
 
-            std::vector<std::reference_wrapper<const Texture>> primitive_textures;
+    //         std::vector<std::reference_wrapper<const Texture>> primitive_textures;
 
-            // Check if texture already exists, if not load it.
-            if (baseColorTexture != -1 && !m_textures.contains(baseColorTexture)) {
-                auto const &gltf_texture = gltf.textures.at(baseColorTexture);
-                m_textures.emplace(baseColorTexture,
-                                   Texture(gltf_texture,
-                                           gltf_path.parent_path(),
-                                           gltf.images,
-                                           gltf.bufferViews,
-                                           gltf.buffers,
-                                           gltf.samplers,
-                                           TextureType::Diffuse));
+    //         // Check if texture already exists, if not load it.
+    //         if (baseColorTexture != -1 && !m_textures.contains(baseColorTexture)) {
+    //             auto const &gltf_texture = gltf.textures.at(baseColorTexture);
+    //             m_textures.emplace(baseColorTexture,
+    //                                Texture(gltf_texture,
+    //                                        gltf_path.parent_path(),
+    //                                        gltf.images,
+    //                                        gltf.bufferViews,
+    //                                        gltf.buffers,
+    //                                        gltf.samplers,
+    //                                        TextureType::Diffuse));
 
-                primitive_textures.emplace_back(m_textures.at(baseColorTexture));
-            }
+    //             primitive_textures.emplace_back(m_textures.at(baseColorTexture));
+    //         }
 
-            if (normalTexture != -1 && !m_textures.contains(normalTexture)) {
-                auto const &gltf_texture = gltf.textures.at(normalTexture);
-                m_textures.emplace(normalTexture,
-                                   Texture(gltf_texture,
-                                           gltf_path.parent_path(),
-                                           gltf.images,
-                                           gltf.bufferViews,
-                                           gltf.buffers,
-                                           gltf.samplers,
-                                           TextureType::Normal));
+    //         if (normalTexture != -1 && !m_textures.contains(normalTexture)) {
+    //             auto const &gltf_texture = gltf.textures.at(normalTexture);
+    //             m_textures.emplace(normalTexture,
+    //                                Texture(gltf_texture,
+    //                                        gltf_path.parent_path(),
+    //                                        gltf.images,
+    //                                        gltf.bufferViews,
+    //                                        gltf.buffers,
+    //                                        gltf.samplers,
+    //                                        TextureType::Normal));
 
-                primitive_textures.emplace_back(m_textures.at(normalTexture));
-            }
+    //             primitive_textures.emplace_back(m_textures.at(normalTexture));
+    //         }
 
-            meshes.emplace_back(Mesh_({primitive, gltf, locations}, primitive_textures));
-        }
-        models.emplace_back(Model(mesh.name, std::move(meshes)));
-    }
-    m_models = std::move(models);
+    //         meshes.emplace_back(Mesh_({primitive, gltf, locations}, primitive_textures));
+    //     }
+    //     models.emplace_back(Model(mesh.name, std::move(meshes)));
+    // }
+    // m_models = std::move(models);
 
-    std::vector<ModelEntity> entities;
-    for (auto const &node : gltf.nodes) {
-        if (node.mesh == -1) {
-            continue;
-        }
+    // std::vector<ModelEntity> entities;
+    // for (auto const &node : gltf.nodes) {
+    //     if (node.mesh == -1) {
+    //         continue;
+    //     }
 
-        ModelEntity entity(Entity::Prototype(node.name, {}, {}, 1.0F),
-                           m_models[static_cast<unsigned>(node.mesh)],
-                           defaultProgram);
+    //     ModelEntity entity(Entity::Prototype(node.name, {}, {}, 1.0F),
+    //                        m_models[static_cast<unsigned>(node.mesh)],
+    //                        defaultProgram);
 
-        if (!node.translation.empty()) {
-            entity.setPosition(
-                glm::vec3(node.translation[0], node.translation[1], node.translation[2]));
-        }
+    //     if (!node.translation.empty()) {
+    //         entity.setPosition(
+    //             glm::vec3(node.translation[0], node.translation[1], node.translation[2]));
+    //     }
 
-        if (!node.rotation.empty()) {
-            entity.setRotation(glm::eulerAngles(
-                glm::quat(node.rotation[3], node.rotation[0], node.rotation[1], node.rotation[2])));
-        }
+    //     if (!node.rotation.empty()) {
+    //         entity.setRotation(glm::eulerAngles(
+    //             glm::quat(node.rotation[3], node.rotation[0], node.rotation[1],
+    //             node.rotation[2])));
+    //     }
 
-        if (!node.scale.empty()) {
-            entity.setScale(node.scale[0]);
-        }
+    //     if (!node.scale.empty()) {
+    //         entity.setScale(node.scale[0]);
+    //     }
 
-        entities.push_back(std::move(entity));
-    }
+    //     entities.push_back(std::move(entity));
+    // }
 
-    for (auto const &node : gltf.nodes) {
-        for (auto const &child : node.children) {
-            if (!node.translation.empty()) {
-                entities[child].translate(
-                    glm::vec3(node.translation[0], node.translation[1], node.translation[2]));
-            }
-        }
-    }
+    // for (auto const &node : gltf.nodes) {
+    //     for (auto const &child : node.children) {
+    //         if (!node.translation.empty()) {
+    //             entities[child].translate(
+    //                 glm::vec3(node.translation[0], node.translation[1], node.translation[2]));
+    //         }
+    //     }
+    // }
 
-    m_entities = std::move(entities);
+    // m_entities = std::move(entities);
 }
 
 void Controller::run()
@@ -183,12 +184,19 @@ void Controller::run()
         m_camera->lookForward();
         m_camera->updateVPM();
 
+        static constexpr auto MICROSECONDS_PER_SECOND = 1'000'000;
+        m_scene.update(
+            std::chrono::microseconds(static_cast<unsigned>(m_deltaTime * MICROSECONDS_PER_SECOND)),
+            &defaultProgram,
+            m_camera->getViewProj(),
+            m_camera->getPosition());
+
         // Draw scene
-        defaultProgram.bind();
-        for (auto const &entity : m_entities) {
-            entity.draw(m_camera->getViewProj(), m_camera->getPosition());
-        }
-        ShaderProgram::unbind();
+        // defaultProgram.bind();
+        // for (auto const &entity : m_entities) {
+        //     entity.draw(m_camera->getViewProj(), m_camera->getPosition());
+        // }
+        // ShaderProgram::unbind();
 
         m_postProcessFrameBuffer.unbind();
         m_postProcessFrameBuffer.drawOnEntireScreen();

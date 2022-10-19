@@ -1,11 +1,11 @@
 #pragma once
 
+#include <array>
 #include <cstdint>
 #include <glad/gl.h>
 #include <map>
 #include <variant>
 #include <vector>
-#include <array>
 
 struct VertexAttributeData
 {
@@ -45,11 +45,20 @@ struct GpuMesh
     GpuMesh(GpuMesh const &) = delete;
     auto operator=(GpuMesh const &) -> GpuMesh & = delete;
 
-    GpuMesh(GpuMesh &&other) noexcept : vao(other.vao) { other.vao = 0; }
+    GpuMesh(GpuMesh &&other) noexcept
+        : vao(other.vao), indices_count(other.indices_count), indices_type(other.indices_type)
+    {
+        other.vao = 0;
+    }
     auto operator=(GpuMesh &&other) noexcept -> GpuMesh &
     {
         vao = other.vao;
+        indices_count = other.indices_count;
+        indices_type = other.indices_type;
+
+        // Deinitialize other
         other.vao = 0;
+        
         return *this;
     };
 
@@ -57,4 +66,7 @@ struct GpuMesh
 
     // TODO: also store vertex buffers.
     GLuint vao{};
+
+    GLsizei indices_count{};
+    GLenum indices_type{};
 };

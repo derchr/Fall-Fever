@@ -8,7 +8,7 @@ static auto create_vertex_attribute_data(std::span<uint8_t const> vertex_attribu
     -> VertexAttributeData
 {
     T attribute_data;
-    attribute_data.reserve(vertex_attribute_data.size_bytes());
+    attribute_data.resize(vertex_attribute_data.size_bytes());
 
     std::memcpy(
         attribute_data.data(), vertex_attribute_data.data(), vertex_attribute_data.size_bytes());
@@ -20,7 +20,7 @@ template <typename T>
 static auto create_indices(std::span<uint8_t const> gltf_index_data) -> Indices
 {
     T index_data;
-    index_data.reserve(gltf_index_data.size_bytes());
+    index_data.resize(gltf_index_data.size_bytes());
 
     std::memcpy(index_data.data(), gltf_index_data.data(), gltf_index_data.size_bytes());
 
@@ -105,7 +105,7 @@ static auto load_material(fx::gltf::Material const &material,
 
 static auto load_attribute(std::string_view attribute_name,
                            uint32_t attribute_id,
-                           fx::gltf::Document const &gltf) -> std::optional<VertexAttributeData>
+                           fx::gltf::Document const &gltf) -> std::optional<std::pair<std::size_t,VertexAttributeData>>
 {
     auto const &attribute_accessor = gltf.accessors.at(attribute_id);
 
@@ -165,13 +165,12 @@ static auto load_attribute(std::string_view attribute_name,
         std::terminate();
     }();
 
-    return std::move(vertex_attribute_data);
+    return std::make_pair(vertex_attribute_id.value(), std::move(vertex_attribute_data));
 }
 
 auto load_gltf_primitive(fx::gltf::Primitive const &gltf_primitive,
                          fx::gltf::Document const &gltf,
-                         std::filesystem::path const &document_path,
-                         unsigned primitive_id,
+                         std::string_view primitive_identifier,
                          entt::resource_cache<Material> &material_cache,
                          entt::resource_cache<Mesh> &mesh_cache) -> GltfPrimitive
 {
@@ -188,13 +187,13 @@ auto load_gltf_primitive(fx::gltf::Primitive const &gltf_primitive,
 
     std::map<Mesh::VertexAttributeId, VertexAttributeData> attributes;
     for (auto const &attribute : gltf_primitive.attributes) {
-        auto vertex_attribute_data = load_attribute(attribute.first, attribute.second, gltf);
+        auto vertex_attribute = load_attribute(attribute.first, attribute.second, gltf);
 
-        if (!vertex_attribute_data.has_value()) {
+        if (!vertex_attribute.has_value()) {
             continue;
         }
 
-        attributes.emplace(attribute.second, std::move(vertex_attribute_data.value()));
+        attributes.emplace(vertex_attribute.value().first, std::move(vertex_attribute.value().second));
     }
 
     // Load indices
@@ -206,11 +205,10 @@ auto load_gltf_primitive(fx::gltf::Primitive const &gltf_primitive,
     std::span<uint8_t const> indices_data_span =
         indices_buffer_span.subspan(indices_buffer_view.byteOffset, indices_buffer_view.byteLength);
 
-    auto indices = [indices_data_span, &indices_accessor]() {
+    Indices indices = [indices_data_span, &indices_accessor]() {
         if (indices_accessor.componentType == fx::gltf::Accessor::ComponentType::UnsignedByte) {
             return create_indices<Indices::UnsignedByte>(indices_data_span);
         }
-
         if (indices_accessor.componentType == fx::gltf::Accessor::ComponentType::UnsignedShort) {
             return create_indices<Indices::UnsignedShort>(indices_data_span);
         }
@@ -222,12 +220,10 @@ auto load_gltf_primitive(fx::gltf::Primitive const &gltf_primitive,
         std::terminate();
     }();
 
-    std::string const mesh_name =
-        document_path.string() + ".primitive." + std::to_string(primitive_id);
-    entt::hashed_string const mesh_hash(mesh_name.c_str());
+    entt::hashed_string const mesh_hash(primitive_identifier.data());
 
     entt::resource<Mesh> mesh =
-        mesh_cache.load(mesh_hash, Mesh{.attributes = attributes, .indices = indices})
+        mesh_cache.load(mesh_hash, Mesh{.attributes = attributes, .indices = std::move(indices)})
             .first->second;
 
     // Get material by hash
@@ -274,8 +270,13 @@ auto GltfLoader::operator()(std::filesystem::path const &document_path) -> resul
         primitives.reserve(gltf_mesh.primitives.size());
 
         for (auto const &gltf_primitive : gltf_mesh.primitives) {
+            std::string const primitive_identifier = document_path.string() + "." + gltf_mesh.name +
+                                                     "." + ".primitive." +
+                                                     std::to_string(primitive_count);
+
             primitives.push_back(load_gltf_primitive(
-                gltf_primitive, gltf, document_path, primitive_count, material_cache, mesh_cache));
+                gltf_primitive, gltf, primitive_identifier, material_cache, mesh_cache));
+            ++primitive_count;
         }
 
         if (gltf_mesh.name.empty()) {
@@ -296,13 +297,10 @@ auto GltfLoader::operator()(std::filesystem::path const &document_path) -> resul
     for (std::size_t i = 0; i < gltf.nodes.size(); ++i) {
         auto const &node = gltf.nodes.at(i);
 
-        auto mesh = [this, &node, &gltf]() -> std::optional<entt::resource<GltfMesh>> {
+        auto mesh = [this, &node, &gltf_meshes]() -> std::optional<entt::resource<GltfMesh>> {
             if (node.mesh != -1) {
-                // Get mesh by hash
-                auto const &gltf_mesh = gltf.meshes.at(node.mesh);
-                entt::hashed_string mesh_hash(gltf_mesh.name.c_str());
-                entt::resource<GltfMesh> mesh = gltf_mesh_cache[mesh_hash];
-                return {mesh};
+                auto const &gltf_mesh = gltf_meshes.at(node.mesh);
+                return {gltf_mesh};
             }
 
             return {};

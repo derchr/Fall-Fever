@@ -1,4 +1,6 @@
 #include "Scene.h"
+#include "ShaderProgram.h"
+#include "mesh.h"
 #include "name.h"
 #include "transform.h"
 #include "util/Log.h"
@@ -48,13 +50,50 @@ Scene::Scene()
         Log::logger().info("Hello entity {}!", name);
     }
 
-    auto mesh_view = m_registry.view<Mesh>();
-        for (auto [entity, mesh] : mesh_view.each()) {
-        Log::logger().info("Convert mesh {}!");
-        
+    auto mesh_view = m_registry.view<entt::resource<Mesh>>();
+    for (auto [entity, mesh] : mesh_view.each()) {
+        m_registry.emplace<GpuMesh>(entity, GpuMesh{mesh});
+
+        // Remove Mesh resource as it is no longer needed.
+        m_registry.erase<entt::resource<Mesh>>(entity);
     }
 }
 
-void Scene::update(std::chrono::duration<float> delta)
+void Scene::update(std::chrono::duration<float> delta,
+                   ShaderProgram *shaderprogram,
+                   glm::mat4 viewProjMatrix,
+                   glm::vec3 viewPosition)
 {
+    auto mesh_view = m_registry.view<GpuMesh, Transform>();
+    for (auto [entity, mesh, transform] : mesh_view.each()) {
+        shaderprogram->bind();
+
+        // Bind modelview matrix uniform
+        {
+            // Translate * Rotate * Scale * vertex_vec;
+            // First scaling, then rotation, then translation
+
+            // Translate
+            glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), transform.translation);
+
+            // Rotate
+            glm::mat4 rotationMatrix = glm::toMat4(transform.rotation);
+
+            // Scale
+            glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), transform.scale);
+
+            glm::mat4 modelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
+
+            glm::mat4 modelViewProj = viewProjMatrix * modelMatrix;
+            shaderprogram->setUniform("u_modelViewProjMatrix", modelViewProj);
+            // shaderprogram->setUniform("u_modelMatrix", modelMatrix);
+            // shaderprogram->setUniform("u_viewPosition", viewPosition);
+        }
+
+        glBindVertexArray(mesh.vao);
+        glDrawElements(GL_TRIANGLES, mesh.indices_count, mesh.indices_type, nullptr);
+        glBindVertexArray(0);
+
+        ShaderProgram::unbind();
+    }
 }

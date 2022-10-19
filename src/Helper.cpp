@@ -109,7 +109,7 @@ void Helper::gl_debug_callback(GLenum source,
     }
 
     if (severity == GL_DEBUG_SEVERITY_HIGH || severity == GL_DEBUG_SEVERITY_MEDIUM)
-        Log::logger().debug("\n[OpenGL Debug Message]\n"
+        Log::logger().debug("[OpenGL Debug Message]\n"
                             "Message: {}\n"
                             "Source: {}\n"
                             "Type: {}\n"

@@ -1,18 +1,23 @@
 #pragma once
 
-#include "mesh.h"
-#include "material.h"
 #include "gltf_loader.h"
+#include "material.h"
+#include "mesh.h"
 
-#include <entt/entt.hpp>
 #include <chrono>
+#include <entt/entt.hpp>
+
+class ShaderProgram;
 
 class Scene
 {
 public:
     Scene();
 
-    void update(std::chrono::duration<float> delta);
+    void update(std::chrono::duration<float> delta,
+                ShaderProgram *shaderprogram,
+                glm::mat4 viewProjMatrix,
+                glm::vec3 viewPosition);
 
 private:
     entt::registry m_registry;
