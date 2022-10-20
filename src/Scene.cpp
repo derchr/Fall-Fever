@@ -2,6 +2,7 @@
 #include "ShaderProgram.h"
 #include "mesh.h"
 #include "name.h"
+#include "relationship.h"
 #include "transform.h"
 #include "util/Log.h"
 
@@ -30,19 +31,45 @@ Scene::Scene()
 
     // Spawn an entity for every node in scene
     for (auto const &node : default_scene->nodes) {
-        auto top_level_entity = m_registry.create();
-        m_registry.emplace<Name>(top_level_entity, node->name);
-        m_registry.emplace<Transform>(top_level_entity, node->transform);
+        std::function<entt::entity(GltfNode const &, std::optional<entt::entity>)> spawn_node =
+            [this, &spawn_node](GltfNode const &node, std::optional<entt::entity> parent) {
+                auto entity = m_registry.create();
+                m_registry.emplace<Name>(entity, node.name);
+                m_registry.emplace<Transform>(entity, node.transform);
+                m_registry.emplace<GlobalTransform>(entity, GlobalTransform{});
 
-        auto mesh = node->mesh;
-        if (mesh.has_value()) {
-            for (auto const &primitive : mesh.value()->primitives) {
-                auto mesh_entity = m_registry.create();
-                m_registry.emplace<Transform>(mesh_entity, Transform{});
-                m_registry.emplace<entt::resource<Mesh>>(mesh_entity, primitive.mesh);
-                m_registry.emplace<entt::resource<Material>>(mesh_entity, primitive.material);
-            }
-        }
+                if (parent.has_value()) {
+                    m_registry.emplace<Parent>(entity, Parent{.parent = parent.value()});
+                }
+
+                std::vector<entt::entity> child_entities;
+
+                auto mesh = node.mesh;
+                if (mesh.has_value()) {
+                    for (auto const &primitive : mesh.value()->primitives) {
+                        auto mesh_entity = m_registry.create();
+                        m_registry.emplace<Parent>(mesh_entity, Parent{.parent = entity});
+                        m_registry.emplace<Transform>(mesh_entity, Transform{});
+                        m_registry.emplace<GlobalTransform>(mesh_entity, GlobalTransform{});
+                        m_registry.emplace<entt::resource<Mesh>>(mesh_entity, primitive.mesh);
+                        m_registry.emplace<entt::resource<Material>>(mesh_entity,
+                                                                     primitive.material);
+
+                        child_entities.push_back(mesh_entity);
+                    }
+                }
+
+                // Spawn child nodes
+                for (auto const &child : node.children) {
+                    auto child_entity = spawn_node(child, entity);
+                    child_entities.push_back(child_entity);
+                }
+
+                m_registry.emplace<Children>(entity, Children{.children = child_entities});
+                return entity;
+            };
+
+        spawn_node(node, {});
     }
 
     auto name_view = m_registry.view<Name>();
@@ -64,27 +91,45 @@ void Scene::update(std::chrono::duration<float> delta,
                    glm::mat4 viewProjMatrix,
                    glm::vec3 viewPosition)
 {
-    auto mesh_view = m_registry.view<GpuMesh, Transform>();
+    // Update GlobalTransform components
+    // TODO: Only do this when the Transform changed.
+    auto root_transform_view =
+        m_registry.view<Transform const, GlobalTransform>(entt::exclude<Parent>);
+    auto transform_view = m_registry.view<Transform const, GlobalTransform, Parent const>();
+
+    for (auto [entity, transform, global_transform] : root_transform_view.each()) {
+        global_transform = transform;
+
+        auto parent_global_transform = global_transform;
+        if (auto *children = m_registry.try_get<Children>(entity)) {
+            for (auto child : children->children) {
+                std::function<void(entt::entity entity, GlobalTransform parent_global_transform)>
+                    transform_propagate =
+                        [this, &transform_propagate, &transform_view](
+                            entt::entity entity, GlobalTransform parent_global_transform) {
+                            auto [transform, global_transform, parent] = transform_view.get(entity);
+                            global_transform.transform = parent_global_transform.transform *
+                                                         GlobalTransform(transform).transform;
+
+                            if (auto *children = m_registry.try_get<Children>(entity)) {
+                                for (auto child : children->children) {
+                                    transform_propagate(child, global_transform);
+                                }
+                            }
+                        };
+
+                transform_propagate(child, parent_global_transform);
+            }
+        }
+    }
+
+    auto mesh_view = m_registry.view<GpuMesh, GlobalTransform>();
     for (auto [entity, mesh, transform] : mesh_view.each()) {
         shaderprogram->bind();
 
         // Bind modelview matrix uniform
         {
-            // Translate * Rotate * Scale * vertex_vec;
-            // First scaling, then rotation, then translation
-
-            // Translate
-            glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), transform.translation);
-
-            // Rotate
-            glm::mat4 rotationMatrix = glm::toMat4(transform.rotation);
-
-            // Scale
-            glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), transform.scale);
-
-            glm::mat4 modelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
-
-            glm::mat4 modelViewProj = viewProjMatrix * modelMatrix;
+            glm::mat4 modelViewProj = viewProjMatrix * transform.transform;
             shaderprogram->setUniform("u_modelViewProjMatrix", modelViewProj);
             // shaderprogram->setUniform("u_modelMatrix", modelMatrix);
             // shaderprogram->setUniform("u_viewPosition", viewPosition);

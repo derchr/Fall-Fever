@@ -105,7 +105,8 @@ static auto load_material(fx::gltf::Material const &material,
 
 static auto load_attribute(std::string_view attribute_name,
                            uint32_t attribute_id,
-                           fx::gltf::Document const &gltf) -> std::optional<std::pair<std::size_t,VertexAttributeData>>
+                           fx::gltf::Document const &gltf)
+    -> std::optional<std::pair<std::size_t, VertexAttributeData>>
 {
     auto const &attribute_accessor = gltf.accessors.at(attribute_id);
 
@@ -193,7 +194,8 @@ auto load_gltf_primitive(fx::gltf::Primitive const &gltf_primitive,
             continue;
         }
 
-        attributes.emplace(vertex_attribute.value().first, std::move(vertex_attribute.value().second));
+        attributes.emplace(vertex_attribute.value().first,
+                           std::move(vertex_attribute.value().second));
     }
 
     // Load indices
@@ -328,13 +330,17 @@ auto GltfLoader::operator()(std::filesystem::path const &document_path) -> resul
     }
 
     // Resolve child hierarchy
-    for (auto const &gltf_node : gltf.nodes) {
+    // TODO WRONG!!! does only work for 1 child generation
+    for (std::size_t i = 0; i < gltf.nodes.size(); ++i) {
+        auto const &gltf_node = gltf.nodes.at(i);
         std::vector<entt::resource<GltfNode>> children;
         for (int child_node_id : gltf_node.children) {
             auto child_node = nodes_map.extract(child_node_id);
             children.push_back(child_node.mapped());
         }
-    }
+        auto const &node = nodes_map.at(i);
+        node->children = std::move(children);
+    };
 
     std::vector<entt::resource<GltfNode>> nodes;
     nodes.reserve(nodes_map.size());
