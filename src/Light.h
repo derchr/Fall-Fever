@@ -1,15 +1,11 @@
 #pragma once
 
-#include "Entity.h"
-
 #include <glm/glm.hpp>
 #include <string>
 
-#define NUM_POINT_LIGHTS 1
-
 class ShaderProgram;
 
-class Light : public Entity
+class Light
 {
 public:
     struct Prototype

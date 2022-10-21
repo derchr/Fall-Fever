@@ -2,10 +2,6 @@
 
 #include "FrameBuffer.h"
 #include "ShaderProgram.h"
-#include "VertexArray.h"
-#include "resources/Model.h"
-#include "Entity.h"
-#include "resources/Texture.h"
 #include "Scene.h"
 
 #include <glm/glm.hpp>
@@ -44,10 +40,6 @@ private:
     static constexpr unsigned MAX_FPS = 60;
 
     Scene m_scene;
-
-    std::vector<ModelEntity> m_entities;
-    std::vector<Model> m_models;
-    std::unordered_map<unsigned, Texture> m_textures;
 
     double m_deltaTime{};
     float m_exposure = 1.0;

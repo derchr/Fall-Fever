@@ -2,8 +2,10 @@
 
 struct AttributeLocations
 {
-    int position;
-    int normal;
-    int uv;
-    int tangent;
+    int position = 0;
+    int uv = 1;
+    int normal = 2;
+    int tangent = 3;
 };
+
+static constexpr AttributeLocations ATTRIBUTE_LOCATION;

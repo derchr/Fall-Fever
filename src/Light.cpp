@@ -6,7 +6,7 @@
 uint32_t Light::s_idCounter = 0;
 
 Light::Light(const std::string &name, glm::vec3 color, float intensity, ShaderProgram *shaderProgram)
-    : Entity(name), m_shaderProgram(shaderProgram), m_intensity(intensity), m_lightColor(color * intensity)
+    : m_shaderProgram(shaderProgram), m_intensity(intensity), m_lightColor(color * intensity)
 {
     m_id = s_idCounter++;
 }

@@ -2,4 +2,7 @@
 
 #include <string>
 
-using Name = std::string;
+struct Name
+{
+    std::string name;
+};

@@ -72,17 +72,20 @@ Scene::Scene()
         spawn_node(node, {});
     }
 
-    auto name_view = m_registry.view<Name>();
-    for (auto [entity, name] : name_view.each()) {
-        Log::logger().info("Hello entity {}!", name);
-    }
-
     auto mesh_view = m_registry.view<entt::resource<Mesh>>();
     for (auto [entity, mesh] : mesh_view.each()) {
-        m_registry.emplace<GpuMesh>(entity, GpuMesh{mesh});
+        m_registry.emplace<GpuMesh>(entity, GpuMesh(mesh));
 
         // Remove Mesh resource as it is no longer needed.
         m_registry.erase<entt::resource<Mesh>>(entity);
+    }
+
+    auto material_view = m_registry.view<entt::resource<Material>>();
+    for (auto [entity, material] : material_view.each()) {
+        m_registry.emplace<GpuMaterial>(entity, GpuMaterial(material));
+
+        // Remove Material resource as it is no longer needed.
+        m_registry.erase<entt::resource<Material>>(entity);
     }
 }
 
@@ -123,16 +126,19 @@ void Scene::update(std::chrono::duration<float> delta,
         }
     }
 
-    auto mesh_view = m_registry.view<GpuMesh, GlobalTransform>();
-    for (auto [entity, mesh, transform] : mesh_view.each()) {
+    auto mesh_view = m_registry.view<GpuMesh const, GpuMaterial const, GlobalTransform const>();
+    for (auto [entity, mesh, material, transform] : mesh_view.each()) {
         shaderprogram->bind();
+
+        // Bind textures
+        material.bind(*shaderprogram);
 
         // Bind modelview matrix uniform
         {
             glm::mat4 modelViewProj = viewProjMatrix * transform.transform;
             shaderprogram->setUniform("u_modelViewProjMatrix", modelViewProj);
-            // shaderprogram->setUniform("u_modelMatrix", modelMatrix);
-            // shaderprogram->setUniform("u_viewPosition", viewPosition);
+            shaderprogram->setUniform("u_modelMatrix", transform.transform);
+            shaderprogram->setUniform("u_viewPosition", viewPosition);
         }
 
         glBindVertexArray(mesh.vao);

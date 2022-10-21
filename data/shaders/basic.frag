@@ -69,7 +69,6 @@ void main()
         fragmentColor += pointLightContribution(u_pointLight[i], normal, v_fragmentPosition, viewDir);
     }
     
-    fragmentColor = vec3(1.,1.,1.);
     f_color = vec4(fragmentColor, 1.0f);
 }
 

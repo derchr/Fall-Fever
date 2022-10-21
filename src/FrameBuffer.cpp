@@ -4,19 +4,17 @@
 
 #include <cstddef>
 
-AbstractFrameBuffer::~AbstractFrameBuffer() = default;
-
-void AbstractFrameBuffer::bind() const
+void Framebuffer::bind() const
 {
     glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
 }
 
-void AbstractFrameBuffer::unbind() const
+void Framebuffer::unbind()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-GLuint AbstractFrameBuffer::getFBO() const
+GLuint Framebuffer::getFBO() const
 {
     return m_FBO;
 }

@@ -120,6 +120,12 @@ void ShaderProgram::setUniform(const std::string &name, int value) const
     glUniform1i(location, value);
 }
 
+void ShaderProgram::setUniform(const std::string &name, unsigned int value) const
+{
+    GLint location = retrieveUniformLocation(name);
+    glUniform1ui(location, value);
+}
+
 void ShaderProgram::setUniform(const std::string &name, float value) const
 {
     GLint location = retrieveUniformLocation(name);

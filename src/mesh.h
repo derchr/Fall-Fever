@@ -50,6 +50,7 @@ struct GpuMesh
     {
         other.vao = 0;
     }
+    
     auto operator=(GpuMesh &&other) noexcept -> GpuMesh &
     {
         vao = other.vao;

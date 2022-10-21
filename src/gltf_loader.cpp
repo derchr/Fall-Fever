@@ -1,5 +1,6 @@
 #include "gltf_loader.h"
 #include "util/Log.h"
+#include "definitions/attribute_locations.h"
 
 #include <iterator>
 
@@ -117,16 +118,16 @@ static auto load_attribute(std::string_view attribute_name,
 
     auto vertex_attribute_id = [attribute_name]() -> std::optional<std::size_t> {
         if (attribute_name == "POSITION") {
-            return 0;
+            return ATTRIBUTE_LOCATION.position;
         }
         if (attribute_name == "TEXCOORD_0") {
-            return 1;
+            return ATTRIBUTE_LOCATION.uv;
         }
         if (attribute_name == "NORMAL") {
-            return 2;
+            return ATTRIBUTE_LOCATION.normal;
         }
         if (attribute_name == "TANGENT") {
-            return 3;
+            return ATTRIBUTE_LOCATION.tangent;
         }
 
         return {};
