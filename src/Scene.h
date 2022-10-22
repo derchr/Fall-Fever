@@ -1,9 +1,9 @@
 #pragma once
 
+#include "Window.h"
 #include "gltf_loader.h"
 #include "material.h"
 #include "mesh.h"
-#include "Window.h"
 
 #include <chrono>
 #include <entt/entt.hpp>
@@ -15,8 +15,12 @@ class Scene
 public:
     Scene();
 
-    void update(std::chrono::duration<float> delta,
-                ShaderProgram *shaderprogram, KeyInput const &key_input,MouseCursorInput const &mouse_cursor_input, float aspect_ratio);
+    void update(std::chrono::duration<float> delta_time,
+                KeyInput const &key_input,
+                MouseCursorInput const &mouse_cursor_input,
+                float aspect_ratio);
+
+    void draw(ShaderProgram *shaderprogram) const;
 
 private:
     entt::registry m_registry;

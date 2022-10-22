@@ -1,5 +1,4 @@
 #include "Controller.h"
-#include "Camera.h"
 #include "FrameBuffer.h"
 #include "Helper.h"
 #include "Light.h"
@@ -64,16 +63,6 @@ void Controller::run()
         limit_framerate();
 
         // --- Update game ---
-
-        // --- Render and buffer swap ---
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        m_postProcessFrameBuffer.bind();
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        // m_camera->lookForward();
-        // m_camera->updateVPM();
-
         m_gameWindow->clear_mouse_cursor_input(); // MOVE DOWN AGAIN!
         glfwPollEvents();
 
@@ -83,8 +72,15 @@ void Controller::run()
         static constexpr auto MICROSECONDS_PER_SECOND = 1'000'000;
         m_scene.update(
             std::chrono::microseconds(static_cast<unsigned>(m_deltaTime * MICROSECONDS_PER_SECOND)),
-            &defaultProgram,
             key_input,mouse_cursor_input, m_gameWindow->aspectRatio());
+
+        // --- Render and buffer swap ---
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        m_postProcessFrameBuffer.bind();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        m_scene.draw(&defaultProgram);
 
         Framebuffer::unbind();
         m_postProcessFrameBuffer.drawOnEntireScreen();
@@ -145,5 +141,5 @@ void Controller::updateExposure(ShaderProgram &shaderProgram) const
 {
     shaderProgram.bind();
     shaderProgram.setUniform("u_exposure", m_exposure);
-    shaderProgram.unbind();
+    ShaderProgram::unbind();
 }

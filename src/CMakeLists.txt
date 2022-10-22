@@ -3,7 +3,6 @@ add_library(fever_engine
     Controller.cpp
     Window.cpp
     ShaderProgram.cpp
-    Camera.cpp
     Light.cpp
     Scene.cpp
     FrameBuffer.cpp

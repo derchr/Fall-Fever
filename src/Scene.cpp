@@ -7,9 +7,6 @@
 #include "transform.h"
 #include "util/Log.h"
 
-#include <GLFW/glfw3.h>
-#include <algorithm>
-
 using namespace entt::literals;
 
 // TODO: make scene initialization part of gltf loader as seen in bevy
@@ -95,14 +92,13 @@ Scene::Scene()
     // Spawn the camera
     auto entity = m_registry.create();
     m_registry.emplace<Name>(entity, "Camera");
-    m_registry.emplace<Transform>(entity, Transform{.translation = glm::vec3(0.0, 0.5, -2.0)});
+    m_registry.emplace<Transform>(entity, Transform{.translation = glm::vec3(0.0, 0.5, -1.0)});
     m_registry.emplace<GlobalTransform>(entity, GlobalTransform{});
     m_registry.emplace<Camera>(entity,
-                               Camera{.projection = Camera::Perspective{.aspect_ratio = 1.6}});
+                               Camera{.projection = Camera::Perspective{}});
 }
 
 void Scene::update(std::chrono::duration<float> delta,
-                   ShaderProgram *shaderprogram,
                    KeyInput const &key_input,
                    MouseCursorInput const &mouse_cursor_input,
                    float aspect_ratio)
@@ -142,114 +138,38 @@ void Scene::update(std::chrono::duration<float> delta,
         }
     }
 
-    {
-        auto mesh_view = m_registry.view<GpuMesh const, GpuMaterial const, GlobalTransform const>();
-        auto camera_view = m_registry.view<Camera const, GlobalTransform const>();
-        auto camera_entity = camera_view.front();
-        auto [camera, camera_transform] = camera_view.get(camera_entity);
-        glm::mat4 view_projection_matrix =
-            camera.projection_matrix() * Camera::view_matrix(camera_transform);
+    Camera::keyboard_movement(m_registry, key_input, delta);
+    Camera::mouse_orientation(m_registry, mouse_cursor_input);
+    Camera::aspect_ratio_update(m_registry, aspect_ratio);
+}
 
-        for (auto [entity, mesh, material, transform] : mesh_view.each()) {
-            shaderprogram->bind();
+void Scene::draw(ShaderProgram *shaderprogram) const
+{
+    auto mesh_view = m_registry.view<GpuMesh const, GpuMaterial const, GlobalTransform const>();
+    auto camera_view = m_registry.view<Camera const, GlobalTransform const>();
+    auto camera_entity = camera_view.front();
+    auto [camera, camera_transform] = camera_view.get(camera_entity);
+    glm::mat4 view_projection_matrix =
+        camera.projection_matrix() * Camera::view_matrix(camera_transform);
 
-            // Bind textures
-            material.bind(*shaderprogram);
+    for (auto [entity, mesh, material, transform] : mesh_view.each()) {
+        shaderprogram->bind();
 
-            // Bind modelview matrix uniform
-            {
-                glm::mat4 modelViewProj = view_projection_matrix * transform.transform;
-                shaderprogram->setUniform("u_modelViewProjMatrix", modelViewProj);
-                shaderprogram->setUniform("u_modelMatrix", transform.transform);
-                shaderprogram->setUniform("u_viewPosition", camera_transform.position());
-            }
+        // Bind textures
+        material.bind(*shaderprogram);
 
-            glBindVertexArray(mesh.vao);
-            glDrawElements(GL_TRIANGLES, mesh.indices_count, mesh.indices_type, nullptr);
-            glBindVertexArray(0);
-
-            ShaderProgram::unbind();
-        }
-    }
-
-    // Camera keyboard update
-    {
-        auto camera_view = m_registry.view<Camera const, Transform, GlobalTransform const>();
-        auto camera_entity = camera_view.front();
-        auto [camera, camera_transform, camera_global_transform] = camera_view.get(camera_entity);
-
-        glm::vec3 front_vec = Camera::front_vector(camera_global_transform);
-        glm::vec3 front_vec_without_y = glm::vec3(front_vec.x, 0., front_vec.z);
-        glm::vec3 deltaPos = glm::vec3(0., 0., 0.);
-        // float deltaFactor = SPEED * deltaTime * (m_accellerate ? 5.0 : 1.0);
-        float delta_factor = 0.5 * delta.count();
-        // m_accellerate = false;
-
-        for (auto const &[key, pressed] : key_input) {
-            if (key == GLFW_KEY_W && pressed) {
-                deltaPos += delta_factor * glm::normalize(front_vec_without_y);
-            }
-            if (key == GLFW_KEY_S && pressed) {
-                deltaPos -= delta_factor * glm::normalize(front_vec_without_y);
-            }
-            if (key == GLFW_KEY_A && pressed) {
-                deltaPos -= delta_factor * glm::normalize(glm::cross(front_vec, Camera::UP_VECTOR));
-            }
-            if (key == GLFW_KEY_D && pressed) {
-                deltaPos += delta_factor * glm::normalize(glm::cross(front_vec, Camera::UP_VECTOR));
-            }
-            if (key == GLFW_KEY_SPACE && pressed) {
-                deltaPos += delta_factor * Camera::UP_VECTOR;
-            }
-            if (key == GLFW_KEY_LEFT_SHIFT && pressed) {
-                deltaPos -= delta_factor * Camera::UP_VECTOR;
-            }
-            // if (key == GLFW_KEY_LEFT_ALT && pressed) {
-            //     m_accellerate = true;
-            // }
-        }
-        camera_transform.translation += deltaPos;
-    }
-
-    // Camera mouse update
-    {
-        auto camera_view = m_registry.view<Camera, Transform>();
-        auto camera_entity = camera_view.front();
-        auto [camera, camera_transform] = camera_view.get(camera_entity);
-
-        auto [deltaX, deltaY] = mouse_cursor_input;
-
-        if (std::abs(deltaX) < std::numeric_limits<double>::epsilon() &&
-            std::abs(deltaY) < std::numeric_limits<double>::epsilon()) {
-            return;
+        // Bind modelview matrix uniform
+        {
+            glm::mat4 modelViewProj = view_projection_matrix * transform.transform;
+            shaderprogram->setUniform("u_modelViewProjMatrix", modelViewProj);
+            shaderprogram->setUniform("u_modelMatrix", transform.transform);
+            shaderprogram->setUniform("u_viewPosition", camera_transform.position());
         }
 
-        auto pitch = static_cast<float>(deltaY);
-        auto yaw = static_cast<float>(deltaX);
-        auto roll = 0.0F;
+        glBindVertexArray(mesh.vao);
+        glDrawElements(GL_TRIANGLES, mesh.indices_count, mesh.indices_type, nullptr);
+        glBindVertexArray(0);
 
-        // Orthographic projection currently unsupported
-        auto &camera_perspective = std::get<Camera::Perspective>(camera.projection);
-
-        camera_perspective.pitch += glm::radians(pitch);
-        camera_perspective.yaw += glm::radians(yaw);
-
-        static constexpr float PITCH_CLIP = glm::radians(89.);
-        camera_perspective.pitch =
-            std::clamp(static_cast<float>(camera_perspective.pitch), -PITCH_CLIP, PITCH_CLIP);
-
-        camera_transform.orientation =
-            glm::quat(glm::vec3(-camera_perspective.pitch, -camera_perspective.yaw, 0.0));
-    }
-
-    // Camera aspect ratio update
-    {
-        auto camera_view = m_registry.view<Camera>();
-        auto camera_entity = camera_view.front();
-        auto [camera] = camera_view.get(camera_entity);
-
-        // Orthographic projection currently unsupported
-        auto &camera_perspective = std::get<Camera::Perspective>(camera.projection);
-        camera_perspective.aspect_ratio = aspect_ratio;
+        ShaderProgram::unbind();
     }
 }

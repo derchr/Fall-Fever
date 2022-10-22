@@ -1,12 +1,10 @@
 #pragma once
 
+#include "input.h"
+
 #include <memory>
 #include <unordered_map>
 #include <utility>
-
-using KeyInput = std::unordered_map<int, bool>;
-using MouseButtonInput = std::unordered_map<int, bool>;
-using MouseCursorInput = std::pair<double, double>;
 
 class GLFWwindow;
 
@@ -35,7 +33,7 @@ private:
     static void glfw_error_callback(int error, const char *description);
     static void framebuffer_size_callback(GLFWwindow *glfw_window, int width, int height);
 
-    static constexpr float MOUSE_SENSITIVITY = 0.15f;
+    static constexpr float MOUSE_SENSITIVITY = 0.15F;
 
     void set_catched_cursor(bool value);
 
