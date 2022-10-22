@@ -1,5 +1,9 @@
 #include "gltf_loader.h"
+#include "camera.h"
 #include "definitions/attribute_locations.h"
+#include "name.h"
+#include "relationship.h"
+#include "scene.h"
 #include "util/Log.h"
 
 #include <iterator>
@@ -74,7 +78,8 @@ static auto load_material(fx::gltf::Material const &material,
                           std::filesystem::path const &document_path,
                           entt::resource_cache<Material> &material_cache,
                           entt::resource_cache<Image> &image_cache,
-                          entt::resource_cache<Shader, ShaderLoader> &shader_cache) -> entt::resource<Material>
+                          entt::resource_cache<Shader, ShaderLoader> &shader_cache)
+    -> entt::resource<Material>
 {
     auto base_color_texture_id = material.pbrMetallicRoughness.baseColorTexture.index;
     auto normal_texture_id = material.normalTexture.index;
@@ -315,6 +320,23 @@ auto GltfLoader::operator()(std::filesystem::path const &document_path) -> resul
             return {};
         }();
 
+        auto camera = [this, &node, &gltf]() -> std::optional<GltfCamera> {
+            if (node.camera != -1) {
+                auto const &camera = gltf.cameras.at(node.camera);
+
+                if (camera.type != fx::gltf::Camera::Type::Perspective) {
+                    Log::logger().warn("Only perspective projections supported.");
+                }
+
+                // Only perspective supported until now
+                GltfCamera gltf_camera{.projection = camera.perspective};
+
+                return {gltf_camera};
+            }
+
+            return {};
+        }();
+
         glm::vec3 translation(node.translation[0], node.translation[1], node.translation[2]);
         glm::quat rotation(node.rotation[3], node.rotation[0], node.rotation[1], node.rotation[2]);
         glm::vec3 scale(node.scale[0], node.scale[1], node.scale[2]);
@@ -326,12 +348,14 @@ auto GltfLoader::operator()(std::filesystem::path const &document_path) -> resul
         }
 
         entt::hashed_string node_hash(node.name.c_str());
-        entt::resource<GltfNode> node_resource =
-            gltf_node_cache
-                .load(node_hash,
-                      GltfNode{
-                          .name = node.name, .transform = transform, .mesh = mesh, .children = {}})
-                .first->second;
+        entt::resource<GltfNode> node_resource = gltf_node_cache
+                                                     .load(node_hash,
+                                                           GltfNode{.name = node.name,
+                                                                    .transform = transform,
+                                                                    .mesh = mesh,
+                                                                    .camera = camera,
+                                                                    .children = {}})
+                                                     .first->second;
 
         nodes_map.emplace(i, node_resource);
     }
@@ -356,35 +380,103 @@ auto GltfLoader::operator()(std::filesystem::path const &document_path) -> resul
     }
 
     // Load scenes
-    std::vector<entt::resource<GltfScene>> scenes;
-    for (auto const &scene : gltf.scenes) {
+    std::vector<entt::resource<Scene>> scenes;
+    for (auto const &gltf_scene : gltf.scenes) {
         // Get nodes by hash
         std::vector<entt::resource<GltfNode>> nodes;
-        nodes.reserve(scene.nodes.size());
+        nodes.reserve(gltf_scene.nodes.size());
 
-        for (auto node_id : scene.nodes) {
+        for (auto node_id : gltf_scene.nodes) {
             auto const &node = gltf.nodes.at(node_id);
             entt::hashed_string node_hash(node.name.c_str());
             nodes.push_back(gltf_node_cache[node_hash]);
         }
 
-        if (scene.name.empty()) {
+        if (gltf_scene.name.empty()) {
             Log::logger().warn("glTF scene has no name.");
         }
 
-        entt::hashed_string scene_hash(scene.name.c_str());
-        entt::resource<GltfScene> scene_resource =
-            gltf_scene_cache.load(scene_hash, GltfScene{.nodes = std::move(nodes)}).first->second;
+        entt::registry registry;
+
+        // Spawn an entity for every node in scene
+        for (auto const &node : nodes) {
+            std::function<entt::entity(GltfNode const &, std::optional<entt::entity>)> spawn_node =
+                [this, &spawn_node, &registry](GltfNode const &node,
+                                               std::optional<entt::entity> parent) {
+                    auto entity = registry.create();
+                    registry.emplace<Name>(entity, node.name);
+                    registry.emplace<Transform>(entity, node.transform);
+                    registry.emplace<GlobalTransform>(entity, GlobalTransform{});
+
+                    if (parent.has_value()) {
+                        registry.emplace<Parent>(entity, Parent{.parent = parent.value()});
+                    }
+
+                    std::vector<entt::entity> child_entities;
+
+                    auto mesh = node.mesh;
+                    if (mesh.has_value()) {
+                        for (auto const &primitive : mesh.value()->primitives) {
+                            auto mesh_entity = registry.create();
+                            registry.emplace<Parent>(mesh_entity, Parent{.parent = entity});
+                            registry.emplace<Transform>(mesh_entity, Transform{});
+                            registry.emplace<GlobalTransform>(mesh_entity, GlobalTransform{});
+                            registry.emplace<entt::resource<Mesh>>(mesh_entity, primitive.mesh);
+                            registry.emplace<entt::resource<Material>>(mesh_entity,
+                                                                       primitive.material);
+
+                            child_entities.push_back(mesh_entity);
+                        }
+                    }
+
+                    auto camera = node.camera;
+                    if (camera.has_value()) {
+                        auto perspective =
+                            std::get<fx::gltf::Camera::Perspective>(camera.value().projection);
+                        Camera::Perspective camera_perspective{.fov = perspective.yfov,
+                                                               .aspect_ratio =
+                                                                   perspective.aspectRatio,
+                                                               .near = perspective.znear,
+                                                               .far = perspective.zfar};
+                        registry.emplace<Camera>(entity, Camera{.projection = camera_perspective});
+                    }
+
+                    // Spawn child nodes
+                    for (auto const &child : node.children) {
+                        auto child_entity = spawn_node(child, entity);
+                        child_entities.push_back(child_entity);
+                    }
+
+                    registry.emplace<Children>(entity, Children{.children = child_entities});
+                    return entity;
+                };
+
+            spawn_node(node, {});
+        }
+
+        auto camera_view = registry.view<Camera const>();
+        if (camera_view.empty()) {
+            // Spawn default camera
+            auto entity = registry.create();
+            registry.emplace<Name>(entity, "Camera");
+            registry.emplace<Transform>(entity, Transform{.translation = Camera::DEFAULT_POSITION});
+            registry.emplace<GlobalTransform>(entity, GlobalTransform{});
+            registry.emplace<Camera>(entity, Camera{.projection = Camera::Perspective{}});
+        }
+
+        entt::hashed_string scene_hash(gltf_scene.name.c_str());
+        entt::resource<Scene> scene_resource =
+            scene_cache.load(scene_hash, Scene{std::move(registry)}).first->second;
         scenes.push_back(scene_resource);
     }
 
     // Default scene
-    entt::resource<GltfScene> default_scene = [&gltf, &scenes]() {
+    auto default_scene = [&gltf, &scenes]() -> std::optional<entt::resource<Scene>> {
         if (gltf.scene != -1) {
             return scenes.at(gltf.scene);
         }
 
-        return scenes.at(0);
+        return {};
     }();
 
     return std::make_shared<Gltf>(Gltf{.materials = std::move(materials),

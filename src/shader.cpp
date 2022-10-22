@@ -33,11 +33,11 @@ Shader::Shader(std::string_view name, std::filesystem::path const &directory)
     }
 
 #ifdef NDEBUG
-    glDetachShader(m_ShaderId, vertexShader);
-    glDetachShader(m_ShaderId, fragmentShader);
+    glDetachShader(program, vertex_shader);
+    glDetachShader(program, fragment_shader);
 
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    glDeleteShader(vertex_shader);
+    glDeleteShader(fragment_shader);
 #endif
 
     Log::logger().trace(R"(Loaded Shader "{}")", name);

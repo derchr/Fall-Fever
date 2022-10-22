@@ -20,6 +20,8 @@ struct Camera
     static constexpr float SPEED = 0.5;
     static constexpr float ACCELERATION = 5.0;
 
+    static constexpr glm::vec3 DEFAULT_POSITION = glm::vec3(0.0, 0.25, -1.0);
+
     struct Perspective
     {
         float fov = DEFAULT_FOV;

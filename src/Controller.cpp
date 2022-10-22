@@ -23,29 +23,34 @@
 using namespace entt::literals;
 
 Controller::Controller()
-    : m_scene(m_shader_cache),
-      m_gameWindow(std::make_shared<Window>()),
+    : m_gameWindow(std::make_shared<Window>()),
       m_postProcessFrameBuffer(m_gameWindow->dimensions().first,
                                m_gameWindow->dimensions().second,
-                               post_processing_shader)
+                               post_processing_shader),
+      m_gltf_loader{.image_cache = m_image_cache,
+                    .material_cache = m_material_cache,
+                    .mesh_cache = m_mesh_cache,
+                    .shader_cache = m_shader_cache,
+                    .scene_cache = m_scene_cache,
+                    .gltf_mesh_cache = m_gltf_mesh_cache,
+                    .gltf_node_cache = m_gltf_node_cache},
+      m_gltf_cache(m_gltf_loader)
 {
-    // if (!gltf.cameras.empty()) {
-    //     auto const &gltf_camera = gltf.cameras.at(0);
+    // std::filesystem::path document_path("Lantern/glTF-Binary/Lantern.glb");
+    std::filesystem::path document_path("ABeautifulGame.glb");
+    entt::hashed_string document_hash(document_path.c_str());
 
-    //     assert(gltf_camera.type == fx::gltf::Camera::Type::Perspective);
-    //     auto const &perspective = gltf_camera.perspective;
+    entt::resource<Gltf> gltf_document =
+        m_gltf_cache.load(document_hash, document_path).first->second;
 
-    //     m_camera = std::make_shared<Camera>(perspective.yfov, perspective.aspectRatio);
-    // } else {
-    // m_camera = std::make_shared<Camera>(90., m_gameWindow->aspectRatio());
-    // }
+    m_scene = gltf_document->default_scene.value().handle();
 }
 
 void Controller::run()
 {
     updateExposure(post_processing_shader);
 
-    entt::hashed_string shader_hash (Material::SHADER_NAME.data());
+    entt::hashed_string shader_hash(Material::SHADER_NAME.data());
     auto standard_material_shader =
         m_shader_cache.load(shader_hash, Material::SHADER_NAME).first->second;
 
@@ -74,7 +79,7 @@ void Controller::run()
         auto const &mouse_cursor_input = m_gameWindow->mouse_cursor_input();
 
         static constexpr auto MICROSECONDS_PER_SECOND = 1'000'000;
-        m_scene.update(
+        m_scene->update(
             std::chrono::microseconds(static_cast<unsigned>(m_deltaTime * MICROSECONDS_PER_SECOND)),
             key_input,
             mouse_cursor_input,
@@ -87,7 +92,7 @@ void Controller::run()
         m_postProcessFrameBuffer.bind();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        Render::render(m_scene.registry());
+        Render::render(m_scene->registry());
 
         Framebuffer::unbind();
         m_postProcessFrameBuffer.drawOnEntireScreen();
