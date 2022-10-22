@@ -1,7 +1,7 @@
 #include "material.h"
-#include "ShaderProgram.h"
+#include "shader.h"
 
-GpuMaterial::GpuMaterial(Material const &material)
+GpuMaterial::GpuMaterial(Material const &material) : shader(material.shader)
 {
     int texture_unit_counter = 0;
 
@@ -17,11 +17,11 @@ GpuMaterial::GpuMaterial(Material const &material)
         normal_map_texture = std::make_pair(GpuImage(material.normal_map_texture.value()), binding);
     }
 }
-void GpuMaterial::bind(ShaderProgram const &shader_program) const
+void GpuMaterial::bind() const
 {
-    auto bind_texture = [&shader_program](auto const &texture) {
+    auto bind_texture = [this](auto const &texture) {
         if (texture.has_value()) {
-            shader_program.setUniform(texture->second.uniform_name, texture->second.texture_unit);
+            shader->set_uniform(texture->second.uniform_name, texture->second.texture_unit);
             glActiveTexture(GL_TEXTURE0 + texture->second.texture_unit);
             glBindTexture(GL_TEXTURE_2D, texture->first.texture);
         }

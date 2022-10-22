@@ -2,9 +2,10 @@
 #include "FrameBuffer.h"
 #include "Helper.h"
 #include "Light.h"
-#include "ShaderProgram.h"
 #include "Window.h"
 #include "gltf_loader.h"
+#include "render.h"
+#include "shader.h"
 #include "util/Log.h"
 
 #include <GLFW/glfw3.h>
@@ -22,10 +23,11 @@
 using namespace entt::literals;
 
 Controller::Controller()
-    : m_gameWindow(std::make_shared<Window>()),
+    : m_scene(m_shader_cache),
+      m_gameWindow(std::make_shared<Window>()),
       m_postProcessFrameBuffer(m_gameWindow->dimensions().first,
                                m_gameWindow->dimensions().second,
-                               postProcessingProgram)
+                               post_processing_shader)
 {
     // if (!gltf.cameras.empty()) {
     //     auto const &gltf_camera = gltf.cameras.at(0);
@@ -41,18 +43,20 @@ Controller::Controller()
 
 void Controller::run()
 {
-    updateExposure(postProcessingProgram);
+    updateExposure(post_processing_shader);
 
-    // m_camera->translate(glm::vec3(0., .5, 2.));
+    entt::hashed_string shader_hash (Material::SHADER_NAME.data());
+    auto standard_material_shader =
+        m_shader_cache.load(shader_hash, Material::SHADER_NAME).first->second;
 
     DirectionalLight directional_light(
         DirectionalLight::Prototype("", glm::vec3(-0.2, -1.0, -0.3), glm::vec3(1.0f), 5.f),
-        &defaultProgram);
+        standard_material_shader.handle().get());
     directional_light.setActive(true);
 
     PointLight point_light(
         PointLight::Prototype("", "", glm::vec3(4.0, 1.0, 6.0), glm::vec3(1.0F), 3.0F),
-        &defaultProgram);
+        standard_material_shader.handle().get());
     point_light.setActive(true);
 
     Log::logger().info("Startup complete. Enter game loop.");
@@ -62,8 +66,8 @@ void Controller::run()
         // --- Timing ---
         limit_framerate();
 
-        // --- Update game ---
-        m_gameWindow->clear_mouse_cursor_input(); // MOVE DOWN AGAIN!
+        // --- Check events, handle input ---
+        m_gameWindow->clear_mouse_cursor_input();
         glfwPollEvents();
 
         auto const &key_input = m_gameWindow->key_input();
@@ -72,7 +76,10 @@ void Controller::run()
         static constexpr auto MICROSECONDS_PER_SECOND = 1'000'000;
         m_scene.update(
             std::chrono::microseconds(static_cast<unsigned>(m_deltaTime * MICROSECONDS_PER_SECOND)),
-            key_input,mouse_cursor_input, m_gameWindow->aspectRatio());
+            key_input,
+            mouse_cursor_input,
+            m_gameWindow->aspectRatio(),
+            m_gameWindow->cursor_catched());
 
         // --- Render and buffer swap ---
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -80,7 +87,7 @@ void Controller::run()
         m_postProcessFrameBuffer.bind();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        m_scene.draw(&defaultProgram);
+        Render::render(m_scene.registry());
 
         Framebuffer::unbind();
         m_postProcessFrameBuffer.drawOnEntireScreen();
@@ -92,19 +99,6 @@ void Controller::run()
             m_gameWindow->update_dimensions();
             update_window_dimensions();
         }
-
-        // --- Check events, handle input ---
-        // m_gameWindow->clear_mouse_cursor_input();
-        // glfwPollEvents();
-
-        // auto const &key_input = m_gameWindow->key_input();
-        // auto const &mouse_cursor_input = m_gameWindow->mouse_cursor_input();
-
-        // m_camera->updatePositionFromKeyboardInput(key_input, (float)m_deltaTime);
-
-        // if (m_gameWindow->cursor_catched()) {
-        //     m_camera->updateDirectionFromMouseInput(mouse_cursor_input);
-        // }
     }
 }
 
@@ -137,9 +131,9 @@ void Controller::update_window_dimensions()
     m_postProcessFrameBuffer.changeDimensions(dimensions.first, dimensions.second);
 }
 
-void Controller::updateExposure(ShaderProgram &shaderProgram) const
+void Controller::updateExposure(Shader &shader) const
 {
-    shaderProgram.bind();
-    shaderProgram.setUniform("u_exposure", m_exposure);
-    ShaderProgram::unbind();
+    shader.bind();
+    shader.set_uniform("u_exposure", m_exposure);
+    Shader::unbind();
 }

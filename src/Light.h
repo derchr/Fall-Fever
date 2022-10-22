@@ -3,7 +3,7 @@
 #include <glm/glm.hpp>
 #include <string>
 
-class ShaderProgram;
+class Shader;
 
 class Light
 {
@@ -21,7 +21,7 @@ public:
         float intensity;
     };
 
-    Light(const std::string &name, glm::vec3 color, float intensity, ShaderProgram *shaderProgram);
+    Light(const std::string &name, glm::vec3 color, float intensity, Shader *shader);
     virtual ~Light() = 0;
 
     virtual void update() = 0;
@@ -29,12 +29,12 @@ public:
     void setActive(bool active);
     void setColor(glm::vec3 color);
     void setIntensity(float intensity);
-    void setShaderProgram(ShaderProgram *shaderProgram);
+    void setShader(Shader *shader);
 
     glm::vec3 getColor();
 
 protected:
-    ShaderProgram *m_shaderProgram;
+    Shader *m_shader;
 
     uint32_t m_id;
     static uint32_t s_idCounter;
@@ -59,7 +59,7 @@ public:
         glm::vec3 position;
     };
 
-    PointLight(Prototype prototype, ShaderProgram *shaderProgram);
+    PointLight(Prototype prototype, Shader *shader);
     ~PointLight() override = default;
 
     void setPosition(glm::vec3 position);
@@ -84,7 +84,7 @@ public:
         glm::vec3 direction;
     };
 
-    DirectionalLight(Prototype prototype, ShaderProgram *shaderProgram);
+    DirectionalLight(Prototype prototype, Shader *shader);
     ~DirectionalLight() override = default;
 
     void setDirection(glm::vec3 direction);

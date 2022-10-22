@@ -7,8 +7,8 @@
 
 ShaderProgram::ShaderProgram(Prototype prototype) : m_shaderProgramId(glCreateProgram())
 {
-    std::string vertexShaderSource = parse(prototype.vertexPath).value();
-    std::string fragmentShaderSource = parse(prototype.fragmentPath).value();
+    std::string vertexShaderSource = parse(prototype.vertexPath);
+    std::string fragmentShaderSource = parse(prototype.fragmentPath);
 
     GLuint vertexShader = compile(vertexShaderSource, GL_VERTEX_SHADER);
     GLuint fragmentShader = compile(fragmentShaderSource, GL_FRAGMENT_SHADER);
@@ -21,7 +21,9 @@ ShaderProgram::ShaderProgram(Prototype prototype) : m_shaderProgramId(glCreatePr
     GLint isLinked = 0;
     glGetProgramiv(m_shaderProgramId, GL_LINK_STATUS, &isLinked);
     if (isLinked == 0) {
-        Log::logger().warn(R"(Failed to link shaderProgram "{}", "{}")", prototype.vertexPath, prototype.fragmentPath);
+        Log::logger().warn(R"(Failed to link shaderProgram "{}", "{}")",
+                           prototype.vertexPath,
+                           prototype.fragmentPath);
     }
 
 #ifdef NDEBUG
@@ -50,19 +52,17 @@ void ShaderProgram::unbind()
     glUseProgram(0);
 }
 
-auto ShaderProgram::parse(const std::filesystem::path &path) -> std::optional<std::string>
+auto ShaderProgram::parse(const std::filesystem::path &path) -> std::string
 {
-    std::fstream shaderfile;
-    shaderfile.open(path, std::ios::in);
+    std::fstream file;
+    file.open(path, std::ios::in);
 
-    if (!shaderfile.is_open()) {
-        Log::logger().warn("Shader \"{}\" not found", path.c_str());
-        return {};
+    if (!file.is_open()) {
+        Log::logger().critical(R"(Shader "{}" not found!)", path.string());
+        std::terminate();
     }
 
-    std::string contents((std::istreambuf_iterator<char>(shaderfile)), (std::istreambuf_iterator<char>()));
-
-    return contents;
+    return {(std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>())};
 }
 
 auto ShaderProgram::compile(const std::string &shaderSource, GLenum type) -> GLuint
@@ -108,49 +108,49 @@ auto ShaderProgram::retrieveUniformLocation(std::string_view uniform_name) const
     return location;
 }
 
-void ShaderProgram::setUniform(const std::string &name, bool value) const
+void ShaderProgram::set_uniform(const std::string &name, bool value) const
 {
     GLint location = retrieveUniformLocation(name);
     glUniform1i(location, (int)value);
 }
 
-void ShaderProgram::setUniform(const std::string &name, int value) const
+void ShaderProgram::set_uniform(const std::string &name, int value) const
 {
     GLint location = retrieveUniformLocation(name);
     glUniform1i(location, value);
 }
 
-void ShaderProgram::setUniform(const std::string &name, unsigned int value) const
+void ShaderProgram::set_uniform(const std::string &name, unsigned int value) const
 {
     GLint location = retrieveUniformLocation(name);
     glUniform1ui(location, value);
 }
 
-void ShaderProgram::setUniform(const std::string &name, float value) const
+void ShaderProgram::set_uniform(const std::string &name, float value) const
 {
     GLint location = retrieveUniformLocation(name);
     glUniform1f(location, value);
 }
 
-void ShaderProgram::setUniform(const std::string &name, glm::vec2 vector) const
+void ShaderProgram::set_uniform(const std::string &name, glm::vec2 vector) const
 {
     GLint location = retrieveUniformLocation(name);
     glUniform2f(location, vector.x, vector.y);
 }
 
-void ShaderProgram::setUniform(const std::string &name, glm::vec3 vector) const
+void ShaderProgram::set_uniform(const std::string &name, glm::vec3 vector) const
 {
     GLint location = retrieveUniformLocation(name);
     glUniform3f(location, vector.x, vector.y, vector.z);
 }
 
-void ShaderProgram::setUniform(const std::string &name, glm::mat3 matrix) const
+void ShaderProgram::set_uniform(const std::string &name, glm::mat3 matrix) const
 {
     GLint location = retrieveUniformLocation(name);
     glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
 }
 
-void ShaderProgram::setUniform(const std::string &name, glm::mat4 matrix) const
+void ShaderProgram::set_uniform(const std::string &name, glm::mat4 matrix) const
 {
     GLint location = retrieveUniformLocation(name);
     glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));

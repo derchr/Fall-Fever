@@ -1,13 +1,14 @@
 #pragma once
 
 #include "FrameBuffer.h"
-#include "ShaderProgram.h"
 #include "Scene.h"
+#include "shader.h"
 
 #include <glm/glm.hpp>
 #include <memory>
-#include <vector>
 #include <unordered_map>
+#include <vector>
+#include <entt/entt.hpp>
 
 class Window;
 class Scene;
@@ -21,20 +22,20 @@ public:
 
     void run();
 
-    void updateExposure(ShaderProgram &shaderProgram) const;
+    void updateExposure(Shader &shader) const;
 
 private:
     void limit_framerate();
     void update_window_dimensions();
 
     std::shared_ptr<Window> m_gameWindow;
-
-    ShaderProgram defaultProgram{{"defaultProgram", "data/shaders/basic.vert", "data/shaders/basic.frag"}};
-    ShaderProgram skyboxProgram{{"skyboxProgram", "data/shaders/skybox.vert", "data/shaders/skybox.frag"}};
-    ShaderProgram postProcessingProgram{
-        {"postProcessingProgram", "data/shaders/postprocessing.vert", "data/shaders/postprocessing.frag"}};
+    
+    Shader skybox_shader{"skybox", "data/shaders"};
+    Shader post_processing_shader{"post_processing", "data/shaders"};
 
     Framebuffer m_postProcessFrameBuffer;
+
+    entt::resource_cache<Shader, ShaderLoader> m_shader_cache;
 
     static constexpr unsigned MAX_FPS = 60;
 

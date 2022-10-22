@@ -1,12 +1,12 @@
 #include "Light.h"
-#include "ShaderProgram.h"
+#include "shader.h"
 
 #include <string>
 
 uint32_t Light::s_idCounter = 0;
 
-Light::Light(const std::string &name, glm::vec3 color, float intensity, ShaderProgram *shaderProgram)
-    : m_shaderProgram(shaderProgram), m_intensity(intensity), m_lightColor(color * intensity)
+Light::Light(const std::string &name, glm::vec3 color, float intensity, Shader *shader)
+    : m_shader(shader), m_intensity(intensity), m_lightColor(color * intensity)
 {
     m_id = s_idCounter++;
 }
@@ -18,9 +18,9 @@ glm::vec3 Light::getColor()
     return m_lightColor;
 }
 
-void Light::setShaderProgram(ShaderProgram *shaderProgram)
+void Light::setShader(Shader *shader)
 {
-    this->m_shaderProgram = shaderProgram;
+    this->m_shader = shader;
     update();
 }
 
@@ -41,21 +41,21 @@ void Light::setActive(bool active)
     update();
 }
 
-PointLight::PointLight(Prototype prototype, ShaderProgram *shaderProgram)
-    : Light(prototype.name, prototype.color, prototype.intensity, shaderProgram), m_position(prototype.position)
+PointLight::PointLight(Prototype prototype, Shader *shader)
+    : Light(prototype.name, prototype.color, prototype.intensity, shader), m_position(prototype.position)
 {
     update();
 }
 
 void PointLight::update()
 {
-    m_shaderProgram->bind();
+    m_shader->bind();
 
-    m_shaderProgram->setUniform((getStructMemberName() + "isActive").c_str(), m_isActive);
-    m_shaderProgram->setUniform((getStructMemberName() + "position").c_str(), m_position);
-    m_shaderProgram->setUniform((getStructMemberName() + "color").c_str(), m_lightColor);
+    m_shader->set_uniform((getStructMemberName() + "isActive").c_str(), m_isActive);
+    m_shader->set_uniform((getStructMemberName() + "position").c_str(), m_position);
+    m_shader->set_uniform((getStructMemberName() + "color").c_str(), m_lightColor);
 
-    m_shaderProgram->unbind();
+    m_shader->unbind();
 }
 
 std::string PointLight::getStructMemberName()
@@ -76,21 +76,21 @@ void PointLight::setPosition(glm::vec3 position)
     update();
 }
 
-DirectionalLight::DirectionalLight(Prototype prototype, ShaderProgram *shaderProgram)
-    : Light(prototype.name, prototype.color, prototype.intensity, shaderProgram), m_direction(prototype.direction)
+DirectionalLight::DirectionalLight(Prototype prototype, Shader *shader)
+    : Light(prototype.name, prototype.color, prototype.intensity, shader), m_direction(prototype.direction)
 {
     update();
 }
 
 void DirectionalLight::update()
 {
-    m_shaderProgram->bind();
+    m_shader->bind();
 
-    m_shaderProgram->setUniform("u_directionalLight.isActive", m_isActive);
-    m_shaderProgram->setUniform("u_directionalLight.direction", m_direction);
-    m_shaderProgram->setUniform("u_directionalLight.color", m_lightColor);
+    m_shader->set_uniform("u_directionalLight.isActive", m_isActive);
+    m_shader->set_uniform("u_directionalLight.direction", m_direction);
+    m_shader->set_uniform("u_directionalLight.color", m_lightColor);
 
-    m_shaderProgram->unbind();
+    m_shader->unbind();
 }
 
 void DirectionalLight::setDirection(glm::vec3 direction)

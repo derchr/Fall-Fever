@@ -69,7 +69,7 @@ void AbstractCubeMap::bind(ShaderProgram *shaderProgram) const
 {
     std::string uniformName = "u_skybox";
 
-    shaderProgram->setUniform(uniformName, 0);
+    shaderProgram->set_uniform(uniformName, 0);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, m_glId);
 }

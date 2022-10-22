@@ -1,5 +1,5 @@
 #include "FrameBuffer.h"
-#include "ShaderProgram.h"
+#include "shader.h"
 #include "util/Log.h"
 
 #include <cstddef>
@@ -19,7 +19,7 @@ GLuint Framebuffer::getFBO() const
     return m_FBO;
 }
 
-Framebuffer::Framebuffer(uint32_t width, uint32_t height, ShaderProgram &shaderProgram) : m_shaderProgram(shaderProgram)
+Framebuffer::Framebuffer(uint32_t width, uint32_t height, Shader &shader) : m_shader(shader)
 {
     glGenFramebuffers(1, &m_FBO);
 
@@ -46,12 +46,11 @@ void Framebuffer::drawOnEntireScreen() const
     glGetIntegerv(GL_POLYGON_MODE, &wireframe);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-    m_shaderProgram.bind();
+    m_shader.bind();
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, getTextureId());
 
-    GLint location = glGetUniformLocation(m_shaderProgram.getShaderProgramId(), "u_texture");
-    glUniform1i(location, 0);
+    m_shader.set_uniform("u_texture", 0);
 
     // A VAO is necessary although no data is stored in it
     GLuint temp_vao;
@@ -61,7 +60,7 @@ void Framebuffer::drawOnEntireScreen() const
     glBindVertexArray(0);
 
     glPolygonMode(GL_FRONT_AND_BACK, static_cast<GLenum>(wireframe));
-    m_shaderProgram.unbind();
+    m_shader.unbind();
 }
 
 void Framebuffer::changeDimensions(uint32_t width, uint32_t height)
@@ -108,7 +107,7 @@ void Framebuffer::generateTextures(uint32_t width, uint32_t height)
 
 void Framebuffer::setExposureCorrection(bool exposureCorrection) const
 {
-    m_shaderProgram.bind();
-    m_shaderProgram.setUniform("u_exposureCorrection", exposureCorrection);
-    m_shaderProgram.unbind();
+    m_shader.bind();
+    m_shader.set_uniform("u_exposureCorrection", exposureCorrection);
+    m_shader.unbind();
 }

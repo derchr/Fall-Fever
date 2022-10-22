@@ -2,12 +2,12 @@
 
 #include <glad/gl.h>
 
-class ShaderProgram;
+class Shader;
 
 class Framebuffer
 {
 public:
-    Framebuffer(uint32_t width, uint32_t height, ShaderProgram &shaderProgram);
+    Framebuffer(uint32_t width, uint32_t height, Shader &shader);
     ~Framebuffer();
 
     void bind() const;
@@ -29,5 +29,5 @@ private:
     GLuint m_depthStencilBuffer;
     GLuint m_FBO;
 
-    ShaderProgram &m_shaderProgram;
+    Shader &m_shader;
 };

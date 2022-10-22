@@ -8,19 +8,20 @@
 #include <chrono>
 #include <entt/entt.hpp>
 
-class ShaderProgram;
+class Shader;
 
 class Scene
 {
 public:
-    Scene();
+    Scene(entt::resource_cache<Shader, ShaderLoader> &shader_cache);
 
     void update(std::chrono::duration<float> delta_time,
                 KeyInput const &key_input,
                 MouseCursorInput const &mouse_cursor_input,
-                float aspect_ratio);
+                float aspect_ratio,
+                bool cursor_catched);
 
-    void draw(ShaderProgram *shaderprogram) const;
+    auto registry() -> entt::registry & { return m_registry; }
 
 private:
     entt::registry m_registry;

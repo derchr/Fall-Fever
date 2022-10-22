@@ -1,6 +1,6 @@
 #include "gltf_loader.h"
-#include "util/Log.h"
 #include "definitions/attribute_locations.h"
+#include "util/Log.h"
 
 #include <iterator>
 
@@ -73,7 +73,8 @@ static auto load_material(fx::gltf::Material const &material,
                           fx::gltf::Document const &gltf,
                           std::filesystem::path const &document_path,
                           entt::resource_cache<Material> &material_cache,
-                          entt::resource_cache<Image> &image_cache) -> entt::resource<Material>
+                          entt::resource_cache<Image> &image_cache,
+                          entt::resource_cache<Shader, ShaderLoader> &shader_cache) -> entt::resource<Material>
 {
     auto base_color_texture_id = material.pbrMetallicRoughness.baseColorTexture.index;
     auto normal_texture_id = material.normalTexture.index;
@@ -92,6 +93,10 @@ static auto load_material(fx::gltf::Material const &material,
             load_texture(normal_texture, gltf, document_path, Image::ColorFormat::RGB, image_cache);
     }
 
+    entt::hashed_string shader_hash(Material::SHADER_NAME.data());
+    entt::resource<Shader> shader =
+        shader_cache.load(shader_hash, Material::SHADER_NAME).first->second;
+
     if (material.name.empty()) {
         Log::logger().warn("glTF material has no name.");
     }
@@ -100,7 +105,8 @@ static auto load_material(fx::gltf::Material const &material,
     return material_cache
         .load(material_hash,
               Material{.base_color_texture = base_color_image,
-                       .normal_map_texture = normal_map_image})
+                       .normal_map_texture = normal_map_image,
+                       .shader = shader})
         .first->second;
 }
 
@@ -256,8 +262,8 @@ auto GltfLoader::operator()(std::filesystem::path const &document_path) -> resul
     // Load materials
     std::vector<entt::resource<Material>> materials;
     for (auto const &gltf_material : gltf.materials) {
-        entt::resource<Material> material =
-            load_material(gltf_material, gltf, document_path, material_cache, image_cache);
+        entt::resource<Material> material = load_material(
+            gltf_material, gltf, document_path, material_cache, image_cache, shader_cache);
         materials.push_back(material);
     }
 

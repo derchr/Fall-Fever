@@ -26,19 +26,19 @@ public:
     auto retrieveUniformLocation(std::string_view uniform_name) const -> GLint;
 
     // May be rewritten...
-    void setUniform(const std::string &name, bool value) const;
-    void setUniform(const std::string &name, int value) const;
-    void setUniform(const std::string &name, unsigned int value) const;
-    void setUniform(const std::string &name, float value) const;
-    void setUniform(const std::string &name, glm::vec2 vector) const;
-    void setUniform(const std::string &name, glm::vec3 vector) const;
-    void setUniform(const std::string &name, glm::mat3 matrix) const;
-    void setUniform(const std::string &name, glm::mat4 matrix) const;
+    void set_uniform(const std::string &name, bool value) const;
+    void set_uniform(const std::string &name, int value) const;
+    void set_uniform(const std::string &name, unsigned int value) const;
+    void set_uniform(const std::string &name, float value) const;
+    void set_uniform(const std::string &name, glm::vec2 vector) const;
+    void set_uniform(const std::string &name, glm::vec3 vector) const;
+    void set_uniform(const std::string &name, glm::mat3 matrix) const;
+    void set_uniform(const std::string &name, glm::mat4 matrix) const;
 
     auto getShaderProgramId() const -> GLuint;
 
 private:
-    static auto parse(const std::filesystem::path &path) -> std::optional<std::string>;
+    static auto parse(const std::filesystem::path &path) -> std::string;
     static auto compile(const std::string &shaderSource, GLenum type) -> GLuint;
 
     GLuint m_shaderProgramId;

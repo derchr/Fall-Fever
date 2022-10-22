@@ -1,20 +1,21 @@
 #include "Scene.h"
-#include "ShaderProgram.h"
 #include "camera.h"
 #include "mesh.h"
 #include "name.h"
 #include "relationship.h"
+#include "shader.h"
 #include "transform.h"
 #include "util/Log.h"
 
 using namespace entt::literals;
 
 // TODO: make scene initialization part of gltf loader as seen in bevy
-Scene::Scene()
+Scene::Scene(entt::resource_cache<Shader, ShaderLoader> &shader_cache)
 {
     GltfLoader loader{.image_cache = m_image_cache,
                       .material_cache = m_material_cache,
                       .mesh_cache = m_mesh_cache,
+                      .shader_cache = shader_cache,
                       .gltf_mesh_cache = m_gltf_mesh_cache,
                       .gltf_node_cache = m_gltf_node_cache,
                       .gltf_scene_cache = m_gltf_scene_cache};
@@ -92,16 +93,16 @@ Scene::Scene()
     // Spawn the camera
     auto entity = m_registry.create();
     m_registry.emplace<Name>(entity, "Camera");
-    m_registry.emplace<Transform>(entity, Transform{.translation = glm::vec3(0.0, 0.5, -1.0)});
+    m_registry.emplace<Transform>(entity, Transform{.translation = glm::vec3(0.0, 0.25, -1.0)});
     m_registry.emplace<GlobalTransform>(entity, GlobalTransform{});
-    m_registry.emplace<Camera>(entity,
-                               Camera{.projection = Camera::Perspective{}});
+    m_registry.emplace<Camera>(entity, Camera{.projection = Camera::Perspective{}});
 }
 
 void Scene::update(std::chrono::duration<float> delta,
                    KeyInput const &key_input,
                    MouseCursorInput const &mouse_cursor_input,
-                   float aspect_ratio)
+                   float aspect_ratio,
+                   bool cursor_catched)
 {
     {
         // Update GlobalTransform components
@@ -138,38 +139,10 @@ void Scene::update(std::chrono::duration<float> delta,
         }
     }
 
-    Camera::keyboard_movement(m_registry, key_input, delta);
-    Camera::mouse_orientation(m_registry, mouse_cursor_input);
     Camera::aspect_ratio_update(m_registry, aspect_ratio);
-}
-
-void Scene::draw(ShaderProgram *shaderprogram) const
-{
-    auto mesh_view = m_registry.view<GpuMesh const, GpuMaterial const, GlobalTransform const>();
-    auto camera_view = m_registry.view<Camera const, GlobalTransform const>();
-    auto camera_entity = camera_view.front();
-    auto [camera, camera_transform] = camera_view.get(camera_entity);
-    glm::mat4 view_projection_matrix =
-        camera.projection_matrix() * Camera::view_matrix(camera_transform);
-
-    for (auto [entity, mesh, material, transform] : mesh_view.each()) {
-        shaderprogram->bind();
-
-        // Bind textures
-        material.bind(*shaderprogram);
-
-        // Bind modelview matrix uniform
-        {
-            glm::mat4 modelViewProj = view_projection_matrix * transform.transform;
-            shaderprogram->setUniform("u_modelViewProjMatrix", modelViewProj);
-            shaderprogram->setUniform("u_modelMatrix", transform.transform);
-            shaderprogram->setUniform("u_viewPosition", camera_transform.position());
-        }
-
-        glBindVertexArray(mesh.vao);
-        glDrawElements(GL_TRIANGLES, mesh.indices_count, mesh.indices_type, nullptr);
-        glBindVertexArray(0);
-
-        ShaderProgram::unbind();
+    Camera::keyboard_movement(m_registry, key_input, delta);
+    if (cursor_catched) {
+        Camera::mouse_orientation(m_registry, mouse_cursor_input);
     }
+    
 }

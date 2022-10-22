@@ -2,7 +2,6 @@ add_library(fever_engine
     main.cpp
     Controller.cpp
     Window.cpp
-    ShaderProgram.cpp
     Light.cpp
     Scene.cpp
     FrameBuffer.cpp
@@ -13,6 +12,7 @@ add_library(fever_engine
     gltf_loader.cpp
     material.cpp
     camera.cpp
+    shader.cpp
 )
 
 target_compile_features(fever_engine PUBLIC cxx_std_20)
