@@ -313,7 +313,7 @@ auto GltfLoader::operator()(std::filesystem::path const &document_path) -> resul
         glm::quat rotation(node.rotation[3], node.rotation[0], node.rotation[1], node.rotation[2]);
         glm::vec3 scale(node.scale[0], node.scale[1], node.scale[2]);
 
-        Transform transform{.translation = translation, .rotation = rotation, .scale = scale};
+        Transform transform{.translation = translation, .orientation = rotation, .scale = scale};
 
         if (node.name.empty()) {
             Log::logger().warn("glTF node has no name.");

@@ -13,6 +13,7 @@ add_library(fever_engine
     mesh.cpp
     gltf_loader.cpp
     material.cpp
+    camera.cpp
 )
 
 target_compile_features(fever_engine PUBLIC cxx_std_20)

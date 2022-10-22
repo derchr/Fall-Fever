@@ -28,11 +28,6 @@ void Camera::translate(glm::vec3 translateVector)
     m_viewMatrix = glm::translate(m_viewMatrix, translateVector * -1.F);
 }
 
-void Camera::lookAtTarget(glm::vec3 target)
-{
-    m_viewMatrix = glm::lookAt(m_position, target, UP_VEC);
-}
-
 void Camera::lookForward()
 {
     m_viewMatrix = glm::lookAt(m_position, m_position + m_front_vec, UP_VEC);
@@ -98,21 +93,6 @@ void Camera::updateDirectionFromMouseInput(MouseCursorInput const &mouse_cursor_
     m_front_vec = glm::normalize(direction);
 }
 
-void Camera::setPosition(glm::vec3 position)
-{
-    this->m_position = position;
-}
-
-auto Camera::getView() const -> glm::mat4
-{
-    return m_viewMatrix;
-}
-
-auto Camera::getProj() const -> glm::mat4
-{
-    return m_projectionMatrix;
-}
-
 auto Camera::getViewProj() const -> glm::mat4
 {
     return m_viewProjectionMatrix;
@@ -123,7 +103,3 @@ auto Camera::getPosition() const -> glm::vec3
     return m_position;
 }
 
-auto Camera::getDirection() const -> glm::vec3
-{
-    return m_front_vec;
-}

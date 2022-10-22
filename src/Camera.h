@@ -15,17 +15,10 @@ public:
     void updateDirectionFromMouseInput(MouseCursorInput const &mouse_cursor_input);
 
     void translate(glm::vec3 translateVector);
-
-    void lookAtTarget(glm::vec3 target);
     void lookForward();
 
-    [[nodiscard]] auto getView() const -> glm::mat4;
-    [[nodiscard]] auto getProj() const -> glm::mat4;
     [[nodiscard]] auto getViewProj() const -> glm::mat4;
     [[nodiscard]] auto getPosition() const -> glm::vec3;
-    [[nodiscard]] auto getDirection() const -> glm::vec3;
-
-    void setPosition(glm::vec3 position);
 
 private:
     glm::mat4 m_viewMatrix;

@@ -36,7 +36,7 @@ Controller::Controller()
 
     //     m_camera = std::make_shared<Camera>(perspective.yfov, perspective.aspectRatio);
     // } else {
-    m_camera = std::make_shared<Camera>(90., m_gameWindow->aspectRatio());
+    // m_camera = std::make_shared<Camera>(90., m_gameWindow->aspectRatio());
     // }
 }
 
@@ -44,7 +44,8 @@ void Controller::run()
 {
     updateExposure(postProcessingProgram);
 
-    m_camera->translate(glm::vec3(0., .5, 2.));
+    // m_camera->translate(glm::vec3(0., .5, 2.));
+
     DirectionalLight directional_light(
         DirectionalLight::Prototype("", glm::vec3(-0.2, -1.0, -0.3), glm::vec3(1.0f), 5.f),
         &defaultProgram);
@@ -70,17 +71,22 @@ void Controller::run()
         m_postProcessFrameBuffer.bind();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        m_camera->lookForward();
-        m_camera->updateVPM();
+        // m_camera->lookForward();
+        // m_camera->updateVPM();
+
+        m_gameWindow->clear_mouse_cursor_input(); // MOVE DOWN AGAIN!
+        glfwPollEvents();
+
+        auto const &key_input = m_gameWindow->key_input();
+        auto const &mouse_cursor_input = m_gameWindow->mouse_cursor_input();
 
         static constexpr auto MICROSECONDS_PER_SECOND = 1'000'000;
         m_scene.update(
             std::chrono::microseconds(static_cast<unsigned>(m_deltaTime * MICROSECONDS_PER_SECOND)),
             &defaultProgram,
-            m_camera->getViewProj(),
-            m_camera->getPosition());
+            key_input,mouse_cursor_input, m_gameWindow->aspectRatio());
 
-        m_postProcessFrameBuffer.unbind();
+        Framebuffer::unbind();
         m_postProcessFrameBuffer.drawOnEntireScreen();
 
         glfwSwapBuffers(&m_gameWindow->glfw_window());
@@ -92,17 +98,17 @@ void Controller::run()
         }
 
         // --- Check events, handle input ---
-        m_gameWindow->clear_mouse_cursor_input();
-        glfwPollEvents();
+        // m_gameWindow->clear_mouse_cursor_input();
+        // glfwPollEvents();
 
-        auto const &key_input = m_gameWindow->key_input();
-        auto const &mouse_cursor_input = m_gameWindow->mouse_cursor_input();
+        // auto const &key_input = m_gameWindow->key_input();
+        // auto const &mouse_cursor_input = m_gameWindow->mouse_cursor_input();
 
-        m_camera->updatePositionFromKeyboardInput(key_input, (float)m_deltaTime);
+        // m_camera->updatePositionFromKeyboardInput(key_input, (float)m_deltaTime);
 
-        if (m_gameWindow->cursor_catched()) {
-            m_camera->updateDirectionFromMouseInput(mouse_cursor_input);
-        }
+        // if (m_gameWindow->cursor_catched()) {
+        //     m_camera->updateDirectionFromMouseInput(mouse_cursor_input);
+        // }
     }
 }
 
@@ -128,7 +134,7 @@ void Controller::limit_framerate()
 
 void Controller::update_window_dimensions()
 {
-    m_camera->updateAspectRatio(m_gameWindow->aspectRatio());
+    // m_camera->updateAspectRatio(m_gameWindow->aspectRatio());
     // m_gameEventHandler->setFirstMouseInput(1);
 
     auto dimensions = m_gameWindow->dimensions();

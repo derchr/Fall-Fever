@@ -28,7 +28,6 @@ private:
     void update_window_dimensions();
 
     std::shared_ptr<Window> m_gameWindow;
-    std::shared_ptr<Camera> m_camera;
 
     ShaderProgram defaultProgram{{"defaultProgram", "data/shaders/basic.vert", "data/shaders/basic.frag"}};
     ShaderProgram skyboxProgram{{"skyboxProgram", "data/shaders/skybox.vert", "data/shaders/skybox.frag"}};

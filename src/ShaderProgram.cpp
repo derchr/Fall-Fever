@@ -24,12 +24,12 @@ ShaderProgram::ShaderProgram(Prototype prototype) : m_shaderProgramId(glCreatePr
         Log::logger().warn(R"(Failed to link shaderProgram "{}", "{}")", prototype.vertexPath, prototype.fragmentPath);
     }
 
-#ifdef _RELEASE
-    glDetachShader(program, vs);
-    glDetachShader(program, fs);
+#ifdef NDEBUG
+    glDetachShader(m_shaderProgramId, vertexShader);
+    glDetachShader(m_shaderProgramId, fragmentShader);
 
-    glDeleteShader(vs);
-    glDeleteShader(fs);
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
 #endif
 
     Log::logger().trace(R"(Loaded shaderprogram "{}".)", prototype.name);

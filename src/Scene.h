@@ -3,6 +3,7 @@
 #include "gltf_loader.h"
 #include "material.h"
 #include "mesh.h"
+#include "Window.h"
 
 #include <chrono>
 #include <entt/entt.hpp>
@@ -15,9 +16,7 @@ public:
     Scene();
 
     void update(std::chrono::duration<float> delta,
-                ShaderProgram *shaderprogram,
-                glm::mat4 viewProjMatrix,
-                glm::vec3 viewPosition);
+                ShaderProgram *shaderprogram, KeyInput const &key_input,MouseCursorInput const &mouse_cursor_input, float aspect_ratio);
 
 private:
     entt::registry m_registry;
