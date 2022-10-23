@@ -1,5 +1,6 @@
 #include "scene.h"
 #include "camera.h"
+#include "light.h"
 #include "mesh.h"
 #include "name.h"
 #include "relationship.h"
@@ -24,6 +25,25 @@ Scene::Scene(entt::registry registry) : m_registry(std::move(registry))
         // Remove Material resource as it is no longer needed.
         m_registry.erase<entt::resource<Material>>(entity);
     }
+
+    // Spawn default lights
+    auto directional_light = m_registry.create();
+    m_registry.emplace<Name>(directional_light, "Directional Light");
+    m_registry.emplace<Transform>(
+        directional_light,
+        Transform{.orientation = glm::toQuat(
+                      glm::lookAt({}, DirectionalLight::DEFAULT_DIRECTION, Camera::UP_VECTOR))});
+    m_registry.emplace<GlobalTransform>(directional_light, GlobalTransform{});
+    m_registry.emplace<DirectionalLight>(
+        directional_light, DirectionalLight{.illuminance = DirectionalLight::DEFAULT_ILLUMINANCE});
+
+    auto point_light = m_registry.create();
+    m_registry.emplace<Name>(point_light, "Point Light");
+    m_registry.emplace<Transform>(point_light,
+                                  Transform{.translation = PointLight::DEFAULT_POSITION});
+    m_registry.emplace<GlobalTransform>(point_light, GlobalTransform{});
+    m_registry.emplace<PointLight>(point_light,
+                                   PointLight{.intensity = PointLight::DEFAULT_INTENSITY});
 }
 
 void Scene::update(std::chrono::duration<float> delta,
@@ -32,41 +52,7 @@ void Scene::update(std::chrono::duration<float> delta,
                    float aspect_ratio,
                    bool cursor_catched)
 {
-    {
-        // Update GlobalTransform components
-        // TODO: Only do this when the Transform changed.
-        auto root_transform_view =
-            m_registry.view<Transform const, GlobalTransform>(entt::exclude<Parent>);
-        auto transform_view = m_registry.view<Transform const, GlobalTransform, Parent const>();
-
-        for (auto [entity, transform, global_transform] : root_transform_view.each()) {
-            global_transform = transform;
-
-            auto parent_global_transform = global_transform;
-            if (auto *children = m_registry.try_get<Children>(entity)) {
-                for (auto child : children->children) {
-                    std::function<void(entt::entity entity,
-                                       GlobalTransform parent_global_transform)>
-                        transform_propagate = [this, &transform_propagate, &transform_view](
-                                                  entt::entity entity,
-                                                  GlobalTransform parent_global_transform) {
-                            auto [transform, global_transform, parent] = transform_view.get(entity);
-                            global_transform.transform = parent_global_transform.transform *
-                                                         GlobalTransform(transform).transform;
-
-                            if (auto *children = m_registry.try_get<Children>(entity)) {
-                                for (auto child : children->children) {
-                                    transform_propagate(child, global_transform);
-                                }
-                            }
-                        };
-
-                    transform_propagate(child, parent_global_transform);
-                }
-            }
-        }
-    }
-
+    GlobalTransform::update(m_registry);
     Camera::aspect_ratio_update(m_registry, aspect_ratio);
     Camera::keyboard_movement(m_registry, key_input, delta);
     if (cursor_catched) {

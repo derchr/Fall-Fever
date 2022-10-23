@@ -1,9 +1,9 @@
 #include "Controller.h"
 #include "FrameBuffer.h"
 #include "Helper.h"
-#include "Light.h"
 #include "Window.h"
 #include "gltf_loader.h"
+#include "light.h"
 #include "render.h"
 #include "shader.h"
 #include "util/Log.h"
@@ -54,16 +54,6 @@ void Controller::run()
     auto standard_material_shader =
         m_shader_cache.load(shader_hash, Material::SHADER_NAME).first->second;
 
-    DirectionalLight directional_light(
-        DirectionalLight::Prototype("", glm::vec3(-0.2, -1.0, -0.3), glm::vec3(1.0f), 5.f),
-        standard_material_shader.handle().get());
-    directional_light.setActive(true);
-
-    PointLight point_light(
-        PointLight::Prototype("", "", glm::vec3(4.0, 1.0, 6.0), glm::vec3(1.0F), 3.0F),
-        standard_material_shader.handle().get());
-    point_light.setActive(true);
-
     Log::logger().info("Startup complete. Enter game loop.");
 
     // This is the game loop
@@ -92,6 +82,7 @@ void Controller::run()
         m_postProcessFrameBuffer.bind();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        Light::update_lights(m_scene->registry(), standard_material_shader);
         Render::render(m_scene->registry());
 
         Framebuffer::unbind();

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <entt/entt.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 
@@ -33,4 +34,6 @@ struct GlobalTransform
     glm::mat4 transform{};
 
     [[nodiscard]] auto position() const -> glm::vec3 { return transform[3]; };
+
+    static void update(entt::registry &registry);
 };
