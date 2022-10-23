@@ -3,9 +3,11 @@
 #include "Helper.h"
 #include "Window.h"
 #include "gltf_loader.h"
+#include "input.h"
 #include "light.h"
 #include "render.h"
 #include "shader.h"
+#include "time.h"
 #include "util/Log.h"
 
 #include <GLFW/glfw3.h>
@@ -43,7 +45,7 @@ Controller::Controller()
     entt::resource<Gltf> gltf_document =
         m_gltf_cache.load(document_hash, document_path).first->second;
 
-    m_scene = gltf_document->default_scene.value().handle();
+    m_scene = gltf_document->default_scene.value_or(gltf_document->scenes.at(0)).handle();
 }
 
 void Controller::run()
@@ -60,21 +62,20 @@ void Controller::run()
     while (glfwWindowShouldClose(&m_gameWindow->glfw_window()) == GLFW_FALSE) {
         // --- Timing ---
         limit_framerate();
+        update_delta_time(m_scene->registry());
 
         // --- Check events, handle input ---
         m_gameWindow->clear_mouse_cursor_input();
         glfwPollEvents();
 
-        auto const &key_input = m_gameWindow->key_input();
-        auto const &mouse_cursor_input = m_gameWindow->mouse_cursor_input();
+        Input::handle_keyboard_input(m_scene->registry(), m_gameWindow->key_input());
+        Input::handle_mouse_cursor_input(m_scene->registry(), m_gameWindow->mouse_cursor_input());
+        Input::handle_mouse_button_input(m_scene->registry(), m_gameWindow->mouse_button_input());
+        m_gameWindow->update_catched_mouse(m_scene->registry());
+        m_gameWindow->update_descriptor(m_scene->registry());
 
-        static constexpr auto MICROSECONDS_PER_SECOND = 1'000'000;
-        m_scene->update(
-            std::chrono::microseconds(static_cast<unsigned>(m_deltaTime * MICROSECONDS_PER_SECOND)),
-            key_input,
-            mouse_cursor_input,
-            m_gameWindow->aspectRatio(),
-            m_gameWindow->cursor_catched());
+        // --- Update game state ---
+        m_scene->update();
 
         // --- Render and buffer swap ---
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -114,7 +115,6 @@ void Controller::limit_framerate()
     }
 
     m_deltaTime = glfwGetTime() - startingTime;
-
     startingTime = glfwGetTime();
 }
 
@@ -132,4 +132,12 @@ void Controller::updateExposure(Shader &shader) const
     shader.bind();
     shader.set_uniform("u_exposure", m_exposure);
     Shader::unbind();
+}
+
+void Controller::update_delta_time(entt::registry &registry) const
+{
+    static constexpr auto MICROSECONDS_PER_SECOND = 1'000'000;
+
+    registry.ctx().erase<Time::Delta>();
+    registry.ctx().emplace<Time::Delta>(std::chrono::microseconds(static_cast<unsigned>(m_deltaTime * MICROSECONDS_PER_SECOND)));
 }

@@ -14,6 +14,7 @@ add_library(fever_engine
     shader.cpp
     transform.cpp
     light.cpp
+    input.cpp
 )
 
 target_compile_features(fever_engine PUBLIC cxx_std_20)

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "input.h"
 #include "transform.h"
 
 #include <GLFW/glfw3.h>
@@ -49,9 +48,7 @@ struct Camera
     [[nodiscard]] static auto view_matrix(GlobalTransform const &transform) -> glm::mat4;
     [[nodiscard]] static auto front_vector(GlobalTransform const &transform) -> glm::vec3;
 
-    static void keyboard_movement(entt::registry &registry,
-                                  KeyInput const &key_input,
-                                  std::chrono::duration<float> delta_time);
-    static void mouse_orientation(entt::registry &registry, MouseCursorInput const &mouse_cursor_input);
-    static void aspect_ratio_update(entt::registry &registry, float aspect_ratio);
+    static void keyboard_movement(entt::registry &registry);
+    static void mouse_orientation(entt::registry &registry);
+    static void aspect_ratio_update(entt::registry &registry);
 };

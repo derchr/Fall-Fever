@@ -7,6 +7,7 @@
 #include "shader.h"
 #include "transform.h"
 #include "util/Log.h"
+#include "Window.h"
 
 Scene::Scene(entt::registry registry) : m_registry(std::move(registry))
 {
@@ -46,16 +47,13 @@ Scene::Scene(entt::registry registry) : m_registry(std::move(registry))
                                    PointLight{.intensity = PointLight::DEFAULT_INTENSITY});
 }
 
-void Scene::update(std::chrono::duration<float> delta,
-                   KeyInput const &key_input,
-                   MouseCursorInput const &mouse_cursor_input,
-                   float aspect_ratio,
-                   bool cursor_catched)
+void Scene::update()
 {
     GlobalTransform::update(m_registry);
-    Camera::aspect_ratio_update(m_registry, aspect_ratio);
-    Camera::keyboard_movement(m_registry, key_input, delta);
-    if (cursor_catched) {
-        Camera::mouse_orientation(m_registry, mouse_cursor_input);
+    Camera::aspect_ratio_update(m_registry);
+    Camera::keyboard_movement(m_registry);
+
+    if (m_registry.ctx().at<Window::MouseCatched>().catched) {
+        Camera::mouse_orientation(m_registry);
     }
 }

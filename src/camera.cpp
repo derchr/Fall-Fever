@@ -1,5 +1,8 @@
 #include "camera.h"
 #include "util/Log.h"
+#include "input.h"
+#include "time.h"
+#include "Window.h"
 
 #include <algorithm>
 #include <glm/gtc/matrix_transform.hpp>
@@ -29,16 +32,16 @@ auto Camera::front_vector(GlobalTransform const &transform) -> glm::vec3
     return glm::normalize(transform.transform * glm::vec4(0.0, 0.0, 1.0, 0.0));
 }
 
-void Camera::keyboard_movement(entt::registry &registry,
-                               KeyInput const &key_input,
-                               std::chrono::duration<float> delta_time)
+void Camera::keyboard_movement(entt::registry &registry)
 {
     struct KeyboardMovementContext
     {
         bool accelerate{};
     };
 
-    auto &context = registry.ctx().emplace<KeyboardMovementContext>();
+    auto &movement_context = registry.ctx().emplace<KeyboardMovementContext>();
+    auto const& key_input = registry.ctx().at<Input::Key>();
+    auto const& delta_time = registry.ctx().at<Time::Delta>();
 
     auto camera_view = registry.view<Camera const, Transform, GlobalTransform const>();
     auto camera_entity = camera_view.front();
@@ -48,10 +51,10 @@ void Camera::keyboard_movement(entt::registry &registry,
     front_vec.y = 0; // NOLINT (cppcoreguidelines-pro-type-union-access)
 
     glm::vec3 delta_pos = glm::vec3(0., 0., 0.);
-    float delta_factor = SPEED * delta_time.count() * (context.accelerate ? ACCELERATION : 1.0F);
-    context.accelerate = false;
+    float delta_factor = SPEED * delta_time.delta.count() * (movement_context.accelerate ? ACCELERATION : 1.0F);
+    movement_context.accelerate = false;
 
-    for (auto const &[key, pressed] : key_input) {
+    for (auto const &[key, pressed] : key_input.key_map) {
         if (key == GLFW_KEY_W && pressed) {
             delta_pos += delta_factor * glm::normalize(front_vec);
         }
@@ -71,19 +74,20 @@ void Camera::keyboard_movement(entt::registry &registry,
             delta_pos -= delta_factor * UP_VECTOR;
         }
         if (key == GLFW_KEY_LEFT_ALT && pressed) {
-            context.accelerate = true;
+            movement_context.accelerate = true;
         }
     }
     camera_transform.translation += delta_pos;
 }
 
-void Camera::mouse_orientation(entt::registry &registry, MouseCursorInput const &mouse_cursor_input)
+void Camera::mouse_orientation(entt::registry &registry)
 {
     auto camera_view = registry.view<Camera, Transform>();
     auto camera_entity = camera_view.front();
     auto [camera, camera_transform] = camera_view.get(camera_entity);
 
-    auto [deltaX, deltaY] = mouse_cursor_input;
+    auto const& mouse_cursor_input = registry.ctx().at<Input::MouseCursor>();
+    auto [deltaX, deltaY] = mouse_cursor_input.cursor_movement;
 
     if (std::abs(deltaX) < std::numeric_limits<double>::epsilon() &&
         std::abs(deltaY) < std::numeric_limits<double>::epsilon()) {
@@ -108,8 +112,10 @@ void Camera::mouse_orientation(entt::registry &registry, MouseCursorInput const 
         glm::quat(glm::vec3(-camera_perspective.pitch, -camera_perspective.yaw, 0.0));
 }
 
-void Camera::aspect_ratio_update(entt::registry &registry, float aspect_ratio)
+void Camera::aspect_ratio_update(entt::registry &registry)
 {
+    float aspect_ratio = registry.ctx().at<Window::Descriptor>().aspect_ratio;
+
     auto camera_view = registry.view<Camera>();
     auto camera_entity = camera_view.front();
     auto [camera] = camera_view.get(camera_entity);

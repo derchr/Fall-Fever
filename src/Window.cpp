@@ -32,7 +32,8 @@ Window::Window()
 #endif
 
     m_glfw_window = std::shared_ptr<GLFWwindow>(
-        glfwCreateWindow(static_cast<int>(m_width), static_cast<int>(m_height), "OpenGL", nullptr, nullptr),
+        glfwCreateWindow(
+            static_cast<int>(m_width), static_cast<int>(m_height), "OpenGL", nullptr, nullptr),
         [](GLFWwindow *window) { glfwDestroyWindow(window); });
 
     if (!m_glfw_window) {
@@ -60,12 +61,15 @@ Window::Window()
     }
 
 #ifndef NDEBUG
-    Log::logger().debug("OpenGL version: {}", reinterpret_cast<const char *>(glGetString(GL_VERSION))); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+    // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
+    Log::logger().debug("OpenGL version: {}",
+                        reinterpret_cast<const char *>(glGetString(GL_VERSION)));
+    // NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback(&Helper::gl_debug_callback, nullptr);
 
     // Disable mouse cursor
-    m_mouse_catched = false;
+    m_mouse_catched.catched = false;
 #endif
 
     // Enable z buffer
@@ -82,7 +86,7 @@ Window::Window()
     // Disable VSync since my sleep function handles this
     glfwSwapInterval(0);
 
-    set_catched_cursor(m_mouse_catched);
+    set_catched_cursor(m_mouse_catched.catched);
 
     glViewport(0, 0, static_cast<GLsizei>(m_width), static_cast<GLsizei>(m_height));
 
@@ -99,7 +103,8 @@ auto Window::dimensions_changed() const -> bool
 
     glfwGetFramebufferSize(m_glfw_window.get(), &new_width, &new_height);
 
-    return !(static_cast<uint32_t>(new_width) == m_width && static_cast<uint32_t>(new_height) == m_height);
+    return !(static_cast<uint32_t>(new_width) == m_width &&
+             static_cast<uint32_t>(new_height) == m_height);
 }
 
 void Window::update_dimensions()
@@ -117,13 +122,11 @@ void Window::update_dimensions()
 
 void Window::set_catched_cursor(bool value)
 {
-    if (value) {
-        glfwSetInputMode(m_glfw_window.get(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    } else {
-        glfwSetInputMode(m_glfw_window.get(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-    }
 
-    m_mouse_catched = value;
+    glfwSetInputMode(
+        m_glfw_window.get(), GLFW_CURSOR, value ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+
+    m_mouse_catched.catched = value;
 }
 
 // GLFW error function
@@ -151,16 +154,18 @@ void Window::key_callback(GLFWwindow *glfw_window, int key, int scancode, int ac
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(glfw_window, GLFW_TRUE);
     } else if (key == GLFW_KEY_LEFT_CONTROL && action == GLFW_PRESS) {
-        window.set_catched_cursor(!window.m_mouse_catched);
+        window.set_catched_cursor(!window.m_mouse_catched.catched);
     } else if (key == GLFW_KEY_O && action == GLFW_PRESS) {
         window.m_wire_frame_mode = !window.m_wire_frame_mode;
         glPolygonMode(GL_FRONT_AND_BACK, window.m_wire_frame_mode ? GL_LINE : GL_FILL);
     } else if (action == GLFW_PRESS || action == GLFW_RELEASE) {
-        window.m_key_input[key] = (action == GLFW_PRESS);
+        window.m_key_input.key_map[key] = (action == GLFW_PRESS);
     }
 }
 // NOLINTBEGIN(bugprone-easily-swappable-parameters)
-void Window::mouse_button_callback(GLFWwindow *glfw_window, int button, int action,
+void Window::mouse_button_callback(GLFWwindow *glfw_window,
+                                   int button,
+                                   int action,
                                    int mods) // NOLINT(bugprone-easily-swappable-parameters)
 // NOLINTEND(bugprone-easily-swappable-parameters)
 {
@@ -183,8 +188,9 @@ void Window::mouse_cursor_callback(GLFWwindow *glfw_window, double xpos, double 
     window.m_last_cursor_pos_y = ypos;
 
     // Check if this is the first VALID mouse event after window being resized
-    if (window.m_first_mouse_input && !(std::abs(deltaCursorPosX) < std::numeric_limits<double>::epsilon() &&
-                                        std::abs(deltaCursorPosY) < std::numeric_limits<double>::epsilon())) {
+    if (window.m_first_mouse_input &&
+        !(std::abs(deltaCursorPosX) < std::numeric_limits<double>::epsilon() &&
+          std::abs(deltaCursorPosY) < std::numeric_limits<double>::epsilon())) {
         window.m_first_mouse_input = false;
         deltaCursorPosX = 0.0;
         deltaCursorPosY = 0.0;
@@ -193,7 +199,7 @@ void Window::mouse_cursor_callback(GLFWwindow *glfw_window, double xpos, double 
     deltaCursorPosX *= MOUSE_SENSITIVITY;
     deltaCursorPosY *= MOUSE_SENSITIVITY;
 
-    auto &[deltaX, deltaY] = window.m_mouse_cursor_input;
+    auto &[deltaX, deltaY] = window.m_mouse_cursor_input.cursor_movement;
     deltaX += deltaCursorPosX;
     deltaY += deltaCursorPosY;
 }
@@ -212,3 +218,16 @@ void Window::clear_mouse_cursor_input()
 {
     m_mouse_cursor_input = {};
 };
+
+void Window::update_catched_mouse(entt::registry &registry) const
+{
+    registry.ctx().erase<MouseCatched>();
+    registry.ctx().emplace<MouseCatched>(m_mouse_catched);
+}
+
+void Window::update_descriptor(entt::registry &registry) const
+{
+    registry.ctx().erase<Descriptor>();
+    registry.ctx().emplace<Descriptor>(
+        Descriptor{.width = m_width, .height = m_height, .aspect_ratio = aspectRatio()});
+}

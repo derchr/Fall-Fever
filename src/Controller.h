@@ -1,9 +1,9 @@
 #pragma once
 
 #include "FrameBuffer.h"
+#include "gltf_loader.h"
 #include "scene.h"
 #include "shader.h"
-#include "gltf_loader.h"
 
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
@@ -27,6 +27,7 @@ public:
 
 private:
     void limit_framerate();
+    void update_delta_time(entt::registry &registry) const;
     void update_window_dimensions();
 
     std::shared_ptr<Window> m_gameWindow;

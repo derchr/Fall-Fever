@@ -11,6 +11,18 @@ class GLFWwindow;
 class Window
 {
 public:
+    struct MouseCatched
+    {
+        bool catched = true;
+    };
+
+    struct Descriptor
+    {
+        uint32_t width{};
+        uint32_t height{};
+        float aspect_ratio{};
+    };
+
     Window();
 
     [[nodiscard]] auto glfw_window() -> GLFWwindow & { return *m_glfw_window; }
@@ -24,6 +36,8 @@ public:
 
     void clear_mouse_cursor_input();
     void update_dimensions();
+    void update_catched_mouse(entt::registry &registry) const;
+    void update_descriptor(entt::registry &registry) const;
 
 private:
     static void key_callback(GLFWwindow *glfw_window, int key, int scancode, int action, int mods);
@@ -40,9 +54,9 @@ private:
     std::shared_ptr<GLFWwindow> m_glfw_window;
 
     // <Key, Action>
-    KeyInput m_key_input;
-    MouseButtonInput m_mouse_button_input;
-    MouseCursorInput m_mouse_cursor_input;
+    Input::Key m_key_input;
+    Input::MouseButton m_mouse_button_input;
+    Input::MouseCursor m_mouse_cursor_input;
 
     uint32_t m_width{};
     uint32_t m_height{};
@@ -50,6 +64,6 @@ private:
     double m_last_cursor_pos_y = 0.0;
 
     bool m_first_mouse_input = false;
-    bool m_mouse_catched = true;
+    MouseCatched m_mouse_catched;
     bool m_wire_frame_mode = false;
 };
