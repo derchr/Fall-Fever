@@ -1,15 +1,9 @@
-[submodule "data/res"]
-	path = data/res
-	url = git@gitlab.com:4VRDriver/fall-fever-resources.git
 [submodule "lib/spdlog"]
 	path = lib/spdlog
 	url = git@github.com:gabime/spdlog.git
 [submodule "lib/entt"]
 	path = lib/entt
 	url = https://github.com/skypjack/entt.git
-[submodule "lib/tinygltf"]
-	path = lib/tinygltf
-	url = https://github.com/syoyo/tinygltf.git
 [submodule "lib/glfw"]
 	path = lib/glfw
 	url = https://github.com/glfw/glfw.git
