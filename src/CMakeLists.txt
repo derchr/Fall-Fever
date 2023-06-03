@@ -31,7 +31,6 @@ target_link_libraries(
     fx-gltf::fx-gltf
     nlohmann_json::nlohmann_json
     stb
-    sail
 )
 
 add_executable(Fall-Fever
