@@ -29,7 +29,6 @@ target_link_libraries(
     pthread
     spdlog
     fx-gltf::fx-gltf
-    nlohmann_json::nlohmann_json
     stb
 )
 
