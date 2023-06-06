@@ -1,16 +1,12 @@
-﻿---
-BasedOnStyle: LLVM
-AccessModifierOffset: '-4'
+﻿AccessModifierOffset: '-4'
 AllowShortFunctionsOnASingleLine: InlineOnly
 AllowShortIfStatementsOnASingleLine: Never
-AllowShortLoopsOnASingleLine: 'false'
-AlwaysBreakTemplateDeclarations: 'true'
 BreakBeforeBraces: Mozilla
 BinPackParameters: 'false'
 BinPackArguments: 'false'
 ColumnLimit: '100'
 ConstructorInitializerAllOnOneLineOrOnePerLine: 'true'
 IndentWidth: '4'
-PointerAlignment: Right
+PointerAlignment: Left
+QualifierAlignment: Right
 
-...
