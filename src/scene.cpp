@@ -53,7 +53,7 @@ void Scene::update()
     Camera::aspect_ratio_update(m_registry);
     Camera::keyboard_movement(m_registry);
 
-    if (m_registry.ctx().at<Window::MouseCatched>().catched) {
+    if (m_registry.ctx().get<Window::MouseCatched>().catched) {
         Camera::mouse_orientation(m_registry);
     }
 }

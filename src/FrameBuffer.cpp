@@ -3,6 +3,7 @@
 #include "util/Log.h"
 
 #include <cstddef>
+#include <glm/fwd.hpp>
 
 void Framebuffer::bind() const
 {
@@ -19,11 +20,11 @@ GLuint Framebuffer::getFBO() const
     return m_FBO;
 }
 
-Framebuffer::Framebuffer(uint32_t width, uint32_t height, Shader &shader) : m_shader(shader)
+Framebuffer::Framebuffer(glm::u32vec2 physical_dimensions, Shader &shader) : m_shader(shader)
 {
     glGenFramebuffers(1, &m_FBO);
 
-    generateTextures(width, height);
+    generateTextures(physical_dimensions.x, physical_dimensions.y);
     setExposureCorrection(true);
 }
 
@@ -63,13 +64,13 @@ void Framebuffer::drawOnEntireScreen() const
     m_shader.unbind();
 }
 
-void Framebuffer::changeDimensions(uint32_t width, uint32_t height)
+void Framebuffer::updateDimensions(glm::u32vec2 physical_dimensions)
 {
     // Delete old textures
     glDeleteTextures(1, &m_colorBuffer);
     glDeleteRenderbuffers(1, &m_depthStencilBuffer);
 
-    generateTextures(width, height);
+    generateTextures(physical_dimensions.x, physical_dimensions.y);
 }
 
 void Framebuffer::generateTextures(uint32_t width, uint32_t height)

@@ -40,15 +40,15 @@ void Camera::keyboard_movement(entt::registry &registry)
     };
 
     auto &movement_context = registry.ctx().emplace<KeyboardMovementContext>();
-    auto const& key_input = registry.ctx().at<Input::Key>();
-    auto const& delta_time = registry.ctx().at<Time::Delta>();
+    auto const& key_input = registry.ctx().get<Input::Key>();
+    auto const& delta_time = registry.ctx().get<Time::Delta>();
 
     auto camera_view = registry.view<Camera const, Transform, GlobalTransform const>();
     auto camera_entity = camera_view.front();
     auto [camera, camera_transform, camera_global_transform] = camera_view.get(camera_entity);
 
     glm::vec3 front_vec = front_vector(camera_global_transform);
-    front_vec.y = 0; // NOLINT (cppcoreguidelines-pro-type-union-access)
+    front_vec.y = 0;
 
     glm::vec3 delta_pos = glm::vec3(0., 0., 0.);
     float delta_factor = SPEED * delta_time.delta.count() * (movement_context.accelerate ? ACCELERATION : 1.0F);
@@ -86,7 +86,7 @@ void Camera::mouse_orientation(entt::registry &registry)
     auto camera_entity = camera_view.front();
     auto [camera, camera_transform] = camera_view.get(camera_entity);
 
-    auto const& mouse_cursor_input = registry.ctx().at<Input::MouseCursor>();
+    auto const& mouse_cursor_input = registry.ctx().get<Input::MouseCursor>();
     auto [deltaX, deltaY] = mouse_cursor_input.cursor_movement;
 
     if (std::abs(deltaX) < std::numeric_limits<double>::epsilon() &&
@@ -96,7 +96,6 @@ void Camera::mouse_orientation(entt::registry &registry)
 
     auto pitch = static_cast<float>(deltaY);
     auto yaw = static_cast<float>(deltaX);
-    auto roll = 0.0F;
 
     // Orthographic projection currently unsupported
     auto &camera_perspective = std::get<Perspective>(camera.projection);
@@ -114,7 +113,7 @@ void Camera::mouse_orientation(entt::registry &registry)
 
 void Camera::aspect_ratio_update(entt::registry &registry)
 {
-    float aspect_ratio = registry.ctx().at<Window::Descriptor>().aspect_ratio;
+    float aspect_ratio = registry.ctx().get<Window::Descriptor>().aspect_ratio;
 
     auto camera_view = registry.view<Camera>();
     auto camera_entity = camera_view.front();

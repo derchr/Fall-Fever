@@ -26,9 +26,7 @@ using namespace entt::literals;
 
 Controller::Controller()
     : m_gameWindow(std::make_shared<Window>()),
-      m_postProcessFrameBuffer(m_gameWindow->dimensions().first,
-                               m_gameWindow->dimensions().second,
-                               post_processing_shader),
+      m_postProcessFrameBuffer(m_gameWindow->physical_dimensions(), post_processing_shader),
       m_gltf_loader{.image_cache = m_image_cache,
                     .material_cache = m_material_cache,
                     .mesh_cache = m_mesh_cache,
@@ -38,7 +36,6 @@ Controller::Controller()
                     .gltf_node_cache = m_gltf_node_cache},
       m_gltf_cache(m_gltf_loader)
 {
-    // std::filesystem::path document_path("Lantern/glTF-Binary/Lantern.glb");
     std::filesystem::path document_path("ABeautifulGame.glb");
     entt::hashed_string document_hash(document_path.c_str());
 
@@ -93,7 +90,6 @@ void Controller::run()
 
         // Update window size
         if (m_gameWindow->dimensions_changed()) {
-            m_gameWindow->update_dimensions();
             update_window_dimensions();
         }
     }
@@ -123,21 +119,22 @@ void Controller::update_window_dimensions()
     // m_camera->updateAspectRatio(m_gameWindow->aspectRatio());
     // m_gameEventHandler->setFirstMouseInput(1);
 
-    auto dimensions = m_gameWindow->dimensions();
-    m_postProcessFrameBuffer.changeDimensions(dimensions.first, dimensions.second);
+    auto dimensions = m_gameWindow->physical_dimensions();
+    m_postProcessFrameBuffer.updateDimensions(dimensions);
 }
 
-void Controller::updateExposure(Shader &shader) const
+void Controller::updateExposure(Shader& shader) const
 {
     shader.bind();
     shader.set_uniform("u_exposure", m_exposure);
     Shader::unbind();
 }
 
-void Controller::update_delta_time(entt::registry &registry) const
+void Controller::update_delta_time(entt::registry& registry) const
 {
     static constexpr auto MICROSECONDS_PER_SECOND = 1'000'000;
 
     registry.ctx().erase<Time::Delta>();
-    registry.ctx().emplace<Time::Delta>(std::chrono::microseconds(static_cast<unsigned>(m_deltaTime * MICROSECONDS_PER_SECOND)));
+    registry.ctx().emplace<Time::Delta>(
+        std::chrono::microseconds(static_cast<unsigned>(m_deltaTime * MICROSECONDS_PER_SECOND)));
 }

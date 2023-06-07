@@ -1,13 +1,14 @@
 #pragma once
 
 #include <glad/gl.h>
+#include <glm/glm.hpp>
 
 class Shader;
 
 class Framebuffer
 {
 public:
-    Framebuffer(uint32_t width, uint32_t height, Shader &shader);
+    Framebuffer(glm::u32vec2 physical_dimensions, Shader &shader);
     ~Framebuffer();
 
     void bind() const;
@@ -16,8 +17,7 @@ public:
 
     void drawOnEntireScreen() const;
 
-    void changeDimensions(uint32_t width, uint32_t height);
-
+    void updateDimensions(glm::u32vec2 physical_dimensions);
     void setExposureCorrection(bool exposureCorrection) const;
 
     GLuint getTextureId() const;

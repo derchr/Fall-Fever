@@ -6,7 +6,7 @@ namespace Time {
 
 struct Delta
 {
-    std::chrono::duration<float> delta;
+    std::chrono::duration<double> delta;
 };
 
 } // namespace Time

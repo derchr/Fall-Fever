@@ -1,17 +1,21 @@
 #include "Controller.h"
+#include "Helper.h"
+#include "util/Log.h"
 
 #include <GLFW/glfw3.h>
 #include <iostream>
 
-auto main(int argc, char **argv) -> int
+auto main() -> int
 {
-    // Suppress warning about unused variable
-    (void)argc;
-    (void)argv;
-
 #ifndef NDEBUG
     std::cout << "[Debug Mode]" << std::endl;
 #endif
+
+    // Initialize GLFW
+    if (glfwInit() == 0) {
+        Log::logger().critical("Could not initialize GLFW");
+        return -1;
+    }
 
     {
         // Create controller

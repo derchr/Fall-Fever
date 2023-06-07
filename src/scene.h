@@ -5,8 +5,6 @@
 #include <chrono>
 #include <entt/entt.hpp>
 
-class Shader;
-
 class Scene
 {
 public:

@@ -8,17 +8,6 @@
 
 Window::Window()
 {
-    // Hint Wayland preference to GLFW
-    // glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_WAYLAND);
-
-    // Initialize GLFW
-    if (glfwInit() == 0) {
-        std::terminate();
-    }
-
-    m_width = INIT_WINDOW_WIDTH;
-    m_height = INIT_WINDOW_HEIGHT;
-
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -32,24 +21,12 @@ Window::Window()
 #endif
 
     m_glfw_window = std::shared_ptr<GLFWwindow>(
-        glfwCreateWindow(
-            static_cast<int>(m_width), static_cast<int>(m_height), "OpenGL", nullptr, nullptr),
-        [](GLFWwindow *window) { glfwDestroyWindow(window); });
+        glfwCreateWindow(INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT, "OpenGL", nullptr, nullptr),
+        [](GLFWwindow* window) { glfwDestroyWindow(window); });
 
     if (!m_glfw_window) {
         Log::logger().critical("Failed to create window");
     }
-
-    // Wait for window to maximize (in case)
-    // Helper::sleep(1000);
-
-    int width{};
-    int height{};
-
-    glfwGetWindowSize(m_glfw_window.get(), &width, &height);
-
-    m_width = static_cast<uint32_t>(width);
-    m_height = static_cast<uint32_t>(height);
 
     // Create OpenGL context
     glfwMakeContextCurrent(m_glfw_window.get());
@@ -57,19 +34,16 @@ Window::Window()
     // Initialize GLAD
     if (gladLoadGL(glfwGetProcAddress) == 0) {
         Log::logger().critical("Failed to initialize GLAD");
-        std::terminate();
+        std::quick_exit(-1);
     }
 
 #ifndef NDEBUG
     // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
-    Log::logger().debug("OpenGL version: {}",
-                        reinterpret_cast<const char *>(glGetString(GL_VERSION)));
+    auto const* gl_version = reinterpret_cast<char const*>(glGetString(GL_VERSION));
     // NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
+    Log::logger().debug("OpenGL version: {}", gl_version);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback(&Helper::gl_debug_callback, nullptr);
-
-    // Disable mouse cursor
-    m_mouse_catched.catched = false;
 #endif
 
     // Enable z buffer
@@ -83,73 +57,64 @@ Window::Window()
     // Enable multisampling (a bit redundant because most graphics drivers do this automatically)
     glEnable(GL_MULTISAMPLE);
 
-    // Disable VSync since my sleep function handles this
+#ifndef NDEBUG
+    // Disable mouse cursor
+    m_mouse_catched.catched = false;
+#endif
+
+    // Disable VSync
     glfwSwapInterval(0);
 
     set_catched_cursor(m_mouse_catched.catched);
 
-    glViewport(0, 0, static_cast<GLsizei>(m_width), static_cast<GLsizei>(m_height));
+    {
+        int width{};
+        int height{};
+        glfwGetFramebufferSize(m_glfw_window.get(), &width, &height);
+        glViewport(0, 0, width, height);
+    }
 
+    // Callbacks
     glfwSetWindowUserPointer(m_glfw_window.get(), this);
     glfwSetKeyCallback(m_glfw_window.get(), key_callback);
-    glfwSetMouseButtonCallback(m_glfw_window.get(), mouse_button_callback);
     glfwSetCursorPosCallback(m_glfw_window.get(), mouse_cursor_callback);
+    glfwSetFramebufferSizeCallback(m_glfw_window.get(), framebuffer_size_callback);
 }
 
-auto Window::dimensions_changed() const -> bool
+auto Window::dimensions_changed() -> bool
 {
-    int new_width{};
-    int new_height{};
-
-    glfwGetFramebufferSize(m_glfw_window.get(), &new_width, &new_height);
-
-    return !(static_cast<uint32_t>(new_width) == m_width &&
-             static_cast<uint32_t>(new_height) == m_height);
-}
-
-void Window::update_dimensions()
-{
-    int width{};
-    int height{};
-
-    glfwGetFramebufferSize(m_glfw_window.get(), &width, &height);
-
-    m_width = static_cast<uint32_t>(width);
-    m_height = static_cast<uint32_t>(height);
-
-    glViewport(0, 0, width, height);
+    bool temp = m_dimensions_changed;
+    m_dimensions_changed = false;
+    return temp;
 }
 
 void Window::set_catched_cursor(bool value)
 {
-
     glfwSetInputMode(
         m_glfw_window.get(), GLFW_CURSOR, value ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
 
     m_mouse_catched.catched = value;
 }
 
-// GLFW error function
-void Window::glfw_error_callback(int error, const char *description)
+void Window::glfw_error_callback(int error, char const* description)
 {
     Log::logger().warn("GLFW [{:d}]: {:s}\n", error, description);
 }
 
-// This function is called when the window gets resized (currently not used)
-void Window::framebuffer_size_callback(GLFWwindow *window, int width, int height)
+void Window::framebuffer_size_callback(GLFWwindow* glfw_window, int width, int height)
 {
-    (void)window;
+    auto& window = *static_cast<Window*>(glfwGetWindowUserPointer(glfw_window));
+    window.m_dimensions_changed = true;
     glViewport(0, 0, width, height);
 }
 
-// NOLINTBEGIN(bugprone-easily-swappable-parameters)
-void Window::key_callback(GLFWwindow *glfw_window, int key, int scancode, int action, int mods)
-// NOLINTEND(bugprone-easily-swappable-parameters)
+void Window::key_callback(GLFWwindow* glfw_window,
+                          int key,
+                          [[maybe_unused]] int scancode,
+                          int action,
+                          [[maybe_unused]] int mods)
 {
-    (void)mods;
-    (void)scancode;
-
-    auto &window = *static_cast<Window *>(glfwGetWindowUserPointer(glfw_window));
+    auto& window = *static_cast<Window*>(glfwGetWindowUserPointer(glfw_window));
 
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(glfw_window, GLFW_TRUE);
@@ -162,24 +127,10 @@ void Window::key_callback(GLFWwindow *glfw_window, int key, int scancode, int ac
         window.m_key_input.key_map[key] = (action == GLFW_PRESS);
     }
 }
-// NOLINTBEGIN(bugprone-easily-swappable-parameters)
-void Window::mouse_button_callback(GLFWwindow *glfw_window,
-                                   int button,
-                                   int action,
-                                   int mods) // NOLINT(bugprone-easily-swappable-parameters)
-// NOLINTEND(bugprone-easily-swappable-parameters)
-{
-    (void)mods;
-    (void)button;
-    (void)action;
 
-    auto &window = *static_cast<Window *>(glfwGetWindowUserPointer(glfw_window));
-    (void)window;
-}
-
-void Window::mouse_cursor_callback(GLFWwindow *glfw_window, double xpos, double ypos)
+void Window::mouse_cursor_callback(GLFWwindow* glfw_window, double xpos, double ypos)
 {
-    auto &window = *static_cast<Window *>(glfwGetWindowUserPointer(glfw_window));
+    auto& window = *static_cast<Window*>(glfwGetWindowUserPointer(glfw_window));
 
     double deltaCursorPosX = xpos - window.m_last_cursor_pos_x;
     double deltaCursorPosY = -(ypos - window.m_last_cursor_pos_y);
@@ -189,8 +140,8 @@ void Window::mouse_cursor_callback(GLFWwindow *glfw_window, double xpos, double 
 
     // Check if this is the first VALID mouse event after window being resized
     if (window.m_first_mouse_input &&
-        !(std::abs(deltaCursorPosX) < std::numeric_limits<double>::epsilon() &&
-          std::abs(deltaCursorPosY) < std::numeric_limits<double>::epsilon())) {
+        (std::abs(deltaCursorPosX) >= std::numeric_limits<double>::epsilon() ||
+         std::abs(deltaCursorPosY) >= std::numeric_limits<double>::epsilon())) {
         window.m_first_mouse_input = false;
         deltaCursorPosX = 0.0;
         deltaCursorPosY = 0.0;
@@ -199,19 +150,25 @@ void Window::mouse_cursor_callback(GLFWwindow *glfw_window, double xpos, double 
     deltaCursorPosX *= MOUSE_SENSITIVITY;
     deltaCursorPosY *= MOUSE_SENSITIVITY;
 
-    auto &[deltaX, deltaY] = window.m_mouse_cursor_input.cursor_movement;
+    auto& [deltaX, deltaY] = window.m_mouse_cursor_input.cursor_movement;
     deltaX += deltaCursorPosX;
     deltaY += deltaCursorPosY;
 }
 
-auto Window::dimensions() const -> std::pair<unsigned, unsigned>
+auto Window::logical_dimensions() const -> glm::u32vec2
 {
-    return {m_width, m_height};
+    int width{};
+    int height{};
+    glfwGetWindowSize(m_glfw_window.get(), &width, &height);
+    return {width, height};
 }
 
-auto Window::aspectRatio() const -> float
+auto Window::physical_dimensions() const -> glm::u32vec2
 {
-    return (float)m_width / (float)m_height;
+    int width{};
+    int height{};
+    glfwGetFramebufferSize(m_glfw_window.get(), &width, &height);
+    return {width, height};
 }
 
 void Window::clear_mouse_cursor_input()
@@ -219,15 +176,18 @@ void Window::clear_mouse_cursor_input()
     m_mouse_cursor_input = {};
 };
 
-void Window::update_catched_mouse(entt::registry &registry) const
+void Window::update_catched_mouse(entt::registry& registry) const
 {
     registry.ctx().erase<MouseCatched>();
     registry.ctx().emplace<MouseCatched>(m_mouse_catched);
 }
 
-void Window::update_descriptor(entt::registry &registry) const
+void Window::update_descriptor(entt::registry& registry) const
 {
+    auto dimensions = logical_dimensions();
+
     registry.ctx().erase<Descriptor>();
-    registry.ctx().emplace<Descriptor>(
-        Descriptor{.width = m_width, .height = m_height, .aspect_ratio = aspectRatio()});
+    registry.ctx().emplace<Descriptor>(Descriptor{
+        .logical_dimensions = dimensions,
+        .aspect_ratio = static_cast<float>(dimensions.x) / static_cast<float>(dimensions.y)});
 }
