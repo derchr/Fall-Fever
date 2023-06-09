@@ -3,11 +3,11 @@ add_library(fever_engine
     Controller.cpp
     Window.cpp
     scene.cpp
-    FrameBuffer.cpp
-    Helper.cpp
+    framebuffer.cpp
     util/Log.cpp
     image.cpp
     mesh.cpp
+    glad.cpp
     gltf_loader.cpp
     material.cpp
     camera.cpp

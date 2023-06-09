@@ -1,10 +1,12 @@
 #include "Window.h"
-#include "Helper.h"
-#include "definitions/window.h"
 #include "util/Log.h"
+#include "glad.h"
 
-#include <GLFW/glfw3.h>
 #include <glad/gl.h>
+#include <GLFW/glfw3.h>
+
+static constexpr unsigned INIT_WINDOW_WIDTH = 1280;
+static constexpr unsigned INIT_WINDOW_HEIGHT = 720;
 
 Window::Window()
 {
@@ -31,54 +33,20 @@ Window::Window()
     // Create OpenGL context
     glfwMakeContextCurrent(m_glfw_window.get());
 
-    // Initialize GLAD
-    if (gladLoadGL(glfwGetProcAddress) == 0) {
-        Log::logger().critical("Failed to initialize GLAD");
-        std::quick_exit(-1);
-    }
-
-#ifndef NDEBUG
-    // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
-    auto const* gl_version = reinterpret_cast<char const*>(glGetString(GL_VERSION));
-    // NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
-    Log::logger().debug("OpenGL version: {}", gl_version);
-    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-    glDebugMessageCallback(&Helper::gl_debug_callback, nullptr);
-#endif
-
-    // Enable z buffer
-    glEnable(GL_DEPTH_TEST);
-
-    // Enable face culling
-    glEnable(GL_CULL_FACE);
-    glFrontFace(GL_CW);
-    glCullFace(GL_FRONT);
-
-    // Enable multisampling (a bit redundant because most graphics drivers do this automatically)
-    glEnable(GL_MULTISAMPLE);
-
 #ifndef NDEBUG
     // Disable mouse cursor
     m_mouse_catched.catched = false;
 #endif
 
-    // Disable VSync
-    glfwSwapInterval(0);
-
     set_catched_cursor(m_mouse_catched.catched);
-
-    {
-        int width{};
-        int height{};
-        glfwGetFramebufferSize(m_glfw_window.get(), &width, &height);
-        glViewport(0, 0, width, height);
-    }
 
     // Callbacks
     glfwSetWindowUserPointer(m_glfw_window.get(), this);
     glfwSetKeyCallback(m_glfw_window.get(), key_callback);
     glfwSetCursorPosCallback(m_glfw_window.get(), mouse_cursor_callback);
     glfwSetFramebufferSizeCallback(m_glfw_window.get(), framebuffer_size_callback);
+
+    init_glad();
 }
 
 auto Window::dimensions_changed() -> bool

@@ -1,6 +1,4 @@
 #include "Controller.h"
-#include "FrameBuffer.h"
-#include "Helper.h"
 #include "Window.h"
 #include "gltf_loader.h"
 #include "input.h"
@@ -24,9 +22,11 @@
 
 using namespace entt::literals;
 
+static constexpr unsigned MAX_FPS = 60;
+
 Controller::Controller()
     : m_gameWindow(std::make_shared<Window>()),
-      m_postProcessFrameBuffer(m_gameWindow->physical_dimensions(), post_processing_shader),
+      post_processing_framebuffer(m_gameWindow->physical_dimensions()),
       m_gltf_loader{.image_cache = m_image_cache,
                     .material_cache = m_material_cache,
                     .mesh_cache = m_mesh_cache,
@@ -47,8 +47,6 @@ Controller::Controller()
 
 void Controller::run()
 {
-    updateExposure(post_processing_shader);
-
     entt::hashed_string shader_hash(Material::SHADER_NAME.data());
     auto standard_material_shader =
         m_shader_cache.load(shader_hash, Material::SHADER_NAME).first->second;
@@ -77,14 +75,14 @@ void Controller::run()
         // --- Render and buffer swap ---
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        m_postProcessFrameBuffer.bind();
+        post_processing_framebuffer.bind();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         Light::update_lights(m_scene->registry(), standard_material_shader);
         Render::render(m_scene->registry());
 
         Framebuffer::unbind();
-        m_postProcessFrameBuffer.drawOnEntireScreen();
+        post_processing_framebuffer.draw(post_processing_shader);
 
         glfwSwapBuffers(&m_gameWindow->glfw_window());
 
@@ -120,14 +118,7 @@ void Controller::update_window_dimensions()
     // m_gameEventHandler->setFirstMouseInput(1);
 
     auto dimensions = m_gameWindow->physical_dimensions();
-    m_postProcessFrameBuffer.updateDimensions(dimensions);
-}
-
-void Controller::updateExposure(Shader& shader) const
-{
-    shader.bind();
-    shader.set_uniform("u_exposure", m_exposure);
-    Shader::unbind();
+    post_processing_framebuffer = Framebuffer(dimensions);
 }
 
 void Controller::update_delta_time(entt::registry& registry) const

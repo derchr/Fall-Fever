@@ -1,6 +1,6 @@
 #pragma once
 
-#include "FrameBuffer.h"
+#include "framebuffer.h"
 #include "gltf_loader.h"
 #include "scene.h"
 #include "shader.h"
@@ -23,26 +23,19 @@ public:
 
     void run();
 
-    void updateExposure(Shader &shader) const;
-
 private:
     void limit_framerate();
-    void update_delta_time(entt::registry &registry) const;
+    void update_delta_time(entt::registry& registry) const;
     void update_window_dimensions();
 
     std::shared_ptr<Window> m_gameWindow;
-
-    Shader skybox_shader{"skybox", "data/shaders"};
-    Shader post_processing_shader{"post_processing", "data/shaders"};
-
-    Framebuffer m_postProcessFrameBuffer;
-
-    static constexpr unsigned MAX_FPS = 60;
-
     std::shared_ptr<Scene> m_scene;
+    Shader skybox_shader{"skybox", "data/shaders"};
+
+    Shader post_processing_shader{"post_processing", "data/shaders"};
+    Framebuffer post_processing_framebuffer;
 
     double m_deltaTime{};
-    float m_exposure = 1.0;
 
     // Resource caches
     entt::resource_cache<Image> m_image_cache;

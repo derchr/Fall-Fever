@@ -1,22 +1,22 @@
-#include "Helper.h"
+#include "glad.h"
 #include "util/Log.h"
 
-#include <algorithm>
+#include <GLFW/glfw3.h>
 
-void Helper::gl_debug_callback(GLenum source,
-                               GLenum type,
-                               GLuint id,
-                               GLenum severity,
-                               GLsizei length,
-                               const GLchar *message,
-                               const void *userParam)
+static void gl_debug_callback(GLenum source,
+                              GLenum type,
+                              GLuint id,
+                              GLenum severity,
+                              GLsizei length,
+                              GLchar const* message,
+                              void const* userParam)
 {
     (void)length;
     (void)userParam;
 
-    const char *_source;
-    const char *_type;
-    const char *_severity;
+    char const* _source;
+    char const* _type;
+    char const* _severity;
 
     // Remove unwanted newline characters from message string
     std::string _message = message;
@@ -108,7 +108,7 @@ void Helper::gl_debug_callback(GLenum source,
         break;
     }
 
-    if (severity == GL_DEBUG_SEVERITY_HIGH || severity == GL_DEBUG_SEVERITY_MEDIUM)
+    if (severity == GL_DEBUG_SEVERITY_HIGH || severity == GL_DEBUG_SEVERITY_MEDIUM) {
         Log::logger().debug("[OpenGL Debug Message]\n"
                             "Message: {}\n"
                             "Source: {}\n"
@@ -120,19 +120,37 @@ void Helper::gl_debug_callback(GLenum source,
                             _type,
                             id,
                             _severity);
+    }
 }
 
-Helper::Timer::Timer(const std::string &name) : m_name(name)
+void init_glad()
 {
-    m_start = std::chrono::high_resolution_clock::now();
-}
+    // Initialize GLAD
+    if (gladLoadGL(glfwGetProcAddress) == 0) {
+        Log::logger().critical("Failed to initialize GLAD");
+        std::quick_exit(-1);
+    }
 
-Helper::Timer::~Timer()
-{
-    m_end = std::chrono::high_resolution_clock::now();
+#ifndef NDEBUG
+    // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
+    auto const* gl_version = reinterpret_cast<char const*>(glGetString(GL_VERSION));
+    // NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
+    Log::logger().debug("OpenGL version: {}", gl_version);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageCallback(&gl_debug_callback, nullptr);
+#endif
 
-    m_duration = m_end - m_start;
-    float ms = m_duration.count() * 1000.0f;
+    // Enable z buffer
+    glEnable(GL_DEPTH_TEST);
 
-    Log::logger().info("Timer {} took {}", m_name, ms);
+    // Enable face culling
+    glEnable(GL_CULL_FACE);
+    glFrontFace(GL_CW);
+    glCullFace(GL_FRONT);
+
+    // Enable multisampling (a bit redundant because most graphics drivers do this automatically)
+    glEnable(GL_MULTISAMPLE);
+
+    // Disable VSync
+    glfwSwapInterval(0);
 }

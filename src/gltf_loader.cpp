@@ -1,12 +1,21 @@
 #include "gltf_loader.h"
 #include "camera.h"
-#include "definitions/attribute_locations.h"
 #include "name.h"
 #include "relationship.h"
 #include "scene.h"
 #include "util/Log.h"
 
 #include <iterator>
+
+struct AttributeLocations
+{
+    int position = 0;
+    int uv = 1;
+    int normal = 2;
+    int tangent = 3;
+};
+
+static constexpr AttributeLocations ATTRIBUTE_LOCATION;
 
 template <typename T>
 static auto create_vertex_attribute_data(std::span<uint8_t const> vertex_attribute_data)

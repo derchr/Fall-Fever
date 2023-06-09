@@ -77,6 +77,8 @@ struct GpuImage
     GpuImage(GpuImage &&other) noexcept : texture(other.texture) { other.texture = 0; }
     auto operator=(GpuImage &&other) noexcept -> GpuImage &
     {
+        glDeleteTextures(1, &texture);
+        
         texture = other.texture;
         other.texture = 0;
         return *this;

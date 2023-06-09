@@ -1,5 +1,4 @@
 #include "Controller.h"
-#include "Helper.h"
 #include "util/Log.h"
 
 #include <GLFW/glfw3.h>
