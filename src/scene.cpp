@@ -6,7 +6,6 @@
 #include "relationship.h"
 #include "shader.h"
 #include "transform.h"
-#include "util/Log.h"
 #include "Window.h"
 
 Scene::Scene(entt::registry registry) : m_registry(std::move(registry))

@@ -3,9 +3,9 @@
 #include "name.h"
 #include "relationship.h"
 #include "scene.h"
-#include "util/Log.h"
 
 #include <iterator>
+#include <spdlog/spdlog.h>
 
 struct AttributeLocations
 {
@@ -41,18 +41,18 @@ static auto create_indices(std::span<uint8_t const> gltf_index_data) -> Indices
     return Indices{.values = std::move(index_data)};
 }
 
-static auto load_texture(fx::gltf::Texture const &texture,
-                         fx::gltf::Document const &gltf,
-                         std::filesystem::path const &document_path,
+static auto load_texture(fx::gltf::Texture const& texture,
+                         fx::gltf::Document const& gltf,
+                         std::filesystem::path const& document_path,
                          Image::ColorFormat colorFormat,
-                         entt::resource_cache<Image> &image_cache) -> entt::resource<Image>
+                         entt::resource_cache<Image>& image_cache) -> entt::resource<Image>
 {
-    auto const &gltf_image = gltf.images.at(texture.source);
+    auto const& gltf_image = gltf.images.at(texture.source);
     auto const base_directory = document_path.parent_path();
 
     if (gltf_image.uri.empty()) {
-        auto const &image_buffer_view = gltf.bufferViews.at(gltf_image.bufferView);
-        auto const &image_buffer = gltf.buffers.at(image_buffer_view.buffer);
+        auto const& image_buffer_view = gltf.bufferViews.at(gltf_image.bufferView);
+        auto const& image_buffer = gltf.buffers.at(image_buffer_view.buffer);
 
         std::string const image_name =
             document_path.string() + ".image." + std::to_string(texture.source);
@@ -82,12 +82,12 @@ static auto load_texture(fx::gltf::Texture const &texture,
     return image_cache.load(image_hash, image_data, colorFormat).first->second;
 }
 
-static auto load_material(fx::gltf::Material const &material,
-                          fx::gltf::Document const &gltf,
-                          std::filesystem::path const &document_path,
-                          entt::resource_cache<Material> &material_cache,
-                          entt::resource_cache<Image> &image_cache,
-                          entt::resource_cache<Shader, ShaderLoader> &shader_cache)
+static auto load_material(fx::gltf::Material const& material,
+                          fx::gltf::Document const& gltf,
+                          std::filesystem::path const& document_path,
+                          entt::resource_cache<Material>& material_cache,
+                          entt::resource_cache<Image>& image_cache,
+                          entt::resource_cache<Shader, ShaderLoader>& shader_cache)
     -> entt::resource<Material>
 {
     auto base_color_texture_id = material.pbrMetallicRoughness.baseColorTexture.index;
@@ -95,14 +95,14 @@ static auto load_material(fx::gltf::Material const &material,
 
     std::optional<entt::resource<Image>> base_color_image;
     if (base_color_texture_id != -1) {
-        auto const &base_color_texture = gltf.textures.at(base_color_texture_id);
+        auto const& base_color_texture = gltf.textures.at(base_color_texture_id);
         base_color_image = load_texture(
             base_color_texture, gltf, document_path, Image::ColorFormat::SRGB, image_cache);
     }
 
     std::optional<entt::resource<Image>> normal_map_image;
     if (normal_texture_id != -1) {
-        auto const &normal_texture = gltf.textures.at(normal_texture_id);
+        auto const& normal_texture = gltf.textures.at(normal_texture_id);
         normal_map_image =
             load_texture(normal_texture, gltf, document_path, Image::ColorFormat::RGB, image_cache);
     }
@@ -112,7 +112,7 @@ static auto load_material(fx::gltf::Material const &material,
         shader_cache.load(shader_hash, Material::SHADER_NAME).first->second;
 
     if (material.name.empty()) {
-        Log::logger().warn("glTF material has no name.");
+        spdlog::warn("glTF material has no name.");
     }
 
     entt::hashed_string material_hash(material.name.c_str());
@@ -126,13 +126,13 @@ static auto load_material(fx::gltf::Material const &material,
 
 static auto load_attribute(std::string_view attribute_name,
                            uint32_t attribute_id,
-                           fx::gltf::Document const &gltf)
+                           fx::gltf::Document const& gltf)
     -> std::optional<std::pair<std::size_t, VertexAttributeData>>
 {
-    auto const &attribute_accessor = gltf.accessors.at(attribute_id);
+    auto const& attribute_accessor = gltf.accessors.at(attribute_id);
 
     if (attribute_accessor.componentType != fx::gltf::Accessor::ComponentType::Float) {
-        Log::logger().critical("Only float attributes supported!");
+        spdlog::critical("Only float attributes supported!");
         std::terminate();
     }
 
@@ -158,8 +158,8 @@ static auto load_attribute(std::string_view attribute_name,
         return {};
     }
 
-    auto const &buffer_view = gltf.bufferViews.at(attribute_accessor.bufferView);
-    auto const &buffer = gltf.buffers.at(buffer_view.buffer);
+    auto const& buffer_view = gltf.bufferViews.at(attribute_accessor.bufferView);
+    auto const& buffer = gltf.buffers.at(buffer_view.buffer);
 
     std::span<uint8_t const> buffer_span(buffer.data);
     std::span<uint8_t const> vertex_attribute_data_span =
@@ -183,32 +183,32 @@ static auto load_attribute(std::string_view attribute_name,
                 vertex_attribute_data_span);
         }
 
-        Log::logger().critical("Unsupported vertex attribute type!");
+        spdlog::critical("Unsupported vertex attribute type!");
         std::terminate();
     }();
 
     return std::make_pair(vertex_attribute_id.value(), std::move(vertex_attribute_data));
 }
 
-auto load_gltf_primitive(fx::gltf::Primitive const &gltf_primitive,
-                         fx::gltf::Document const &gltf,
+auto load_gltf_primitive(fx::gltf::Primitive const& gltf_primitive,
+                         fx::gltf::Document const& gltf,
                          std::string_view primitive_identifier,
-                         entt::resource_cache<Material> &material_cache,
-                         entt::resource_cache<Mesh> &mesh_cache) -> GltfPrimitive
+                         entt::resource_cache<Material>& material_cache,
+                         entt::resource_cache<Mesh>& mesh_cache) -> GltfPrimitive
 {
     // Load attributes
     auto tangent_it =
         std::find_if(gltf_primitive.attributes.cbegin(),
                      gltf_primitive.attributes.cend(),
-                     [](auto const &attribute) { return attribute.first == "TANGENT"; });
+                     [](auto const& attribute) { return attribute.first == "TANGENT"; });
 
     if (tangent_it == gltf_primitive.attributes.cend()) {
-        Log::logger().critical("glTF scene has to include tangent and normal components!");
+        spdlog::critical("glTF scene has to include tangent and normal components!");
         std::terminate();
     }
 
     std::map<Mesh::VertexAttributeId, VertexAttributeData> attributes;
-    for (auto const &attribute : gltf_primitive.attributes) {
+    for (auto const& attribute : gltf_primitive.attributes) {
         auto vertex_attribute = load_attribute(attribute.first, attribute.second, gltf);
 
         if (!vertex_attribute.has_value()) {
@@ -220,9 +220,9 @@ auto load_gltf_primitive(fx::gltf::Primitive const &gltf_primitive,
     }
 
     // Load indices
-    auto const &indices_accessor = gltf.accessors.at(gltf_primitive.indices);
-    auto const &indices_buffer_view = gltf.bufferViews.at(indices_accessor.bufferView);
-    auto const &indices_buffer = gltf.buffers.at(indices_buffer_view.buffer);
+    auto const& indices_accessor = gltf.accessors.at(gltf_primitive.indices);
+    auto const& indices_buffer_view = gltf.bufferViews.at(indices_accessor.bufferView);
+    auto const& indices_buffer = gltf.buffers.at(indices_buffer_view.buffer);
 
     std::span<uint8_t const> indices_buffer_span(indices_buffer.data);
     std::span<uint8_t const> indices_data_span =
@@ -239,7 +239,7 @@ auto load_gltf_primitive(fx::gltf::Primitive const &gltf_primitive,
             return create_indices<Indices::UnsignedInt>(indices_data_span);
         }
 
-        Log::logger().critical("Unsupported indices type!");
+        spdlog::critical("Unsupported indices type!");
         std::terminate();
     }();
 
@@ -250,14 +250,14 @@ auto load_gltf_primitive(fx::gltf::Primitive const &gltf_primitive,
             .first->second;
 
     // Get material by hash
-    auto const &gltf_material = gltf.materials.at(gltf_primitive.material);
+    auto const& gltf_material = gltf.materials.at(gltf_primitive.material);
     entt::hashed_string material_hash(gltf_material.name.c_str());
     entt::resource<Material> material = material_cache[material_hash];
 
     return GltfPrimitive{.mesh = mesh, .material = material};
 }
 
-auto GltfLoader::operator()(std::filesystem::path const &document_path) -> result_type
+auto GltfLoader::operator()(std::filesystem::path const& document_path) -> result_type
 {
     fx::gltf::ReadQuotas const read_quotas{.MaxFileSize = MAX_SIZE,
                                            .MaxBufferByteLength = MAX_SIZE};
@@ -275,7 +275,7 @@ auto GltfLoader::operator()(std::filesystem::path const &document_path) -> resul
 
     // Load materials
     std::vector<entt::resource<Material>> materials;
-    for (auto const &gltf_material : gltf.materials) {
+    for (auto const& gltf_material : gltf.materials) {
         entt::resource<Material> material = load_material(
             gltf_material, gltf, document_path, material_cache, image_cache, shader_cache);
         materials.push_back(material);
@@ -285,14 +285,14 @@ auto GltfLoader::operator()(std::filesystem::path const &document_path) -> resul
     std::vector<entt::resource<GltfMesh>> gltf_meshes;
     gltf_meshes.reserve(gltf.meshes.size());
 
-    for (auto const &gltf_mesh : gltf.meshes) {
+    for (auto const& gltf_mesh : gltf.meshes) {
         // Load primitives
         unsigned primitive_count = 0;
 
         std::vector<GltfPrimitive> primitives;
         primitives.reserve(gltf_mesh.primitives.size());
 
-        for (auto const &gltf_primitive : gltf_mesh.primitives) {
+        for (auto const& gltf_primitive : gltf_mesh.primitives) {
             std::string const primitive_identifier = document_path.string() + "." + gltf_mesh.name +
                                                      "." + ".primitive." +
                                                      std::to_string(primitive_count);
@@ -303,7 +303,7 @@ auto GltfLoader::operator()(std::filesystem::path const &document_path) -> resul
         }
 
         if (gltf_mesh.name.empty()) {
-            Log::logger().warn("glTF mesh has no name.");
+            spdlog::warn("glTF mesh has no name.");
         }
 
         entt::hashed_string gltf_mesh_hash(gltf_mesh.name.c_str());
@@ -318,11 +318,11 @@ auto GltfLoader::operator()(std::filesystem::path const &document_path) -> resul
     std::unordered_map<std::size_t, entt::resource<GltfNode>> nodes_map;
     nodes_map.reserve(gltf.nodes.size());
     for (std::size_t i = 0; i < gltf.nodes.size(); ++i) {
-        auto const &node = gltf.nodes.at(i);
+        auto const& node = gltf.nodes.at(i);
 
         auto mesh = [this, &node, &gltf_meshes]() -> std::optional<entt::resource<GltfMesh>> {
             if (node.mesh != -1) {
-                auto const &gltf_mesh = gltf_meshes.at(node.mesh);
+                auto const& gltf_mesh = gltf_meshes.at(node.mesh);
                 return {gltf_mesh};
             }
 
@@ -331,10 +331,10 @@ auto GltfLoader::operator()(std::filesystem::path const &document_path) -> resul
 
         auto camera = [this, &node, &gltf]() -> std::optional<GltfCamera> {
             if (node.camera != -1) {
-                auto const &camera = gltf.cameras.at(node.camera);
+                auto const& camera = gltf.cameras.at(node.camera);
 
                 if (camera.type != fx::gltf::Camera::Type::Perspective) {
-                    Log::logger().warn("Only perspective projections supported.");
+                    spdlog::warn("Only perspective projections supported.");
                 }
 
                 // Only perspective supported until now
@@ -353,7 +353,7 @@ auto GltfLoader::operator()(std::filesystem::path const &document_path) -> resul
         Transform transform{.translation = translation, .orientation = rotation, .scale = scale};
 
         if (node.name.empty()) {
-            Log::logger().warn("glTF node has no name.");
+            spdlog::warn("glTF node has no name.");
         }
 
         entt::hashed_string node_hash(node.name.c_str());
@@ -372,45 +372,45 @@ auto GltfLoader::operator()(std::filesystem::path const &document_path) -> resul
     // Resolve child hierarchy
     // TODO WRONG!!! does only work for 1 child generation
     for (std::size_t i = 0; i < gltf.nodes.size(); ++i) {
-        auto const &gltf_node = gltf.nodes.at(i);
+        auto const& gltf_node = gltf.nodes.at(i);
         std::vector<entt::resource<GltfNode>> children;
         for (int child_node_id : gltf_node.children) {
             auto child_node = nodes_map.extract(child_node_id);
             children.push_back(child_node.mapped());
         }
-        auto const &node = nodes_map.at(i);
+        auto const& node = nodes_map.at(i);
         node->children = std::move(children);
     };
 
     std::vector<entt::resource<GltfNode>> nodes;
     nodes.reserve(nodes_map.size());
-    for (auto const &node : nodes_map) {
+    for (auto const& node : nodes_map) {
         nodes.push_back(node.second);
     }
 
     // Load scenes
     std::vector<entt::resource<Scene>> scenes;
-    for (auto const &gltf_scene : gltf.scenes) {
+    for (auto const& gltf_scene : gltf.scenes) {
         // Get nodes by hash
         std::vector<entt::resource<GltfNode>> nodes;
         nodes.reserve(gltf_scene.nodes.size());
 
         for (auto node_id : gltf_scene.nodes) {
-            auto const &node = gltf.nodes.at(node_id);
+            auto const& node = gltf.nodes.at(node_id);
             entt::hashed_string node_hash(node.name.c_str());
             nodes.push_back(gltf_node_cache[node_hash]);
         }
 
         if (gltf_scene.name.empty()) {
-            Log::logger().warn("glTF scene has no name.");
+            spdlog::warn("glTF scene has no name.");
         }
 
         entt::registry registry;
 
         // Spawn an entity for every node in scene
-        for (auto const &node : nodes) {
-            std::function<entt::entity(GltfNode const &, std::optional<entt::entity>)> spawn_node =
-                [this, &spawn_node, &registry](GltfNode const &node,
+        for (auto const& node : nodes) {
+            std::function<entt::entity(GltfNode const&, std::optional<entt::entity>)> spawn_node =
+                [this, &spawn_node, &registry](GltfNode const& node,
                                                std::optional<entt::entity> parent) {
                     auto entity = registry.create();
                     registry.emplace<Name>(entity, node.name);
@@ -425,7 +425,7 @@ auto GltfLoader::operator()(std::filesystem::path const &document_path) -> resul
 
                     auto mesh = node.mesh;
                     if (mesh.has_value()) {
-                        for (auto const &primitive : mesh.value()->primitives) {
+                        for (auto const& primitive : mesh.value()->primitives) {
                             auto mesh_entity = registry.create();
                             registry.emplace<Parent>(mesh_entity, Parent{.parent = entity});
                             registry.emplace<Transform>(mesh_entity, Transform{});
@@ -451,7 +451,7 @@ auto GltfLoader::operator()(std::filesystem::path const &document_path) -> resul
                     }
 
                     // Spawn child nodes
-                    for (auto const &child : node.children) {
+                    for (auto const& child : node.children) {
                         auto child_entity = spawn_node(child, entity);
                         child_entities.push_back(child_entity);
                     }

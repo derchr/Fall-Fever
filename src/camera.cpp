@@ -1,8 +1,7 @@
 #include "camera.h"
-#include "util/Log.h"
+#include "Window.h"
 #include "input.h"
 #include "time.h"
-#include "Window.h"
 
 #include <algorithm>
 #include <glm/gtc/matrix_transform.hpp>
@@ -10,7 +9,7 @@
 auto Camera::projection_matrix() const -> glm::mat4
 {
     return std::visit(
-        [](auto &&arg) -> glm::mat4 {
+        [](auto&& arg) -> glm::mat4 {
             using T = std::decay_t<decltype(arg)>;
             if constexpr (std::is_same_v<T, Perspective>) {
                 return glm::perspective(arg.fov / 2, arg.aspect_ratio, arg.near, arg.far);
@@ -21,25 +20,25 @@ auto Camera::projection_matrix() const -> glm::mat4
         projection);
 };
 
-auto Camera::view_matrix(GlobalTransform const &transform) -> glm::mat4
+auto Camera::view_matrix(GlobalTransform const& transform) -> glm::mat4
 {
     return glm::lookAt(
         transform.position(), transform.position() + front_vector(transform), UP_VECTOR);
 }
 
-auto Camera::front_vector(GlobalTransform const &transform) -> glm::vec3
+auto Camera::front_vector(GlobalTransform const& transform) -> glm::vec3
 {
     return glm::normalize(transform.transform * glm::vec4(0.0, 0.0, 1.0, 0.0));
 }
 
-void Camera::keyboard_movement(entt::registry &registry)
+void Camera::keyboard_movement(entt::registry& registry)
 {
     struct KeyboardMovementContext
     {
         bool accelerate{};
     };
 
-    auto &movement_context = registry.ctx().emplace<KeyboardMovementContext>();
+    auto& movement_context = registry.ctx().emplace<KeyboardMovementContext>();
     auto const& key_input = registry.ctx().get<Input::Key>();
     auto const& delta_time = registry.ctx().get<Time::Delta>();
 
@@ -51,10 +50,11 @@ void Camera::keyboard_movement(entt::registry &registry)
     front_vec.y = 0;
 
     glm::vec3 delta_pos = glm::vec3(0., 0., 0.);
-    float delta_factor = SPEED * delta_time.delta.count() * (movement_context.accelerate ? ACCELERATION : 1.0F);
+    float delta_factor =
+        SPEED * delta_time.delta.count() * (movement_context.accelerate ? ACCELERATION : 1.0F);
     movement_context.accelerate = false;
 
-    for (auto const &[key, pressed] : key_input.key_map) {
+    for (auto const& [key, pressed] : key_input.key_map) {
         if (key == GLFW_KEY_W && pressed) {
             delta_pos += delta_factor * glm::normalize(front_vec);
         }
@@ -80,7 +80,7 @@ void Camera::keyboard_movement(entt::registry &registry)
     camera_transform.translation += delta_pos;
 }
 
-void Camera::mouse_orientation(entt::registry &registry)
+void Camera::mouse_orientation(entt::registry& registry)
 {
     auto camera_view = registry.view<Camera, Transform>();
     auto camera_entity = camera_view.front();
@@ -98,7 +98,7 @@ void Camera::mouse_orientation(entt::registry &registry)
     auto yaw = static_cast<float>(deltaX);
 
     // Orthographic projection currently unsupported
-    auto &camera_perspective = std::get<Perspective>(camera.projection);
+    auto& camera_perspective = std::get<Perspective>(camera.projection);
 
     camera_perspective.pitch += glm::radians(pitch);
     camera_perspective.yaw += glm::radians(yaw);
@@ -111,7 +111,7 @@ void Camera::mouse_orientation(entt::registry &registry)
         glm::quat(glm::vec3(-camera_perspective.pitch, -camera_perspective.yaw, 0.0));
 }
 
-void Camera::aspect_ratio_update(entt::registry &registry)
+void Camera::aspect_ratio_update(entt::registry& registry)
 {
     float aspect_ratio = registry.ctx().get<Window::Descriptor>().aspect_ratio;
 
@@ -120,6 +120,6 @@ void Camera::aspect_ratio_update(entt::registry &registry)
     auto [camera] = camera_view.get(camera_entity);
 
     // Orthographic projection currently unsupported
-    auto &camera_perspective = std::get<Perspective>(camera.projection);
+    auto& camera_perspective = std::get<Perspective>(camera.projection);
     camera_perspective.aspect_ratio = aspect_ratio;
 }

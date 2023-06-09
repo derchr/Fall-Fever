@@ -1,18 +1,17 @@
 #include "Controller.h"
-#include "util/Log.h"
+#include "log.h"
 
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <spdlog/spdlog.h>
 
 auto main() -> int
 {
-#ifndef NDEBUG
-    std::cout << "[Debug Mode]" << std::endl;
-#endif
+    Log::initialize();
 
     // Initialize GLFW
     if (glfwInit() == 0) {
-        Log::logger().critical("Could not initialize GLFW");
+        spdlog::critical("Could not initialize GLFW");
         return -1;
     }
 

@@ -1,7 +1,7 @@
 #include "framebuffer.h"
-#include "util/Log.h"
 
 #include <array>
+#include <spdlog/spdlog.h>
 
 Framebuffer::Framebuffer(glm::u32vec2 physical_dimensions)
 {
@@ -35,7 +35,7 @@ Framebuffer::Framebuffer(glm::u32vec2 physical_dimensions)
         GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depth_stencil_buffer);
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        Log::logger().error("Framebuffer not complete");
+        spdlog::error("Framebuffer not complete");
     }
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

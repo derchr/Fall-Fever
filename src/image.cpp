@@ -1,5 +1,6 @@
 #include "image.h"
-#include "util/Log.h"
+
+#include <spdlog/spdlog.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -10,15 +11,17 @@ Image::Image(std::span<uint8_t const> bytes, ColorFormat colorFormat) : colorFor
     int height{};
     int components{};
 
-    uint8_t *stbi_image =
-        stbi_load_from_memory(bytes.data(), static_cast<int>(bytes.size()), &width, &height, &components, 0);
+    uint8_t* stbi_image = stbi_load_from_memory(
+        bytes.data(), static_cast<int>(bytes.size()), &width, &height, &components, 0);
 
     std::size_t const buffer_length = static_cast<unsigned>(width * height * components);
 
-    // Copy the image data into a vector as stbi currently does not support writing into user-defined buffers.
-    std::copy(stbi_image,
-              &stbi_image[buffer_length], // NOLINT (cppcoreguidelines-pro-bounds-pointer-arithmetic)
-              std::back_inserter(data));
+    // Copy the image data into a vector as stbi currently does not support writing into
+    // user-defined buffers.
+    std::copy(
+        stbi_image,
+        &stbi_image[buffer_length], // NOLINT (cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        std::back_inserter(data));
 
     dataFormat = [components]() {
         switch (components) {
@@ -32,7 +35,7 @@ Image::Image(std::span<uint8_t const> bytes, ColorFormat colorFormat) : colorFor
             return DataFormat::RGBA8Uint;
 
         default:
-            Log::logger().warn("Unsupported data format for image.");
+            spdlog::warn("Unsupported data format for image.");
             return DataFormat::RGBA8Uint;
         }
     }();
@@ -42,7 +45,7 @@ Image::Image(std::span<uint8_t const> bytes, ColorFormat colorFormat) : colorFor
     stbi_image_free(stbi_image);
 }
 
-GpuImage::GpuImage(Image const &image)
+GpuImage::GpuImage(Image const& image)
 {
     GLenum internalFormat{};
     GLenum dataFormat{};
@@ -57,7 +60,8 @@ GpuImage::GpuImage(Image const &image)
         dataFormat = GL_RGB;
         break;
     case Image::DataFormat::RGBA8Uint:
-        internalFormat = (image.colorFormat == Image::ColorFormat::SRGB) ? GL_SRGB8_ALPHA8 : GL_RGBA8;
+        internalFormat =
+            (image.colorFormat == Image::ColorFormat::SRGB) ? GL_SRGB8_ALPHA8 : GL_RGBA8;
         dataFormat = GL_RGBA;
         break;
     }
@@ -65,8 +69,10 @@ GpuImage::GpuImage(Image const &image)
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, static_cast<GLint>(image.sampler.magFilter));
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, static_cast<GLint>(image.sampler.minFilter));
+    glTexParameteri(
+        GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, static_cast<GLint>(image.sampler.magFilter));
+    glTexParameteri(
+        GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, static_cast<GLint>(image.sampler.minFilter));
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, LOD_BIAS);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, static_cast<GLint>(image.sampler.wrapS));

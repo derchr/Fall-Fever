@@ -1,11 +1,11 @@
 #include "shader.h"
-#include "util/Log.h"
 
 #include <fmt/format.h>
 #include <fstream>
 #include <glm/gtc/type_ptr.hpp>
+#include <spdlog/spdlog.h>
 
-Shader::Shader(std::string_view name, std::filesystem::path const &directory)
+Shader::Shader(std::string_view name, std::filesystem::path const& directory)
     : program(glCreateProgram())
 {
     std::filesystem::path vertex_shader_path = directory / name;
@@ -27,9 +27,9 @@ Shader::Shader(std::string_view name, std::filesystem::path const &directory)
 
     GLint linked = 0;
     glGetProgramiv(program, GL_LINK_STATUS, &linked);
-    
+
     if (linked == 0) {
-        Log::logger().warn(R"(Failed to link Shader "{}")", name);
+        spdlog::warn(R"(Failed to link Shader "{}")", name);
     }
 
 #ifdef NDEBUG
@@ -40,7 +40,7 @@ Shader::Shader(std::string_view name, std::filesystem::path const &directory)
     glDeleteShader(fragment_shader);
 #endif
 
-    Log::logger().trace(R"(Loaded Shader "{}")", name);
+    spdlog::trace(R"(Loaded Shader "{}")", name);
 }
 
 Shader::~Shader()
@@ -58,13 +58,13 @@ void Shader::unbind()
     glUseProgram(0);
 }
 
-auto Shader::parse(const std::filesystem::path &path) -> std::string
+auto Shader::parse(std::filesystem::path const& path) -> std::string
 {
     std::fstream file;
     file.open(path, std::ios::in);
 
     if (!file.is_open()) {
-        Log::logger().critical(R"(Shader "{}" not found!)", path.string());
+        spdlog::critical(R"(Shader "{}" not found!)", path.string());
         std::terminate();
     }
 
@@ -74,7 +74,7 @@ auto Shader::parse(const std::filesystem::path &path) -> std::string
 auto Shader::compile(std::string_view source, GLenum type) -> GLuint
 {
     GLuint program = glCreateShader(type);
-    auto const *src = source.data();
+    auto const* src = source.data();
     glShaderSource(program, 1, &src, nullptr);
     glCompileShader(program);
 
@@ -89,7 +89,7 @@ auto Shader::compile(std::string_view source, GLenum type) -> GLuint
         message.reserve(static_cast<unsigned>(length));
 
         glGetShaderInfoLog(program, length, &length, message.data());
-        Log::logger().error("Shader compilation failed: {}", message);
+        spdlog::error("Shader compilation failed: {}", message);
 
         return 0;
     }
@@ -108,14 +108,13 @@ auto Shader::retrieveUniformLocation(std::string_view uniform_name) const -> GLi
     if (location != -1) {
         uniform_location_cache[uniform_name.data()] = location;
     } else {
-        Log::logger().warn(R"(Uniform "{}" not found.)", uniform_name);
+        spdlog::warn(R"(Uniform "{}" not found.)", uniform_name);
     }
 
     return location;
 }
 
-template <typename T>
-void Shader::set_uniform(std::string_view name, T value) const
+template <typename T> void Shader::set_uniform(std::string_view name, T value) const
 {
     GLint location = retrieveUniformLocation(name);
 
@@ -126,9 +125,10 @@ void Shader::set_uniform(std::string_view name, T value) const
     } else if constexpr (std::is_same_v<T, float>) {
         glUniform1f(location, value);
     } else if constexpr (std::is_same_v<T, glm::vec2>) {
-        glUniform2f(location, value.x, value.y); //NOLINT(cppcoreguidelines-pro-type-union-access)
+        glUniform2f(location, value.x, value.y); // NOLINT(cppcoreguidelines-pro-type-union-access)
     } else if constexpr (std::is_same_v<T, glm::vec3>) {
-        glUniform3f(location, value.x, value.y, value.z); //NOLINT(cppcoreguidelines-pro-type-union-access)
+        glUniform3f(
+            location, value.x, value.y, value.z); // NOLINT(cppcoreguidelines-pro-type-union-access)
     } else if constexpr (std::is_same_v<T, glm::mat3>) {
         glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(value));
     } else if constexpr (std::is_same_v<T, glm::mat4>) {

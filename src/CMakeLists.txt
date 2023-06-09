@@ -4,7 +4,7 @@ add_library(fever_engine
     Window.cpp
     scene.cpp
     framebuffer.cpp
-    util/Log.cpp
+    log.cpp
     image.cpp
     mesh.cpp
     glad.cpp

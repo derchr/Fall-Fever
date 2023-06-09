@@ -6,7 +6,6 @@
 #include "render.h"
 #include "shader.h"
 #include "time.h"
-#include "util/Log.h"
 
 #include <GLFW/glfw3.h>
 #include <array>
@@ -17,6 +16,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
+#include <spdlog/spdlog.h>
 #include <thread>
 #include <utility>
 
@@ -51,7 +51,7 @@ void Controller::run()
     auto standard_material_shader =
         m_shader_cache.load(shader_hash, Material::SHADER_NAME).first->second;
 
-    Log::logger().info("Startup complete. Enter game loop.");
+    spdlog::info("Startup complete. Enter game loop.");
 
     // This is the game loop
     while (glfwWindowShouldClose(&m_gameWindow->glfw_window()) == GLFW_FALSE) {

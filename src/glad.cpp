@@ -1,7 +1,7 @@
 #include "glad.h"
-#include "util/Log.h"
 
 #include <GLFW/glfw3.h>
+#include <spdlog/spdlog.h>
 
 static void gl_debug_callback(GLenum source,
                               GLenum type,
@@ -109,17 +109,17 @@ static void gl_debug_callback(GLenum source,
     }
 
     if (severity == GL_DEBUG_SEVERITY_HIGH || severity == GL_DEBUG_SEVERITY_MEDIUM) {
-        Log::logger().debug("[OpenGL Debug Message]\n"
-                            "Message: {}\n"
-                            "Source: {}\n"
-                            "Type: {}\n"
-                            "ID: {}\n"
-                            "Severity: {}\n",
-                            _message,
-                            _source,
-                            _type,
-                            id,
-                            _severity);
+        spdlog::debug("[OpenGL Debug Message]\n"
+                      "Message: {}\n"
+                      "Source: {}\n"
+                      "Type: {}\n"
+                      "ID: {}\n"
+                      "Severity: {}\n",
+                      _message,
+                      _source,
+                      _type,
+                      id,
+                      _severity);
     }
 }
 
@@ -127,7 +127,7 @@ void init_glad()
 {
     // Initialize GLAD
     if (gladLoadGL(glfwGetProcAddress) == 0) {
-        Log::logger().critical("Failed to initialize GLAD");
+        spdlog::critical("Failed to initialize GLAD");
         std::quick_exit(-1);
     }
 
@@ -135,7 +135,7 @@ void init_glad()
     // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
     auto const* gl_version = reinterpret_cast<char const*>(glGetString(GL_VERSION));
     // NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
-    Log::logger().debug("OpenGL version: {}", gl_version);
+    spdlog::debug("OpenGL version: {}", gl_version);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback(&gl_debug_callback, nullptr);
 #endif

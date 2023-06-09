@@ -1,9 +1,9 @@
 #include "Window.h"
-#include "util/Log.h"
 #include "glad.h"
 
-#include <glad/gl.h>
 #include <GLFW/glfw3.h>
+#include <glad/gl.h>
+#include <spdlog/spdlog.h>
 
 static constexpr unsigned INIT_WINDOW_WIDTH = 1280;
 static constexpr unsigned INIT_WINDOW_HEIGHT = 720;
@@ -27,7 +27,7 @@ Window::Window()
         [](GLFWwindow* window) { glfwDestroyWindow(window); });
 
     if (!m_glfw_window) {
-        Log::logger().critical("Failed to create window");
+        spdlog::critical("Failed to create window");
     }
 
     // Create OpenGL context
@@ -66,7 +66,7 @@ void Window::set_catched_cursor(bool value)
 
 void Window::glfw_error_callback(int error, char const* description)
 {
-    Log::logger().warn("GLFW [{:d}]: {:s}\n", error, description);
+    spdlog::warn("GLFW [{:d}]: {:s}\n", error, description);
 }
 
 void Window::framebuffer_size_callback(GLFWwindow* glfw_window, int width, int height)

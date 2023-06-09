@@ -1,15 +1,14 @@
 #include "mesh.h"
-#include "util/Log.h"
 
 #include <exception>
 
-GpuMesh::GpuMesh(Mesh const &mesh)
+GpuMesh::GpuMesh(Mesh const& mesh)
 {
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
     // Vertex attributes
-    for (auto const &[attribute_id, attribute_data] : mesh.attributes) {
+    for (auto const& [attribute_id, attribute_data] : mesh.attributes) {
         // BUG: https://github.com/llvm/llvm-project/issues/48582
         auto attr_id = attribute_id;
 
@@ -18,7 +17,7 @@ GpuMesh::GpuMesh(Mesh const &mesh)
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
         std::visit(
-            [attr_id](auto &&arg) {
+            [attr_id](auto&& arg) {
                 glBufferData(GL_ARRAY_BUFFER, arg.size(), arg.data(), GL_STATIC_DRAW);
 
                 int const components = [arg]() -> int {
@@ -56,7 +55,7 @@ GpuMesh::GpuMesh(Mesh const &mesh)
     glGenBuffers(1, &ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     std::visit(
-        [this](auto &&arg) {
+        [this](auto&& arg) {
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, arg.size(), arg.data(), GL_STATIC_DRAW);
 
             indices_count = arg.size();
