@@ -9,6 +9,7 @@ add_library(fever_engine
     core/light.cpp
     core/render.cpp
     core/shader.cpp
+    core/time.cpp
     input/input.cpp
     scene/gltf_loader.cpp
     scene/scene.cpp

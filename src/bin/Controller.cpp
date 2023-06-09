@@ -56,8 +56,7 @@ void Controller::run()
     // This is the game loop
     while (glfwWindowShouldClose(&m_gameWindow->glfw_window()) == GLFW_FALSE) {
         // --- Timing ---
-        limit_framerate();
-        update_delta_time(m_scene->registry());
+        Time::update_delta_time(m_scene->registry());
 
         // --- Check events, handle input ---
         m_gameWindow->clear_mouse_cursor_input();
@@ -88,44 +87,8 @@ void Controller::run()
 
         // Update window size
         if (m_gameWindow->dimensions_changed()) {
-            update_window_dimensions();
+            auto dimensions = m_gameWindow->physical_dimensions();
+            post_processing_framebuffer = Framebuffer(dimensions);
         }
     }
-}
-
-void Controller::limit_framerate()
-{
-    static double startingTime = 0.0;
-    static double lastTime = 0.0;
-
-    lastTime = glfwGetTime() - startingTime;
-
-    double frameTime = 1 / (double)MAX_FPS;
-    if (frameTime > lastTime) {
-        static constexpr auto MICROSECONDS_PER_SECOND = 1'000'000;
-        auto sleep_time_us =
-            static_cast<unsigned>((frameTime - lastTime) * MICROSECONDS_PER_SECOND);
-        std::this_thread::sleep_for(std::chrono::microseconds(sleep_time_us));
-    }
-
-    m_deltaTime = glfwGetTime() - startingTime;
-    startingTime = glfwGetTime();
-}
-
-void Controller::update_window_dimensions()
-{
-    // m_camera->updateAspectRatio(m_gameWindow->aspectRatio());
-    // m_gameEventHandler->setFirstMouseInput(1);
-
-    auto dimensions = m_gameWindow->physical_dimensions();
-    post_processing_framebuffer = Framebuffer(dimensions);
-}
-
-void Controller::update_delta_time(entt::registry& registry) const
-{
-    static constexpr auto MICROSECONDS_PER_SECOND = 1'000'000;
-
-    registry.ctx().erase<Time::Delta>();
-    registry.ctx().emplace<Time::Delta>(
-        std::chrono::microseconds(static_cast<unsigned>(m_deltaTime * MICROSECONDS_PER_SECOND)));
 }

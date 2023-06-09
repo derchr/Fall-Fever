@@ -24,10 +24,6 @@ public:
     void run();
 
 private:
-    void limit_framerate();
-    void update_delta_time(entt::registry& registry) const;
-    void update_window_dimensions();
-
     std::shared_ptr<Window> m_gameWindow;
     std::shared_ptr<Scene> m_scene;
     Shader skybox_shader{"skybox", "data/shaders"};

@@ -151,6 +151,6 @@ void init_glad()
     // Enable multisampling (a bit redundant because most graphics drivers do this automatically)
     glEnable(GL_MULTISAMPLE);
 
-    // Disable VSync
-    glfwSwapInterval(0);
+    // Enable VSync
+    glfwSwapInterval(1);
 }
