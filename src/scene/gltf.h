@@ -1,8 +1,8 @@
 #pragma once
 
-#include "material.h"
-#include "mesh.h"
-#include "transform.h"
+#include "components/transform.h"
+#include "core/graphics/material.h"
+#include "core/graphics/mesh.h"
 
 #include <entt/entt.hpp>
 #include <fx/gltf.h>

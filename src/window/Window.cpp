@@ -1,8 +1,8 @@
 #include "Window.h"
-#include "glad.h"
+#include "core/glad.h"
 
-#include <GLFW/glfw3.h>
 #include <glad/gl.h>
+#include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
 
 static constexpr unsigned INIT_WINDOW_WIDTH = 1280;

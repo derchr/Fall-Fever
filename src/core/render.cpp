@@ -1,14 +1,10 @@
-#pragma once
+#include "render.h"
+#include "core/camera.h"
+#include "core/graphics/material.h"
+#include "core/graphics/mesh.h"
+#include "core/shader.h"
 
-#include "camera.h"
-#include "material.h"
-#include "mesh.h"
-
-#include <entt/entt.hpp>
-
-namespace Render {
-    
-void render(entt::registry &registry)
+void Render::render(entt::registry& registry)
 {
     auto mesh_view = registry.view<GpuMesh const, GpuMaterial const, GlobalTransform const>();
     auto camera_view = registry.view<Camera const, GlobalTransform const>();
@@ -39,5 +35,3 @@ void render(entt::registry &registry)
         Shader::unbind();
     }
 }
-
-} // namespace Render

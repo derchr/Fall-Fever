@@ -1,8 +1,9 @@
 #include "camera.h"
-#include "Window.h"
-#include "input.h"
-#include "time.h"
+#include "core/time.h"
+#include "input/input.h"
+#include "window/Window.h"
 
+#include <GLFW/glfw3.h>
 #include <algorithm>
 #include <glm/gtc/matrix_transform.hpp>
 

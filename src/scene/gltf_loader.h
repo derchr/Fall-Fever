@@ -1,7 +1,7 @@
 #pragma once
 
 #include "gltf.h"
-#include "transform.h"
+#include "components/transform.h"
 
 #include <entt/entt.hpp>
 #include <filesystem>

@@ -1,8 +1,7 @@
 #pragma once
 
-#include "transform.h"
+#include "components/transform.h"
 
-#include <GLFW/glfw3.h>
 #include <chrono>
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>

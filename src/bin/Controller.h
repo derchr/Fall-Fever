@@ -1,9 +1,9 @@
 #pragma once
 
-#include "framebuffer.h"
-#include "gltf_loader.h"
-#include "scene.h"
-#include "shader.h"
+#include "core/graphics/framebuffer.h"
+#include "core/shader.h"
+#include "scene/gltf_loader.h"
+#include "scene/scene.h"
 
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "color.h"
-#include "shader.h"
+#include "components/color.h"
+#include "core/shader.h"
 
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
@@ -25,5 +25,5 @@ struct DirectionalLight
 };
 
 namespace Light {
-void update_lights(entt::registry &registry, Shader &shader);
+void update_lights(entt::registry& registry, Shader& shader);
 }

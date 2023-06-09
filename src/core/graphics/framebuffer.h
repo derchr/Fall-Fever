@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shader.h"
+#include "core/shader.h"
 
 #include <entt/entt.hpp>
 #include <glad/gl.h>

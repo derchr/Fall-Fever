@@ -1,11 +1,11 @@
 #include "Controller.h"
-#include "Window.h"
-#include "gltf_loader.h"
-#include "input.h"
-#include "light.h"
-#include "render.h"
-#include "shader.h"
-#include "time.h"
+#include "core/light.h"
+#include "core/render.h"
+#include "core/shader.h"
+#include "core/time.h"
+#include "input/input.h"
+#include "scene/gltf_loader.h"
+#include "window/Window.h"
 
 #include <GLFW/glfw3.h>
 #include <array>

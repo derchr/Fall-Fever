@@ -1,12 +1,10 @@
 #include "scene.h"
-#include "camera.h"
-#include "light.h"
-#include "mesh.h"
-#include "name.h"
-#include "relationship.h"
-#include "shader.h"
-#include "transform.h"
-#include "Window.h"
+#include "components/name.h"
+#include "components/transform.h"
+#include "core/camera.h"
+#include "core/graphics/mesh.h"
+#include "core/light.h"
+#include "window/Window.h"
 
 Scene::Scene(entt::registry registry) : m_registry(std::move(registry))
 {

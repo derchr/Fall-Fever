@@ -1,5 +1,5 @@
 #include "Controller.h"
-#include "log.h"
+#include "util/log.h"
 
 #include <GLFW/glfw3.h>
 #include <iostream>

@@ -1,5 +1,5 @@
 #include "light.h"
-#include "transform.h"
+#include "components/transform.h"
 
 static auto light_active(float illuminance) -> bool
 {

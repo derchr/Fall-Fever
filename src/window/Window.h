@@ -1,9 +1,8 @@
 #pragma once
 
-#include "input.h"
+#include "input/input.h"
 
 #include <glm/glm.hpp>
-
 #include <memory>
 #include <unordered_map>
 #include <utility>
@@ -26,24 +25,24 @@ public:
 
     Window();
 
-    [[nodiscard]] auto glfw_window() -> GLFWwindow & { return *m_glfw_window; }
+    [[nodiscard]] auto glfw_window() -> GLFWwindow& { return *m_glfw_window; }
     [[nodiscard]] auto physical_dimensions() const -> glm::u32vec2;
     [[nodiscard]] auto logical_dimensions() const -> glm::u32vec2;
     [[nodiscard]] auto dimensions_changed() -> bool;
-    [[nodiscard]] auto key_input() const -> auto const & { return m_key_input; }
-    [[nodiscard]] auto mouse_cursor_input() const -> auto const & { return m_mouse_cursor_input; }
-    [[nodiscard]] auto mouse_button_input() const -> auto const & { return m_mouse_button_input; }
+    [[nodiscard]] auto key_input() const -> auto const& { return m_key_input; }
+    [[nodiscard]] auto mouse_cursor_input() const -> auto const& { return m_mouse_cursor_input; }
+    [[nodiscard]] auto mouse_button_input() const -> auto const& { return m_mouse_button_input; }
     [[nodiscard]] auto cursor_catched() const -> auto { return m_mouse_catched; }
 
     void clear_mouse_cursor_input();
-    void update_catched_mouse(entt::registry &registry) const;
-    void update_descriptor(entt::registry &registry) const;
+    void update_catched_mouse(entt::registry& registry) const;
+    void update_descriptor(entt::registry& registry) const;
 
 private:
-    static void key_callback(GLFWwindow *glfw_window, int key, int scancode, int action, int mods);
-    static void mouse_cursor_callback(GLFWwindow *glfw_window, double xpos, double ypos);
-    static void framebuffer_size_callback(GLFWwindow *glfw_window, int width, int height);
-    static void glfw_error_callback(int error, const char *description);
+    static void key_callback(GLFWwindow* glfw_window, int key, int scancode, int action, int mods);
+    static void mouse_cursor_callback(GLFWwindow* glfw_window, double xpos, double ypos);
+    static void framebuffer_size_callback(GLFWwindow* glfw_window, int width, int height);
+    static void glfw_error_callback(int error, char const* description);
 
     static constexpr float MOUSE_SENSITIVITY = 0.15F;
 

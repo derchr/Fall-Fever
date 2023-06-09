@@ -1,7 +1,7 @@
 #pragma once
 
 #include "image.h"
-#include "shader.h"
+#include "core/shader.h"
 
 #include <entt/entt.hpp>
 #include <optional>

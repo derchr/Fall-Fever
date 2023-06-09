@@ -1,7 +1,7 @@
 #include "gltf_loader.h"
-#include "camera.h"
-#include "name.h"
-#include "relationship.h"
+#include "components/name.h"
+#include "components/relationship.h"
+#include "core/camera.h"
 #include "scene.h"
 
 #include <iterator>
