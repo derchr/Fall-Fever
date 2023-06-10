@@ -14,7 +14,7 @@ add_library(fever_engine
     scene/gltf_loader.cpp
     scene/scene.cpp
     util/log.cpp
-    window/Window.cpp
+    window/window.cpp
 )
 
 target_compile_features(fever_engine PUBLIC cxx_std_20)

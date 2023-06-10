@@ -1,7 +1,7 @@
 #include "camera.h"
 #include "core/time.h"
 #include "input/input.h"
-#include "window/Window.h"
+#include "window/window.h"
 
 #include <GLFW/glfw3.h>
 #include <algorithm>
@@ -40,7 +40,7 @@ void Camera::keyboard_movement(entt::registry& registry)
     };
 
     auto& movement_context = registry.ctx().emplace<KeyboardMovementContext>();
-    auto const& key_input = registry.ctx().get<Input::Key>();
+    auto const& key_state = registry.ctx().get<Input::State<Input::KeyCode>>();
     auto const& delta_time = registry.ctx().get<Time::Delta>();
 
     auto camera_view = registry.view<Camera const, Transform, GlobalTransform const>();
@@ -55,29 +55,28 @@ void Camera::keyboard_movement(entt::registry& registry)
         SPEED * delta_time.delta.count() * (movement_context.accelerate ? ACCELERATION : 1.0F);
     movement_context.accelerate = false;
 
-    for (auto const& [key, pressed] : key_input.key_map) {
-        if (key == GLFW_KEY_W && pressed) {
-            delta_pos += delta_factor * glm::normalize(front_vec);
-        }
-        if (key == GLFW_KEY_S && pressed) {
-            delta_pos -= delta_factor * glm::normalize(front_vec);
-        }
-        if (key == GLFW_KEY_A && pressed) {
-            delta_pos -= delta_factor * glm::normalize(glm::cross(front_vec, Camera::UP_VECTOR));
-        }
-        if (key == GLFW_KEY_D && pressed) {
-            delta_pos += delta_factor * glm::normalize(glm::cross(front_vec, Camera::UP_VECTOR));
-        }
-        if (key == GLFW_KEY_SPACE && pressed) {
-            delta_pos += delta_factor * UP_VECTOR;
-        }
-        if (key == GLFW_KEY_LEFT_SHIFT && pressed) {
-            delta_pos -= delta_factor * UP_VECTOR;
-        }
-        if (key == GLFW_KEY_LEFT_ALT && pressed) {
-            movement_context.accelerate = true;
-        }
+    if (key_state.pressed(Input::KeyCode{GLFW_KEY_W})) {
+        delta_pos += delta_factor * glm::normalize(front_vec);
     }
+    if (key_state.pressed(Input::KeyCode{GLFW_KEY_S})) {
+        delta_pos -= delta_factor * glm::normalize(front_vec);
+    }
+    if (key_state.pressed(Input::KeyCode{GLFW_KEY_A})) {
+        delta_pos -= delta_factor * glm::normalize(glm::cross(front_vec, Camera::UP_VECTOR));
+    }
+    if (key_state.pressed(Input::KeyCode{GLFW_KEY_D})) {
+        delta_pos += delta_factor * glm::normalize(glm::cross(front_vec, Camera::UP_VECTOR));
+    }
+    if (key_state.pressed(Input::KeyCode{GLFW_KEY_SPACE})) {
+        delta_pos += delta_factor * UP_VECTOR;
+    }
+    if (key_state.pressed(Input::KeyCode{GLFW_KEY_LEFT_SHIFT})) {
+        delta_pos -= delta_factor * UP_VECTOR;
+    }
+    if (key_state.pressed(Input::KeyCode{GLFW_KEY_LEFT_ALT})) {
+        movement_context.accelerate = true;
+    }
+
     camera_transform.translation += delta_pos;
 }
 
@@ -87,16 +86,12 @@ void Camera::mouse_orientation(entt::registry& registry)
     auto camera_entity = camera_view.front();
     auto [camera, camera_transform] = camera_view.get(camera_entity);
 
-    auto const& mouse_cursor_input = registry.ctx().get<Input::MouseCursor>();
-    auto [deltaX, deltaY] = mouse_cursor_input.cursor_movement;
+    auto const& mouse_cursor_input = registry.ctx().get<Input::MouseMotion>();
+    auto delta_x = mouse_cursor_input.delta.x;
+    auto delta_y = mouse_cursor_input.delta.y;
 
-    if (std::abs(deltaX) < std::numeric_limits<double>::epsilon() &&
-        std::abs(deltaY) < std::numeric_limits<double>::epsilon()) {
-        return;
-    }
-
-    auto pitch = static_cast<float>(deltaY);
-    auto yaw = static_cast<float>(deltaX);
+    auto pitch = static_cast<float>(-delta_y);
+    auto yaw = static_cast<float>(delta_x);
 
     // Orthographic projection currently unsupported
     auto& camera_perspective = std::get<Perspective>(camera.projection);

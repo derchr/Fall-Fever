@@ -2,8 +2,9 @@
 
 #include "core/graphics/framebuffer.h"
 #include "core/shader.h"
+#include "entt/entity/fwd.hpp"
 #include "scene/gltf_loader.h"
-#include "scene/scene.h"
+#include "input/input.h"
 
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
@@ -11,9 +12,9 @@
 #include <unordered_map>
 #include <vector>
 
-class Window;
 class Scene;
 class Camera;
+class Window;
 class Framebuffer;
 
 class Controller
@@ -24,14 +25,19 @@ public:
     void run();
 
 private:
+    void recreate_framebuffer();
+
     std::shared_ptr<Window> m_gameWindow;
     std::shared_ptr<Scene> m_scene;
-    Shader skybox_shader{"skybox", "data/shaders"};
 
     Shader post_processing_shader{"post_processing", "data/shaders"};
     Framebuffer post_processing_framebuffer;
 
-    double m_deltaTime{};
+    entt::registry registry;
+
+    entt::dispatcher event_dispatcher{};
+    Input::KeyListener key_listener;
+    Input::CursorListener cursor_listener;
 
     // Resource caches
     entt::resource_cache<Image> m_image_cache;

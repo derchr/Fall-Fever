@@ -2,6 +2,7 @@
 AllowShortFunctionsOnASingleLine: InlineOnly
 AllowShortIfStatementsOnASingleLine: Never
 BreakBeforeBraces: Mozilla
+BreakConstructorInitializers: AfterColon
 BinPackParameters: 'false'
 BinPackArguments: 'false'
 ColumnLimit: '100'

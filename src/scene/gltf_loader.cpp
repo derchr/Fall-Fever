@@ -405,13 +405,10 @@ auto GltfLoader::operator()(std::filesystem::path const& document_path) -> resul
             spdlog::warn("glTF scene has no name.");
         }
 
-        entt::registry registry;
-
         // Spawn an entity for every node in scene
         for (auto const& node : nodes) {
             std::function<entt::entity(GltfNode const&, std::optional<entt::entity>)> spawn_node =
-                [this, &spawn_node, &registry](GltfNode const& node,
-                                               std::optional<entt::entity> parent) {
+                [this, &spawn_node](GltfNode const& node, std::optional<entt::entity> parent) {
                     auto entity = registry.create();
                     registry.emplace<Name>(entity, node.name);
                     registry.emplace<Transform>(entity, node.transform);
@@ -475,7 +472,7 @@ auto GltfLoader::operator()(std::filesystem::path const& document_path) -> resul
 
         entt::hashed_string scene_hash(gltf_scene.name.c_str());
         entt::resource<Scene> scene_resource =
-            scene_cache.load(scene_hash, Scene{std::move(registry)}).first->second;
+            scene_cache.load(scene_hash, Scene{registry}).first->second;
         scenes.push_back(scene_resource);
     }
 
