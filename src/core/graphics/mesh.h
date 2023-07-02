@@ -53,6 +53,8 @@ struct GpuMesh
     
     auto operator=(GpuMesh &&other) noexcept -> GpuMesh &
     {
+        glDeleteVertexArrays(1, &vao);
+        
         vao = other.vao;
         indices_count = other.indices_count;
         indices_type = other.indices_type;

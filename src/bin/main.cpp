@@ -1,4 +1,4 @@
-#include "Controller.h"
+#include "controller.h"
 #include "util/log.h"
 
 #include <GLFW/glfw3.h>

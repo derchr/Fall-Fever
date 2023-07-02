@@ -34,7 +34,6 @@ public:
     auto just_pressed(T input) const -> bool { return just_pressed_keys.contains(input); }
     auto just_released(T input) const -> bool { return just_pressed_keys.contains(input); }
 
-    static void init_state(entt::registry& registry);
     static void update_state(entt::registry& registry);
 
 private:

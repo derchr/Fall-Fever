@@ -28,7 +28,7 @@
         },
         {
             "name": "dev",
-            "generator": "Unix Makefiles",
+            "generator": "Ninja",
             "binaryDir": "${sourceDir}/build",
             "inherits": [
                 "std"

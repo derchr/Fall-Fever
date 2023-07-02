@@ -5,14 +5,15 @@ add_library(fever_engine
     core/graphics/material.cpp
     core/graphics/mesh.cpp
     core/camera.cpp
+    core/game_loop.cpp
     core/glad.cpp
     core/light.cpp
     core/render.cpp
     core/shader.cpp
     core/time.cpp
     input/input.cpp
+    scene/gltf.cpp
     scene/gltf_loader.cpp
-    scene/scene.cpp
     util/log.cpp
     window/window.cpp
 )
@@ -35,7 +36,7 @@ target_link_libraries(
 
 add_executable(Fall-Fever
     bin/main.cpp
-    bin/Controller.cpp
+    bin/controller.cpp
 )
 
 target_link_libraries(Fall-Fever PRIVATE fever_engine)

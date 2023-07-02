@@ -3,13 +3,10 @@
 #include <chrono>
 #include <entt/entt.hpp>
 
-class Scene
+struct Scene
 {
-public:
-    Scene(entt::registry& registry);
+    // entt::registry registry;
 
-    void update();
-
-private:
-    entt::registry& registry;
+    // Spawns a scene for every entity having an entt:resource<Scene> component
+    // static void spawn_scenes(entt::registry& registry);
 };

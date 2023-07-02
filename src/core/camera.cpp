@@ -6,6 +6,7 @@
 #include <GLFW/glfw3.h>
 #include <algorithm>
 #include <glm/gtc/matrix_transform.hpp>
+#include <spdlog/spdlog.h>
 
 auto Camera::projection_matrix() const -> glm::mat4
 {
@@ -45,14 +46,20 @@ void Camera::keyboard_movement(entt::registry& registry)
 
     auto camera_view = registry.view<Camera const, Transform, GlobalTransform const>();
     auto camera_entity = camera_view.front();
+
+    if (camera_entity == entt::null) {
+        spdlog::debug("No camera entity found");
+        return;
+    }
+
     auto [camera, camera_transform, camera_global_transform] = camera_view.get(camera_entity);
 
     glm::vec3 front_vec = front_vector(camera_global_transform);
     front_vec.y = 0;
 
     glm::vec3 delta_pos = glm::vec3(0., 0., 0.);
-    float delta_factor =
-        SPEED * delta_time.delta.count() * (movement_context.accelerate ? ACCELERATION : 1.0F);
+    float acceleration = movement_context.accelerate ? ACCELERATION : 1.0F;
+    float delta_factor = static_cast<float>(delta_time.delta.count()) * SPEED * acceleration;
     movement_context.accelerate = false;
 
     if (key_state.pressed(Input::KeyCode{GLFW_KEY_W})) {
@@ -84,6 +91,12 @@ void Camera::mouse_orientation(entt::registry& registry)
 {
     auto camera_view = registry.view<Camera, Transform>();
     auto camera_entity = camera_view.front();
+
+    if (camera_entity == entt::null) {
+        spdlog::debug("No camera entity found");
+        return;
+    }
+
     auto [camera, camera_transform] = camera_view.get(camera_entity);
 
     auto const& mouse_cursor_input = registry.ctx().get<Input::MouseMotion>();
@@ -113,6 +126,12 @@ void Camera::aspect_ratio_update(entt::registry& registry)
 
     auto camera_view = registry.view<Camera>();
     auto camera_entity = camera_view.front();
+
+    if (camera_entity == entt::null) {
+        spdlog::debug("No camera entity found");
+        return;
+    }
+
     auto [camera] = camera_view.get(camera_entity);
 
     // Orthographic projection currently unsupported

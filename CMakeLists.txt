@@ -8,6 +8,10 @@ project(
     LANGUAGES C CXX
 )
 
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(FetchContent)
@@ -15,7 +19,7 @@ include(FetchContent)
 # EnTT
 FetchContent_Declare(
     entt
-    URL https://github.com/skypjack/entt/archive/refs/tags/v3.11.1.tar.gz
+    URL https://github.com/skypjack/entt/archive/refs/tags/v3.12.0.tar.gz
 )
 
 FetchContent_MakeAvailable(entt)
@@ -27,6 +31,8 @@ FetchContent_Declare(
 )
 
 option(GLFW_BUILD_DOCS "" OFF)
+option(GLFW_BUILD_EXAMPLES "" OFF)
+option(GLFW_BUILD_TESTS "" OFF)
 option(GLFW_INSTALL "" OFF)
 FetchContent_MakeAvailable(glfw)
 

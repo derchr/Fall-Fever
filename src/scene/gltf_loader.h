@@ -1,6 +1,5 @@
 #pragma once
 
-#include "entt/entity/fwd.hpp"
 #include "gltf.h"
 
 #include <entt/entt.hpp>
@@ -19,10 +18,7 @@ struct GltfLoader
     entt::resource_cache<Material>& material_cache;
     entt::resource_cache<Mesh>& mesh_cache;
     entt::resource_cache<Shader, ShaderLoader>& shader_cache;
-    entt::resource_cache<Scene>& scene_cache;
 
     entt::resource_cache<GltfMesh>& gltf_mesh_cache;
     entt::resource_cache<GltfNode>& gltf_node_cache;
-
-    entt::registry& registry;
 };

@@ -6,8 +6,8 @@
 
 struct Transform
 {
-    glm::vec3 translation;
-    glm::quat orientation;
+    glm::vec3 translation{};
+    glm::quat orientation{};
     glm::vec3 scale{1.0, 1.0, 1.0};
 };
 
