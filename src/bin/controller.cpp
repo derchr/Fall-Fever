@@ -9,7 +9,8 @@ using namespace entt::literals;
 
 Controller::Controller()
 {
-    std::filesystem::path document_path("WaterBottle/glTF-Binary/WaterBottle.glb");
+    std::filesystem::path document_path("ABeautifulGame.glb");
+    // std::filesystem::path document_path("WaterBottle/glTF-Binary/WaterBottle.glb");
     entt::hashed_string document_hash(document_path.string().c_str());
 
     entt::resource<Gltf> gltf_document =

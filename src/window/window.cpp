@@ -107,17 +107,7 @@ auto Window::physical_dimensions() const -> glm::u32vec2
 
 void Window::mouse_catching(entt::registry& registry) const
 {
-    if (!registry.ctx().contains<MouseCatched>()) {
-        bool catched = true;
-
-#ifndef NDEBUG
-        catched = false;
-#endif
-
-        registry.ctx().emplace<MouseCatched>(MouseCatched{.catched = catched});
-    }
-
-    auto& mouse_catched = registry.ctx().get<MouseCatched>();
+    auto& mouse_catched = registry.ctx().emplace<MouseCatched>(MouseCatched{.catched = false});
     auto const& key_state = registry.ctx().get<Input::State<Input::KeyCode>>();
 
     if (key_state.just_pressed(Input::KeyCode{GLFW_KEY_LEFT_CONTROL})) {
