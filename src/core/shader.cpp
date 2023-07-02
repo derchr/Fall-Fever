@@ -1,6 +1,5 @@
 #include "shader.h"
 
-#include <fmt/format.h>
 #include <fstream>
 #include <glm/gtc/type_ptr.hpp>
 #include <spdlog/spdlog.h>

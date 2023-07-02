@@ -20,17 +20,17 @@ add_library(fever_engine
 
 target_compile_features(fever_engine PUBLIC cxx_std_20)
 target_include_directories(fever_engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_compile_definitions(fever_engine PRIVATE SPDLOG_FMT_EXTERNAL)
 
 target_link_libraries(
     fever_engine PUBLIC
     glad
     glfw
     EnTT::EnTT
-    fmt
     pthread
     spdlog
+    glm
     fx-gltf::fx-gltf
+    nlohmann_json::nlohmann_json
     stb
 )
 

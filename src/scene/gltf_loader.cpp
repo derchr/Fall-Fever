@@ -78,7 +78,7 @@ static auto load_texture(fx::gltf::Texture const& texture,
               std::istreambuf_iterator<char>(),
               std::back_inserter(image_data));
 
-    entt::hashed_string const image_hash(image_path.c_str());
+    entt::hashed_string const image_hash(image_path.string().c_str());
 
     return image_cache.load(image_hash, image_data, colorFormat).first->second;
 }
@@ -388,103 +388,6 @@ auto GltfLoader::operator()(std::filesystem::path const& document_path) -> resul
     for (auto const& node : nodes_map) {
         nodes.push_back(node.second);
     }
-
-    // // Load scenes
-    // std::vector<entt::resource<Scene>> scenes;
-    // for (auto const& gltf_scene : gltf.scenes) {
-    //     // Get nodes by hash
-    //     std::vector<entt::resource<GltfNode>> nodes;
-    //     nodes.reserve(gltf_scene.nodes.size());
-
-    //     for (auto node_id : gltf_scene.nodes) {
-    //         auto const& node = gltf.nodes.at(node_id);
-    //         entt::hashed_string node_hash(node.name.c_str());
-    //         nodes.push_back(gltf_node_cache[node_hash]);
-    //     }
-
-    //     if (gltf_scene.name.empty()) {
-    //         spdlog::warn("glTF scene has no name.");
-    //     }
-
-    //     // Spawn an entity for every node in scene
-    //     for (auto const& node : nodes) {
-    //         std::function<entt::entity(GltfNode const&, std::optional<entt::entity>)> spawn_node =
-    //             [this, &spawn_node](GltfNode const& node, std::optional<entt::entity> parent) {
-    //                 auto entity = registry.create();
-    //                 registry.emplace<Name>(entity, node.name);
-    //                 registry.emplace<Transform>(entity, node.transform);
-    //                 registry.emplace<GlobalTransform>(entity, GlobalTransform{});
-
-    //                 if (parent.has_value()) {
-    //                     registry.emplace<Parent>(entity, Parent{.parent = parent.value()});
-    //                 }
-
-    //                 std::vector<entt::entity> child_entities;
-
-    //                 auto mesh = node.mesh;
-    //                 if (mesh.has_value()) {
-    //                     for (auto const& primitive : mesh.value()->primitives) {
-    //                         auto mesh_entity = registry.create();
-    //                         registry.emplace<Parent>(mesh_entity, Parent{.parent = entity});
-    //                         registry.emplace<Transform>(mesh_entity, Transform{});
-    //                         registry.emplace<GlobalTransform>(mesh_entity, GlobalTransform{});
-    //                         registry.emplace<entt::resource<Mesh>>(mesh_entity, primitive.mesh);
-    //                         registry.emplace<entt::resource<Material>>(mesh_entity,
-    //                                                                    primitive.material);
-
-    //                         child_entities.push_back(mesh_entity);
-    //                     }
-    //                 }
-
-    //                 auto camera = node.camera;
-    //                 if (camera.has_value()) {
-    //                     auto perspective =
-    //                         std::get<fx::gltf::Camera::Perspective>(camera.value().projection);
-    //                     Camera::Perspective camera_perspective{.fov = perspective.yfov,
-    //                                                            .aspect_ratio =
-    //                                                                perspective.aspectRatio,
-    //                                                            .near = perspective.znear,
-    //                                                            .far = perspective.zfar};
-    //                     registry.emplace<Camera>(entity, Camera{.projection = camera_perspective});
-    //                 }
-
-    //                 // Spawn child nodes
-    //                 for (auto const& child : node.children) {
-    //                     auto child_entity = spawn_node(child, entity);
-    //                     child_entities.push_back(child_entity);
-    //                 }
-
-    //                 registry.emplace<Children>(entity, Children{.children = child_entities});
-    //                 return entity;
-    //             };
-
-    //         spawn_node(node, {});
-    //     }
-
-    //     auto camera_view = registry.view<Camera const>();
-    //     if (camera_view.empty()) {
-    //         // Spawn default camera
-    //         auto entity = registry.create();
-    //         registry.emplace<Name>(entity, "Camera");
-    //         registry.emplace<Transform>(entity, Transform{.translation = Camera::DEFAULT_POSITION});
-    //         registry.emplace<GlobalTransform>(entity, GlobalTransform{});
-    //         registry.emplace<Camera>(entity, Camera{.projection = Camera::Perspective{}});
-    //     }
-
-    //     entt::hashed_string scene_hash(gltf_scene.name.c_str());
-    //     entt::resource<Scene> scene_resource =
-    //         scene_cache.load(scene_hash, Scene{}).first->second;
-    //     scenes.push_back(scene_resource);
-    // }
-
-    // // Default scene
-    // auto default_scene = [&gltf, &scenes]() -> std::optional<entt::resource<Scene>> {
-    //     if (gltf.scene != -1) {
-    //         return scenes.at(gltf.scene);
-    //     }
-
-    //     return {};
-    // }();
 
     return std::make_shared<Gltf>(Gltf{.materials = std::move(materials),
                                        .meshes = std::move(gltf_meshes),

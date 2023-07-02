@@ -10,7 +10,7 @@ using namespace entt::literals;
 Controller::Controller()
 {
     std::filesystem::path document_path("WaterBottle/glTF-Binary/WaterBottle.glb");
-    entt::hashed_string document_hash(document_path.c_str());
+    entt::hashed_string document_hash(document_path.string().c_str());
 
     entt::resource<Gltf> gltf_document =
         gltf_cache.load(document_hash, document_path).first->second;

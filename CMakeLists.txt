@@ -30,6 +30,14 @@ FetchContent_Declare(
     URL https://github.com/glfw/glfw/releases/download/3.3.8/glfw-3.3.8.zip
 )
 
+# nlohmann-json
+FetchContent_Declare(
+    json 
+    URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz
+)
+
+FetchContent_MakeAvailable(json)
+
 option(GLFW_BUILD_DOCS "" OFF)
 option(GLFW_BUILD_EXAMPLES "" OFF)
 option(GLFW_BUILD_TESTS "" OFF)
@@ -47,8 +55,21 @@ option(FX_GLTF_BUILD_TESTS "" OFF)
 option(FX_GLTF_INSTALL "" OFF)
 FetchContent_MakeAvailable(fx-gltf)
 
-find_package(glm REQUIRED)
-find_package(spdlog REQUIRED)
+# glm
+FetchContent_Declare(
+    glm
+    URL https://github.com/g-truc/glm/archive/refs/tags/0.9.9.8.tar.gz
+)
+
+FetchContent_MakeAvailable(glm)
+
+# glm
+FetchContent_Declare(
+    spdlog
+    URL https://github.com/gabime/spdlog/archive/refs/tags/v1.11.0.tar.gz
+)
+
+FetchContent_MakeAvailable(spdlog)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/lib)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src)

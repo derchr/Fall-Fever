@@ -128,7 +128,7 @@ void init_glad()
     // Initialize GLAD
     if (gladLoadGL(glfwGetProcAddress) == 0) {
         spdlog::critical("Failed to initialize GLAD");
-        std::quick_exit(-1);
+        std::abort();
     }
 
 #ifndef NDEBUG
