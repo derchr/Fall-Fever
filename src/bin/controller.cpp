@@ -3,14 +3,15 @@
 #include "components/transform.h"
 #include "core/camera.h"
 #include "core/light.h"
+#include "spdlog/spdlog.h"
 #include "window/window.h"
 
 using namespace entt::literals;
 
-Controller::Controller()
+Controller::Controller(std::string_view path)
 {
-    std::filesystem::path document_path("ABeautifulGame.glb");
-    // std::filesystem::path document_path("WaterBottle/glTF-Binary/WaterBottle.glb");
+    spdlog::info("Open {}", path);
+    std::filesystem::path document_path(path);
     entt::hashed_string document_hash(document_path.string().c_str());
 
     entt::resource<Gltf> gltf_document =

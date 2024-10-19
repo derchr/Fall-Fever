@@ -42,6 +42,12 @@ Window::Window(entt::dispatcher& event_dispatcher) : event_dispatcher(event_disp
     glfwSetFramebufferSizeCallback(glfw_window.get(), framebuffer_size_callback);
 
     init_glad();
+    
+    {
+        int width, height;
+        glfwGetFramebufferSize(glfw_window.get(), &width, &height);
+        glViewport(0, 0, width, height);
+    }
 }
 
 void Window::glfw_error_callback(int error, char const* description)

@@ -2,6 +2,8 @@
 
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
+
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
 struct Transform

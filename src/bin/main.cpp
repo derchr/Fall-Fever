@@ -2,11 +2,12 @@
 #include "util/log.h"
 
 #include <GLFW/glfw3.h>
-#include <iostream>
 #include <spdlog/spdlog.h>
 
-auto main() -> int
+auto main(int argc, char *argv[]) -> int
 {
+    auto arguments = std::span(argv, argc);
+
     Log::initialize();
 
     // Initialize GLFW
@@ -17,7 +18,7 @@ auto main() -> int
 
     {
         // Create controller
-        Controller controller;
+        Controller controller(arguments[1]);
         controller.run();
     }
 

@@ -19,7 +19,8 @@ include(FetchContent)
 # EnTT
 FetchContent_Declare(
     entt
-    URL https://github.com/skypjack/entt/archive/refs/tags/v3.12.0.tar.gz
+    SYSTEM
+    URL https://github.com/skypjack/entt/releases/download/v3.13.2/entt-v3.13.2.tar.gz
 )
 
 FetchContent_MakeAvailable(entt)
@@ -27,38 +28,42 @@ FetchContent_MakeAvailable(entt)
 # GLFW
 FetchContent_Declare(
     glfw
-    URL https://github.com/glfw/glfw/releases/download/3.3.8/glfw-3.3.8.zip
+    SYSTEM
+    URL https://github.com/glfw/glfw/releases/download/3.4/glfw-3.4.zip
 )
 
 # nlohmann-json
 FetchContent_Declare(
-    json 
-    URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz
+    json
+    SYSTEM
+    URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
 )
 
 FetchContent_MakeAvailable(json)
 
-option(GLFW_BUILD_DOCS "" OFF)
-option(GLFW_BUILD_EXAMPLES "" OFF)
-option(GLFW_BUILD_TESTS "" OFF)
-option(GLFW_INSTALL "" OFF)
+set(GLFW_BUILD_DOCS OFF)
+set(GLFW_BUILD_EXAMPLES OFF)
+set(GLFW_BUILD_TESTS OFF)
+set(GLFW_INSTALL OFF)
 FetchContent_MakeAvailable(glfw)
 
 
 # fx-gltf
 FetchContent_Declare(
     fx-gltf
+    SYSTEM
     URL https://github.com/jessey-git/fx-gltf/archive/refs/tags/v2.0.0.tar.gz
 )
 
-option(FX_GLTF_BUILD_TESTS "" OFF)
-option(FX_GLTF_INSTALL "" OFF)
+set(FX_GLTF_BUILD_TESTS OFF)
+set(FX_GLTF_INSTALL OFF)
 FetchContent_MakeAvailable(fx-gltf)
 
 # glm
 FetchContent_Declare(
     glm
-    URL https://github.com/g-truc/glm/archive/refs/tags/0.9.9.8.tar.gz
+    SYSTEM
+    URL https://github.com/g-truc/glm/archive/refs/tags/1.0.1.tar.gz
 )
 
 FetchContent_MakeAvailable(glm)
@@ -66,7 +71,8 @@ FetchContent_MakeAvailable(glm)
 # glm
 FetchContent_Declare(
     spdlog
-    URL https://github.com/gabime/spdlog/archive/refs/tags/v1.11.0.tar.gz
+    SYSTEM
+    URL https://github.com/gabime/spdlog/archive/refs/tags/v1.14.1.tar.gz
 )
 
 FetchContent_MakeAvailable(spdlog)

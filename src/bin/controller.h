@@ -4,13 +4,10 @@
 
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
-#include <memory>
-#include <unordered_map>
-#include <vector>
 
 class Controller : public GameLoop
 {
 public:
-    Controller();
+    Controller(std::string_view path);
     void update() override;
 };
