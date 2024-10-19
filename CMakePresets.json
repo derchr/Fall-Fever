@@ -35,7 +35,8 @@
             ],
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_CXX_FLAGS": "-Wall -Wextra -Wpedantic -fdiagnostics-color=always"
+                "CMAKE_CXX_FLAGS": "-Wall -Wextra -Wpedantic -fdiagnostics-color=always",
+                "GLFW_BUILD_X11": "OFF"
             }
         }
     ]

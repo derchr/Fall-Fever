@@ -1,12 +1,19 @@
+find_package(EnTT REQUIRED)
+find_package(fx-gltf REQUIRED)
+find_package(glfw3 REQUIRED)
+find_package(glm REQUIRED)
+find_package(nlohmann_json REQUIRED)
+find_package(spdlog REQUIRED)
+
 add_library(fever_core
     components/transform.cpp
+    core/camera.cpp
+    core/game_loop.cpp
+    core/glad.cpp
     core/graphics/framebuffer.cpp
     core/graphics/image.cpp
     core/graphics/material.cpp
     core/graphics/mesh.cpp
-    core/camera.cpp
-    core/game_loop.cpp
-    core/glad.cpp
     core/light.cpp
     core/render.cpp
     core/shader.cpp

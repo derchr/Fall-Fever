@@ -2,13 +2,25 @@
 #include "util/log.h"
 
 #include <GLFW/glfw3.h>
+#include <argparse/argparse.hpp>
 #include <spdlog/spdlog.h>
 
-auto main(int argc, char *argv[]) -> int
+auto main(int argc, char* argv[]) -> int
 {
-    auto arguments = std::span(argv, argc);
-
     Log::initialize();
+
+    argparse::ArgumentParser program("Fall-Fever");
+    program.add_argument("model").help("model file to load");
+
+    try {
+        program.parse_args(argc, argv);
+    } catch (std::exception const& err) {
+        std::cerr << err.what() << std::endl;
+        std::cerr << program;
+        return 1;
+    }
+
+    auto model = program.get<std::string>("model");
 
     // Initialize GLFW
     if (glfwInit() == 0) {
@@ -18,7 +30,7 @@ auto main(int argc, char *argv[]) -> int
 
     {
         // Create controller
-        Controller controller(arguments[1]);
+        Controller controller(model);
         controller.run();
     }
 
