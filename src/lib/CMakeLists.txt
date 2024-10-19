@@ -1,10 +1,3 @@
-find_package(EnTT REQUIRED)
-find_package(fx-gltf REQUIRED)
-find_package(glfw3 REQUIRED)
-find_package(glm REQUIRED)
-find_package(nlohmann_json REQUIRED)
-find_package(spdlog REQUIRED)
-
 add_library(fever_core
     components/transform.cpp
     core/camera.cpp
