@@ -1,7 +1,7 @@
 add_library(fever_core
     components/transform.cpp
+    core/application.cpp
     core/camera.cpp
-    core/game_loop.cpp
     core/glad.cpp
     core/graphics/framebuffer.cpp
     core/graphics/image.cpp

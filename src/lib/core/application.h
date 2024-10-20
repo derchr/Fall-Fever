@@ -10,22 +10,22 @@
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
 #include <memory>
-#include <unordered_map>
-#include <vector>
 
 class Camera;
 class Window;
 
-class GameLoop
+namespace FeverCore {
+
+class Application
 {
 public:
-    GameLoop();
+    Application();
 
-    virtual ~GameLoop();
-    GameLoop(GameLoop const&) = delete;
-    GameLoop(GameLoop&&) = delete;
-    auto operator=(GameLoop const&) -> GameLoop& = delete;
-    auto operator=(GameLoop&&) -> GameLoop& = delete;
+    virtual ~Application();
+    Application(Application const&) = delete;
+    Application(Application&&) = delete;
+    auto operator=(Application const&) -> Application& = delete;
+    auto operator=(Application&&) -> Application& = delete;
 
     auto registry() -> entt::registry& { return entt_registry; }
     auto registry() const -> entt::registry const& { return entt_registry; }
@@ -63,3 +63,5 @@ protected:
     GltfLoader gltf_loader;
     entt::resource_cache<Gltf, GltfLoader> gltf_cache;
 };
+
+} // namespace FeverCore

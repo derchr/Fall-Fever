@@ -1,29 +1,25 @@
-#include "game_loop.h"
+#include "application.h"
+
 #include "core/camera.h"
 #include "core/light.h"
 #include "core/render.h"
 #include "core/shader.h"
 #include "core/time.h"
 #include "input/input.h"
-#include "scene/scene.h"
 #include "window/window.h"
 
 #include <GLFW/glfw3.h>
-#include <array>
-#include <chrono>
-#include <filesystem>
 #include <fx/gltf.h>
 #include <glad/gl.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <iostream>
 #include <spdlog/spdlog.h>
-#include <thread>
-#include <utility>
 
-GameLoop::~GameLoop() = default;
+namespace FeverCore {
 
-GameLoop::GameLoop() :
+Application::~Application() = default;
+
+Application::Application() :
     game_window(std::make_shared<Window>(event_dispatcher)),
     post_processing_framebuffer(game_window->physical_dimensions()),
     key_listener{.registry = entt_registry},
@@ -38,13 +34,13 @@ GameLoop::GameLoop() :
 {
     register_context_variables();
 
-    event_dispatcher.sink<Window::ResizeEvent>().connect<&GameLoop::recreate_framebuffer>(this);
+    event_dispatcher.sink<Window::ResizeEvent>().connect<&Application::recreate_framebuffer>(this);
     event_dispatcher.sink<Input::KeyInput>().connect<&Input::KeyListener::key_event>(key_listener);
     event_dispatcher.sink<Input::MouseMotion>().connect<&Input::CursorListener::cursor_event>(
         cursor_listener);
 }
 
-void GameLoop::run()
+void Application::run()
 {
     entt::hashed_string shader_hash(Material::SHADER_NAME.data());
     auto standard_material_shader =
@@ -70,7 +66,7 @@ void GameLoop::run()
         GlobalTransform::update(entt_registry);
         Camera::aspect_ratio_update(entt_registry);
 
-        update();
+        this->update();
 
         Input::State<Input::KeyCode>::update_state(entt_registry);
         Input::reset_mouse_motion(entt_registry);
@@ -91,14 +87,16 @@ void GameLoop::run()
     }
 }
 
-void GameLoop::register_context_variables()
+void Application::register_context_variables()
 {
     entt_registry.ctx().emplace<Input::State<Input::KeyCode>>();
     entt_registry.ctx().emplace<Input::MouseMotion>();
 }
 
-void GameLoop::recreate_framebuffer()
+void Application::recreate_framebuffer()
 {
     auto dimensions = game_window->physical_dimensions();
     post_processing_framebuffer = Framebuffer(dimensions);
 }
+
+} // namespace FeverCore

@@ -84,16 +84,6 @@ auto Gltf::spawn_scene(std::size_t index,
         registry.get<Children>(scene_entity).children.push_back(node_entity);
     }
 
-    auto camera_view = registry.view<Camera const>();
-    if (camera_view.empty()) {
-        // Spawn default camera
-        auto entity = registry.create();
-        registry.emplace<Name>(entity, "Camera");
-        registry.emplace<Transform>(entity, Transform{.translation = Camera::DEFAULT_POSITION});
-        registry.emplace<GlobalTransform>(entity, GlobalTransform{});
-        registry.emplace<Camera>(entity, Camera{.projection = Camera::Perspective{}});
-    }
-
     return scene_entity;
 }
 
@@ -113,12 +103,32 @@ auto Gltf::spawn_scene(std::string_view name,
     return entt::null;
 }
 
-auto Gltf::spawn_default_scene(entt::registry& registry, entt::resource_cache<GltfNode>& node_cache)
-    -> entt::entity
+auto Gltf::spawn_default_scene(entt::registry& registry,
+                               entt::resource_cache<GltfNode>& node_cache) -> entt::entity
 {
-    if (document.scene != -1) {
-        return spawn_scene(document.scene, registry, node_cache);
+    if (document.scene == -1) {
+        return entt::null;
     }
 
-    return entt::null;
+    auto scene = spawn_scene(document.scene, registry, node_cache);
+
+    // Convert meshes
+    auto mesh_view = registry.view<entt::resource<Mesh>>();
+    for (auto [entity, mesh] : mesh_view.each()) {
+        registry.emplace<GpuMesh>(entity, GpuMesh(mesh));
+
+        // Remove Mesh resource as it is no longer needed.
+        registry.erase<entt::resource<Mesh>>(entity);
+    }
+
+    // Convert materials
+    auto material_view = registry.view<entt::resource<Material>>();
+    for (auto [entity, material] : material_view.each()) {
+        registry.emplace<GpuMaterial>(entity, GpuMaterial(material));
+
+        // Remove Material resource as it is no longer needed.
+        registry.erase<entt::resource<Material>>(entity);
+    }
+
+    return scene;
 }

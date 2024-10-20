@@ -2,7 +2,6 @@
 
 #include "components/transform.h"
 
-#include <chrono>
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
 #include <variant>
@@ -14,11 +13,6 @@ struct Camera
     static constexpr float DEFAULT_FOV = 90.0;
 
     static constexpr glm::vec3 UP_VECTOR = glm::vec3(0.0, 1.0, 0.0);
-
-    static constexpr float SPEED = 0.5;
-    static constexpr float ACCELERATION = 5.0;
-
-    static constexpr glm::vec3 DEFAULT_POSITION = glm::vec3(0.0, 0.25, -1.0);
 
     struct Perspective
     {

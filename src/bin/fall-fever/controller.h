@@ -1,11 +1,11 @@
 #pragma once
 
-#include "core/game_loop.h"
+#include "core/application.h"
 
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
 
-class Controller : public GameLoop
+class Controller : public FeverCore::Application
 {
 public:
     Controller(std::string_view path);
