@@ -1,6 +1,7 @@
 #include "gltf.h"
 #include "components/name.h"
 #include "components/relationship.h"
+#include "components/visibility.h"
 #include "core/camera.h"
 
 #include <spdlog/spdlog.h>
@@ -18,6 +19,7 @@ auto Gltf::spawn_scene(std::size_t index,
     entt::entity scene_entity = registry.create();
     registry.emplace<Transform>(scene_entity, Transform{});
     registry.emplace<GlobalTransform>(scene_entity, GlobalTransform{});
+    registry.emplace<Visibility>(scene_entity);
     registry.emplace<Children>(scene_entity, Children{});
 
     std::vector<entt::resource<GltfNode>> nodes;
@@ -42,6 +44,7 @@ auto Gltf::spawn_scene(std::size_t index,
                 registry.emplace<Transform>(entity, node.transform);
                 registry.emplace<GlobalTransform>(entity, GlobalTransform{});
                 registry.emplace<Parent>(entity, Parent{.parent = parent});
+                registry.emplace<Visibility>(entity);
 
                 std::vector<entt::entity> child_entities;
 
@@ -52,6 +55,7 @@ auto Gltf::spawn_scene(std::size_t index,
                         registry.emplace<Parent>(mesh_entity, Parent{.parent = entity});
                         registry.emplace<Transform>(mesh_entity, Transform{});
                         registry.emplace<GlobalTransform>(mesh_entity, GlobalTransform{});
+                        registry.emplace<Visibility>(mesh_entity);
                         registry.emplace<entt::resource<Mesh>>(mesh_entity, primitive.mesh);
                         registry.emplace<entt::resource<Material>>(mesh_entity, primitive.material);
 

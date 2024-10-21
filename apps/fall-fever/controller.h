@@ -10,4 +10,5 @@ class Controller : public FeverCore::Application
 public:
     Controller(std::string_view path);
     void update() override;
+    void renderUi() override;
 };

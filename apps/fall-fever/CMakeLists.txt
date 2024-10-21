@@ -1,4 +1,5 @@
-find_package(cxxopts CONFIG)
+find_package(cxxopts REQUIRED)
+find_package(imgui REQUIRED)
 
 add_executable(Fall-Fever
     main.cpp
@@ -6,4 +7,8 @@ add_executable(Fall-Fever
     flycam.cpp
 )
 
-target_link_libraries(Fall-Fever PRIVATE fever_core cxxopts::cxxopts)
+target_link_libraries(Fall-Fever PRIVATE
+    fever_core
+    cxxopts::cxxopts
+    imgui::imgui
+)

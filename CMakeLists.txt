@@ -11,9 +11,9 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-find_package(EnTT CONFIG REQUIRED)
-find_package(glm CONFIG REQUIRED)
-find_package(nlohmann_json CONFIG REQUIRED)
+find_package(EnTT REQUIRED)
+find_package(glm REQUIRED)
+find_package(nlohmann_json REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(fx-gltf REQUIRED)
@@ -22,6 +22,7 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/lib)
 
 add_library(fever_core
     src/components/transform.cpp
+    src/components/visibility.cpp
     src/core/application.cpp
     src/core/camera.cpp
     src/core/glad.cpp

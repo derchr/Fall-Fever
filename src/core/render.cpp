@@ -1,4 +1,5 @@
 #include "render.h"
+#include "components/visibility.h"
 #include "core/camera.h"
 #include "core/graphics/material.h"
 #include "core/graphics/mesh.h"
@@ -8,10 +9,11 @@
 
 void Render::render(entt::registry& registry)
 {
-    auto mesh_view = registry.view<GpuMesh const, GpuMaterial const, GlobalTransform const>();
+    auto mesh_view =
+        registry.view<GpuMesh const, GpuMaterial const, GlobalTransform const, Visibility const>();
     auto camera_view = registry.view<Camera const, GlobalTransform const>();
     auto camera_entity = camera_view.front();
-    
+
     if (camera_entity == entt::null) {
         spdlog::debug("No camera entity found");
         return;
@@ -21,7 +23,11 @@ void Render::render(entt::registry& registry)
     glm::mat4 view_projection_matrix =
         camera.projection_matrix() * Camera::view_matrix(camera_transform);
 
-    for (auto [entity, mesh, material, transform] : mesh_view.each()) {
+    for (auto [entity, mesh, material, transform, visibility] : mesh_view.each()) {
+        if (visibility.inherited_visibility == Visibility::InheritedVisibility::Hidden) {
+            continue;
+        }
+
         auto shader = material.shader;
         shader->bind();
 

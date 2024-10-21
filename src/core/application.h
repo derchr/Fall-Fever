@@ -35,7 +35,8 @@ public:
 
     void run();
 
-    virtual void update() = 0;
+    virtual void update() {};
+    virtual void renderUi() {};
 
 protected:
     virtual void register_context_variables();

@@ -1,5 +1,6 @@
 #include "application.h"
 
+#include "components/visibility.h"
 #include "core/camera.h"
 #include "core/light.h"
 #include "core/render.h"
@@ -63,7 +64,8 @@ void Application::run()
         game_window->mouse_catching(entt_registry);
         game_window->close_on_esc(entt_registry);
 
-        GlobalTransform::update(entt_registry);
+        GlobalTransform::propagate(entt_registry);
+        Visibility::propagate(entt_registry);
         Camera::aspect_ratio_update(entt_registry);
 
         this->update();
@@ -82,6 +84,8 @@ void Application::run()
 
         Framebuffer::unbind();
         post_processing_framebuffer.draw(post_processing_shader);
+
+        this->renderUi();
 
         glfwSwapBuffers(&game_window->handle());
     }

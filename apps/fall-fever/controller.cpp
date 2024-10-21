@@ -1,4 +1,5 @@
 #include "controller.h"
+#include "components/visibility.h"
 #include "flycam.h"
 
 #include "components/name.h"
@@ -6,6 +7,10 @@
 #include "core/camera.h"
 #include "core/light.h"
 #include "window/window.h"
+
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 #include <spdlog/spdlog.h>
 
@@ -51,6 +56,20 @@ Controller::Controller(std::string_view path)
         registry().emplace<Camera>(entity, Camera{.projection = Camera::Perspective{}});
         registry().emplace<Flycam>(entity);
     }
+
+    // imgui
+    // Setup ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    (void)io;
+
+    // Setup ImGui style
+    ImGui::StyleColorsDark();
+
+    // Setup Platform/Renderer bindings
+    ImGui_ImplGlfw_InitForOpenGL(&this->game_window->handle(), true);
+    ImGui_ImplOpenGL3_Init("#version 330"); // Use appropriate GLSL version
 }
 
 void Controller::update()
@@ -60,4 +79,24 @@ void Controller::update()
     if (registry().ctx().get<Window::MouseCatched>().catched) {
         Flycam::mouse_orientation(registry());
     }
+}
+
+void Controller::renderUi()
+{
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    auto name_view = registry().view<Name const, Visibility>();
+    for (auto [entity, name, visibility] : name_view.each()) {
+        bool visible = visibility.entity_visibility != Visibility::EntityVisibility::Hidden;
+        ImGui::Checkbox(name.name.c_str(), &visible);
+
+        visibility.entity_visibility = visible ? Visibility::EntityVisibility::Inherited
+                                               : Visibility::EntityVisibility::Hidden;
+    }
+
+    // Rendering
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }

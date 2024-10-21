@@ -1,7 +1,7 @@
 #include "transform.h"
 #include "relationship.h"
 
-void GlobalTransform::update(entt::registry &registry)
+void GlobalTransform::propagate(entt::registry &registry)
 {
     // Update GlobalTransform components
     // TODO: Only do this when the Transform changed.

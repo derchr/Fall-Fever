@@ -37,5 +37,5 @@ struct GlobalTransform
 
     [[nodiscard]] auto position() const -> glm::vec3 { return transform[3]; };
 
-    static void update(entt::registry &registry);
+    static void propagate(entt::registry &registry);
 };

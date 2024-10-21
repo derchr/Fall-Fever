@@ -8,6 +8,7 @@
     "cxxopts",
     "entt",
     "fmt",
+    "fx-gltf",
     {
       "name": "glfw3",
       "features": [
@@ -15,8 +16,14 @@
       ]
     },
     "glm",
+    {
+      "name": "imgui",
+      "features": [
+        "glfw-binding",
+        "opengl3-binding"
+      ]
+    },
     "nlohmann-json",
-    "spdlog",
-    "fx-gltf"
+    "spdlog"
   ]
 }
