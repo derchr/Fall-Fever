@@ -24,12 +24,11 @@ target_include_directories(fever_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(
     fever_core PUBLIC
     glad
+    stb
     glfw
     EnTT::EnTT
-    pthread
-    spdlog
+    spdlog::spdlog
     glm::glm
     fx-gltf::fx-gltf
     nlohmann_json::nlohmann_json
-    stb
 )

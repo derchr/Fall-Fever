@@ -1,4 +1,4 @@
-CPMAddPackage(NAME argparse URL "https://github.com/p-ranav/argparse/archive/refs/tags/v3.1.tar.gz")
+find_package(cxxopts CONFIG)
 
 add_executable(Fall-Fever
     main.cpp
@@ -6,4 +6,4 @@ add_executable(Fall-Fever
     flycam.cpp
 )
 
-target_link_libraries(Fall-Fever PRIVATE fever_core argparse)
+target_link_libraries(Fall-Fever PRIVATE fever_core cxxopts::cxxopts)

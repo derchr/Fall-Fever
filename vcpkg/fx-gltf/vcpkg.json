@@ -1,0 +1,7 @@
+{
+    "name": "fx-gltf",
+    "version": "2.0.0",
+    "description": "A C++ library for loading and saving glTF 2.0 files.",
+    "homepage": "https://github.com/jessey-git/fx-gltf",
+    "dependencies": []
+}

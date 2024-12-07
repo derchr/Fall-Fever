@@ -2,25 +2,35 @@
 #include "util/log.h"
 
 #include <GLFW/glfw3.h>
-#include <argparse/argparse.hpp>
+#include <cxxopts.hpp>
+#include <iostream>
 #include <spdlog/spdlog.h>
 
 auto main(int argc, char* argv[]) -> int
 {
     Log::initialize();
 
-    argparse::ArgumentParser program("Fall-Fever");
-    program.add_argument("model").help("model file to load");
+    cxxopts::Options options("Fall-Fever", "A brief description");
 
-    try {
-        program.parse_args(argc, argv);
-    } catch (std::exception const& err) {
-        std::cerr << err.what() << std::endl;
-        std::cerr << program;
-        return 1;
+    // clang-format off
+    options.add_options()
+        ("model", "Model file to load", cxxopts::value<std::string>())
+        ("h,help", "Print usage")
+    ;
+    // clang-format on
+
+    options.parse_positional({"model"});
+
+    auto result = options.parse(argc, argv);
+
+    if (result.count("help")) {
+        std::cout << options.help() << std::endl;
+        exit(0);
     }
 
-    auto model = program.get<std::string>("model");
+    std::string model;
+    if (result.count("model"))
+        model = result["model"].as<std::string>();
 
     // Initialize GLFW
     if (glfwInit() == 0) {
