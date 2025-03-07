@@ -12,6 +12,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 find_package(EnTT CONFIG REQUIRED)
+find_package(flecs CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(glfw3 REQUIRED)
@@ -49,6 +50,7 @@ target_link_libraries(
     stb
     glfw
     EnTT::EnTT
+    flecs::flecs
     spdlog::spdlog
     glm::glm
     fx-gltf::fx-gltf

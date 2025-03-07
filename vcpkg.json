@@ -8,6 +8,7 @@
     "cxxopts",
     "entt",
     "fmt",
+    "fx-gltf",
     {
       "name": "glfw3",
       "features": [
@@ -17,7 +18,8 @@
     "glm",
     "nlohmann-json",
     "spdlog",
-    "fx-gltf"
+    "fx-gltf",
+    "flecs"
   ],
   "builtin-baseline": "c14d62387153eaa2d720113542dbde2e9754ee71"
 }

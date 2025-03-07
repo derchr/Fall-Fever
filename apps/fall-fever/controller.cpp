@@ -8,6 +8,7 @@
 #include "window/window.h"
 
 #include <spdlog/spdlog.h>
+#include <flecs.h>
 
 using namespace entt::literals;
 
