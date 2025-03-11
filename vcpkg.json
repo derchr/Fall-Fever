@@ -18,5 +18,6 @@
     "nlohmann-json",
     "spdlog",
     "fx-gltf"
-  ]
+  ],
+  "builtin-baseline": "c14d62387153eaa2d720113542dbde2e9754ee71"
 }
